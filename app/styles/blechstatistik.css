@@ -1,0 +1,340 @@
+/* blechstatistik.css */
+.blechstatistik {
+  padding: 4rem 0;
+  min-height: calc(100vh - 200px);
+}
+
+.blechstatistik h1 {
+  text-align: center;
+  font-size: 2.5rem;
+  margin-bottom: 2rem;
+  background: linear-gradient(135deg, #4776E6 0%, #8E54E9 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: gradientShift 8s ease infinite;
+}
+
+.year-selector {
+  display: flex;
+  justify-content: center;
+  gap: 1.5rem;
+  margin-bottom: 3rem;
+}
+
+.year-button {
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #666;
+  min-width: 200px;
+}
+
+.year-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.year-button.active {
+  background: linear-gradient(135deg, #4776E6 0%, #8E54E9 100%);
+  color: white;
+  border: none;
+}
+
+.blech-content {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 1rem;
+}
+
+.blech-image-container {
+  width: 100%;
+  border-radius: 12px;
+  overflow: hidden;
+  background: white;
+  margin-bottom: 3rem;
+}
+
+.blech-image-container .clickable-image {
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+  border-radius: 12px;
+  display: block;
+  background: white;
+  overflow: hidden;
+}
+
+.blech-image-container .clickable-image:hover {
+  transform: scale(1.02);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+}
+
+.blech-image-container .clickable-image:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(71, 118, 230, 0.3);
+}
+
+.blech-image {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+/* Modal Styles */
+.fixed {
+  animation: modalBackdropFadeIn 0.3s ease-out;
+  backdrop-filter: blur(8px);
+  z-index: 1000;
+}
+
+.fixed > div {
+  animation: modalFadeIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: 1001;
+}
+
+.fixed img {
+  box-shadow: 0 16px 32px rgba(0, 0, 0, 0.2);
+  border-radius: 12px;
+  max-height: 85vh;
+  object-fit: contain;
+  background: white;
+}
+
+@keyframes modalFadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95) translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+@keyframes modalBackdropFadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.blech-table-container {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  margin-top: 2rem;
+}
+
+.blech-table-scroll {
+  overflow-x: auto;
+  padding: 1rem;
+}
+
+.blech-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  min-width: 800px;
+}
+
+.blech-table td,
+.blech-table th {
+  padding: 1rem;
+  text-align: center;
+  border-bottom: 1px solid #eee;
+}
+
+.blech-table th {
+  background: linear-gradient(135deg, #4776E6 0%, #8E54E9 100%);
+  color: white;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.blech-table th:first-child,
+.blech-table td:first-child {
+  text-align: left;
+  padding-left: 1.5rem;
+}
+
+.blech-table tr:hover:not(.total-row) {
+  background-color: #f8f9fa;
+  transition: background-color 0.3s ease;
+}
+
+.total-row {
+  background: #f0f2f5;
+  font-weight: 600;
+}
+
+.total-row td {
+  border-top: 2px solid #ddd;
+}
+
+.coming-soon {
+  text-align: center;
+  padding: 4rem 2rem;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.coming-soon h2 {
+  color: #4776E6;
+  margin-bottom: 1rem;
+}
+
+.coming-soon p {
+  color: #666;
+}
+
+@keyframes gradientShift {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+@media (max-width: 480px) {
+  .blechstatistik {
+    padding: 1.5rem 0;
+  }
+
+  .blechstatistik h1 {
+    font-size: 1.75rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .year-selector {
+    flex-direction: column;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 2rem;
+  }
+
+  .year-button {
+    width: 100%;
+    max-width: 280px;
+    padding: 0.625rem 1rem;
+    font-size: 0.9375rem;
+    min-width: unset;
+  }
+
+  .blech-content {
+    padding: 0.5rem;
+  }
+
+  .blech-image-container {
+    margin-bottom: 2rem;
+    border-radius: 8px;
+  }
+
+  .blech-table-container {
+    border-radius: 8px;
+    margin-top: 1.5rem;
+  }
+
+  .blech-table-scroll {
+    padding: 0.5rem;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .blech-table {
+    min-width: 600px;
+  }
+
+  .blech-table td,
+  .blech-table th {
+    padding: 0.625rem 0.5rem;
+    font-size: 0.8125rem;
+  }
+
+  .blech-table th:first-child,
+  .blech-table td:first-child {
+    padding-left: 1rem;
+  }
+
+  .coming-soon {
+    padding: 2rem 1rem;
+  }
+
+  .coming-soon h2 {
+    font-size: 1.25rem;
+  }
+
+  .coming-soon p {
+    font-size: 0.9375rem;
+  }
+}
+
+@media (min-width: 481px) and (max-width: 768px) {
+  .blechstatistik {
+    padding: 2rem 0;
+  }
+
+  .blechstatistik h1 {
+    font-size: 2rem;
+    margin-bottom: 1.75rem;
+  }
+
+  .year-selector {
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 2.5rem;
+  }
+
+  .year-button {
+    width: 100%;
+    max-width: 300px;
+  }
+
+  .blech-content {
+    padding: 0.75rem;
+  }
+
+  .blech-table-scroll {
+    padding: 0.75rem;
+  }
+
+  .blech-table td,
+  .blech-table th {
+    padding: 0.75rem;
+    font-size: 0.875rem;
+  }
+}
+
+@media (min-width: 769px) and (max-width: 1024px) {
+  .blech-content {
+    max-width: 90%;
+  }
+
+  .blech-table-container {
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
+  }
+
+  .blech-table {
+    min-width: 700px;
+  }
+
+  .blech-table td,
+  .blech-table th {
+    padding: 1rem 0.75rem;
+  }
+}

@@ -1,0 +1,240 @@
+/* members.css */
+.members {
+    padding: 2rem 0;
+}
+
+.members h1 {
+    color: var(--primary-color);
+    text-align: center;
+    margin-bottom: 3rem;
+    font-size: 2.5rem;
+}
+
+.members h2 {
+    color: var(--primary-color);
+    margin-bottom: 1.5rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid var(--accent-color);
+    font-size: 1.8rem;
+}
+
+/* Category Styles */
+.members__category {
+    background: var(--secondary-color);
+    border-radius: 8px;
+    box-shadow: var(--shadow);
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+    max-width: 800px;
+}
+
+.members__category-title {
+    color: var(--primary-color);
+    margin-bottom: 1.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.members__date {
+    font-size: 0.9rem;
+    color: #666;
+}
+
+/* Expanded Item Styles */
+.members__item-expanded {
+    background: var(--secondary-color);
+    border-radius: 8px;
+    margin-bottom: 1rem;
+    box-shadow: var(--shadow);
+    overflow: hidden;
+    transition: var(--transition);
+}
+
+.members__basic-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem;
+    cursor: pointer;
+    background-color: var(--secondary-color);
+    transition: var(--transition);
+}
+
+.members__basic-info:hover {
+    background-color: rgba(42, 33, 126, 0.05);
+}
+
+.members__name {
+    font-weight: 500;
+    color: var(--primary-color);
+}
+
+.members__hcp {
+    font-family: monospace;
+    background: #f0f0f0;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    font-weight: 500;
+}
+
+/* Detail Panel Styles */
+.members__detail-panel {
+    display: none;
+    grid-template-columns: 200px 1fr;
+    gap: 1.5rem;
+    padding: 1.5rem;
+    background-color: #f9f9f9;
+    border-top: 1px solid #eee;
+    transition: all 0.3s ease;
+}
+
+.members__photo {
+    width: 200px;
+    height: 200px;
+    overflow: hidden;
+    border-radius: 8px;
+    box-shadow: var(--shadow);
+}
+
+.members__photo-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+}
+
+.members__photo-img:hover {
+    transform: scale(1.05);
+}
+
+.members__details {
+    display: grid;
+    gap: 0.75rem;
+    align-content: start;
+}
+
+.members__details p {
+    margin: 0;
+    font-size: 0.95rem;
+    line-height: 1.4;
+}
+
+.members__details strong {
+    color: var(--primary-color);
+    margin-right: 0.5rem;
+}
+
+/* Officials Section */
+.members__officials {
+    margin-top: 4rem;
+}
+
+.members__officials-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+}
+
+.members__official {
+    background: var(--secondary-color);
+    padding: 1.5rem;
+    border-radius: 8px;
+    box-shadow: var(--shadow);
+    transition: var(--transition);
+}
+
+.members__official:hover {
+    transform: translateY(-3px);
+}
+
+.members__official-title {
+    color: var(--primary-color);
+    margin-bottom: 0.5rem;
+    font-size: 1.1rem;
+}
+
+.members__category--memorial {
+    border-left: 3px solid var(--accent-color);
+    background-color: rgba(255, 255, 255, 0.95);
+}
+
+.members__item--memorial .members__basic-info {
+    background-color: rgba(245, 245, 245, 0.95);
+}
+
+
+.members__item--memorial .members__name {
+    font-style: italic;
+}
+
+/* Expanded state */
+.members__item-expanded.active .members__detail-panel {
+    display: grid;
+    animation: slideDown 0.3s ease-out;
+}
+
+/* Animation */
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .members h1 {
+        font-size: 2rem;
+    }
+
+    .members__category-title {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+    }
+
+    .members__detail-panel {
+        grid-template-columns: 1fr;
+        padding: 1rem;
+    }
+
+    .members__photo {
+        width: 150px;
+        height: 150px;
+        margin: 0 auto;
+    }
+
+    .members__officials-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .members__official {
+        padding: 1rem;
+    }
+}
+
+/* Print styles */
+@media print {
+    .members__item-expanded {
+        break-inside: avoid;
+    }
+
+    .members__detail-panel {
+        display: grid !important;
+        break-inside: avoid;
+    }
+
+    .members__basic-info {
+        cursor: default;
+    }
+
+    .nav-sticky-wrapper,
+    .main-footer {
+        display: none;
+    }
+}

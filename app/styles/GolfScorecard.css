@@ -1,0 +1,341 @@
+/* app/styles/GolfScorecard.css */
+
+.scorecard-container {
+  margin: 20px auto;
+  display: flex;
+  flex-direction: column;
+  gap: 0px;
+  max-width: 1250px;
+  padding: 20px 16px;
+  background-color: white;
+}
+
+.clickable-image {
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.clickable-image:hover {
+  transform: scale(1.02);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+}
+
+.clickable-image:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(178, 0, 34, 0.3);
+}
+
+.scorecard-image {
+  width: 95%; 
+  height: auto;
+  margin: 0 auto; 
+  display: block;
+  max-width: none;
+  border-radius: 8px;
+  padding-right: 20px;
+}
+
+.scorecard-image-geld {
+  width: 95%; 
+  height: auto;
+  margin: 0 auto;
+  margin-bottom: 50px; 
+  display: block;
+  max-width: none;
+  border-radius: 8px;
+  padding-right: 20px;
+}
+
+.scorecard-image-stat {
+  width: 100%; 
+  height: auto;
+  margin: 0 auto;
+  margin-bottom: 50px; 
+  display: block;
+  max-width: none;
+  border-radius: 8px;
+  padding-right: 20px;
+  padding-left: 10px;
+}
+
+/* Modal Styles */
+@keyframes modalFadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes modalBackdropFadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.fixed {
+  animation: modalBackdropFadeIn 0.3s ease-out;
+  backdrop-filter: blur(8px);
+  z-index: 1000;
+}
+
+.fixed > div {
+  animation: modalFadeIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: 1001;
+}
+
+.fixed img {
+  box-shadow: 0 16px 32px rgba(0, 0, 0, 0.2);
+  border-radius: 12px;
+  max-height: 85vh;
+  object-fit: contain;
+  background: var(--card-background);
+}
+
+/* Dark mode adjustments */
+@media (prefers-color-scheme: dark) {
+  .clickable-image::after {
+    background: rgba(0, 0, 0, 0.7);
+    color: white;
+  }
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .clickable-image::after {
+    top: 5px;
+    right: 15px;
+    padding: 6px;
+    font-size: 14px;
+  }
+}
+
+.loading-indicator {
+  text-align: center;
+  padding: 16px 0;
+  color: #4b5563;
+}
+
+.error-message {
+  text-align: center;
+  color: #ef4444;
+  padding: 16px 0;
+}
+
+.button-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: center;
+}
+
+.date-button {
+  border-radius: 8px;
+  padding: 8px 12px;
+  text-align: center;
+  align-items: center;
+  display: inline-block;
+  cursor: pointer;
+  transition: all 0.3s ease-in-out;
+  background: var(--card-background);
+  color: var(--text-color);
+  border: 1px solid rgba(79, 70, 229, 0.2);
+  font-weight: 500;
+}
+
+.date-button-active {
+  background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+  color: white;
+  border: none;
+  box-shadow: var(--shadow);
+}
+
+.date-button-inactive {
+  background: var(--card-background);
+  color: var(--text-color);
+}
+
+.date-button-inactive:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(79, 70, 229, 0.15);
+  border-color: var(--primary-color);
+}
+
+.selected-scorecard-container {
+  margin-top: 16px;
+}
+
+@media (max-width: 480px) {
+  .scorecard-container {
+    margin: 10px auto;
+    padding: 10px 8px;
+  }
+
+  .button-grid {
+    gap: 6px;
+  }
+
+  .date-button {
+    padding: 6px 10px;
+    font-size: 0.9rem;
+    min-width: 80px;
+  }
+
+  .scorecard-image,
+  .scorecard-image-geld,
+  .scorecard-image-stat {
+    width: 100%;
+    padding-right: 0;
+    padding-left: 0;
+    margin-bottom: 30px;
+  }
+
+  .image-container {
+    min-height: 200px;
+    padding: 8px;
+  }
+
+  .year-selector {
+    padding: 12px 10px;
+    margin-bottom: 1.5rem;
+    gap: 0.75rem;
+  }
+
+  .year-button {
+    padding: 6px 12px;
+    font-size: 0.9rem;
+    width: 100%;
+  }
+}
+
+@media (min-width: 481px) and (max-width: 768px) {
+  .scorecard-container {
+    margin: 15px auto;
+    padding: 15px 12px;
+  }
+
+  .button-grid {
+    gap: 8px;
+  }
+
+  .date-button {
+    padding: 8px 12px;
+    font-size: 1rem;
+  }
+
+  .scorecard-image,
+  .scorecard-image-geld,
+  .scorecard-image-stat {
+    width: 98%;
+    padding-right: 10px;
+    padding-left: 5px;
+    margin-bottom: 40px;
+  }
+
+  .image-container {
+    min-height: 300px;
+    padding: 12px;
+  }
+
+  .year-selector {
+    padding: 15px;
+    margin-bottom: 1.75rem;
+    gap: 0.875rem;
+  }
+
+  .year-button {
+    padding: 8px 14px;
+    width: 100%;
+  }
+}
+
+.year-selector {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 2rem;
+  background: rgba(79, 70, 229, 0.05);
+  padding: 20px 15px;
+  border-radius: 12px;
+}
+
+.year-button {
+  padding: 8px 16px;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.3s ease-in-out;
+  background: var(--card-background);
+  color: var(--text-color);
+  border: 1px solid rgba(79, 70, 229, 0.2);
+  font-weight: 500;
+}
+
+.year-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(79, 70, 229, 0.15);
+  border-color: var(--primary-color);
+}
+
+.year-button.active {
+  background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+  color: white;
+  border: none;
+}
+
+.year-button.active:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(79, 70, 229, 0.2);
+}
+
+.content-grid {
+  display: grid;
+  grid-template-columns: 10% 90%;
+  gap: 1rem;
+}
+
+.image-container {
+  border-radius: 8px;
+  padding: 0px;
+  min-height: 400px;
+  max-width: 1000px;
+}
+
+.year-content {
+  margin-top: 1rem;
+}
+
+.no-data-message {
+  text-align: center;
+  padding: 3rem;
+  color: #6b7280;
+  font-size: 1.1rem;
+}
+
+@media (max-width: 1024px) {
+  .content-grid {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+
+  .year-selector {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .image-container {
+    margin: 0 auto;
+  }
+
+  .no-data-message {
+    padding: 2rem;
+    font-size: 1rem;
+  }
+}

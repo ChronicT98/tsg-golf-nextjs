@@ -1,0 +1,353 @@
+/* regelwerk.css */
+.regelwerk {
+    padding: 4rem 0;
+    background: linear-gradient(to bottom, var(--background-color), rgba(79, 70, 229, 0.05));
+}
+
+.regelwerk h1 {
+    text-align: center;
+    margin-bottom: 3rem;
+    font-size: clamp(2rem, 4vw, 3rem);
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    background-size: 200% 200%;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: fadeIn 0.8s ease-out, gradientShift 8s ease infinite;
+}
+
+.regelwerk__section {
+    margin-bottom: 4rem;
+    animation: fadeIn 0.8s ease-out;
+}
+
+.regelwerk__section h2 {
+    color: var(--text-color);
+    margin-bottom: 2rem;
+    font-size: clamp(1.5rem, 3vw, 2rem);
+    text-align: center;
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.regelwerk__card {
+    background: var(--card-background);
+    padding: 2rem;
+    border-radius: 16px;
+    box-shadow: var(--shadow);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    transition: var(--transition);
+    animation: fadeIn 0.8s ease-out;
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.regelwerk__card:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--shadow-lg);
+}
+
+.regelwerk__grid {
+    display: grid;
+    gap: 2rem;
+    animation: fadeIn 0.8s ease-out 0.2s backwards;
+}
+
+.regelwerk__rule {
+    background: var(--card-background);
+    padding: 2rem;
+    border-radius: 16px;
+    box-shadow: var(--shadow);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    transition: var(--transition);
+    position: relative;
+    overflow: hidden;
+}
+
+.regelwerk__rule::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    opacity: 0;
+    transition: var(--transition);
+}
+
+.regelwerk__rule:hover {
+    transform: translateY(-5px) scale(1.02);
+    box-shadow: var(--shadow-lg);
+    background: linear-gradient(
+        to bottom right,
+        var(--card-background),
+        rgba(79, 70, 229, 0.05)
+    );
+}
+
+.regelwerk__rule:hover::before {
+    opacity: 1;
+}
+
+.regelwerk__rule h3 {
+    color: var(--text-color);
+    margin-bottom: 1rem;
+    font-size: 1.3rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.sub-rules {
+    display: grid;
+    gap: 1rem;
+    margin-top: 1.5rem;
+    padding: 1rem;
+    background: rgba(79, 70, 229, 0.03);
+    border-radius: 12px;
+}
+
+.sub-rules p {
+    padding-left: 1rem;
+    border-left: 3px solid var(--primary-color);
+    transition: var(--transition);
+}
+
+.sub-rules p:hover {
+    border-left-color: var(--secondary-color);
+    background: rgba(79, 70, 229, 0.05);
+    border-radius: 0 8px 8px 0;
+}
+
+.sub-rules strong {
+    color: var(--primary-color);
+    font-weight: 600;
+}
+
+.regelwerk__fees {
+    width: 100%;
+    max-width: 800px;
+    margin: 1.5rem auto;
+    border-collapse: separate;
+    border-spacing: 0;
+    background: var(--card-background);
+    box-shadow: var(--shadow);
+    border-radius: 16px;
+    overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.regelwerk__fees th,
+.regelwerk__fees td {
+    padding: 1.25rem;
+    text-align: left;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    transition: var(--transition);
+}
+
+.regelwerk__fees th {
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    color: white;
+    font-weight: 500;
+}
+
+.regelwerk__fees tr:last-child td {
+    border-bottom: none;
+}
+
+.regelwerk__fees tr:hover td {
+    background: rgba(79, 70, 229, 0.05);
+}
+
+.regelwerk__note {
+    margin-top: 1.5rem;
+    font-style: italic;
+    color: var(--text-light);
+    text-align: center;
+    padding: 1rem;
+    background: rgba(79, 70, 229, 0.03);
+    border-radius: 12px;
+    transition: var(--transition);
+}
+
+.regelwerk__note:hover {
+    background: rgba(79, 70, 229, 0.05);
+}
+
+@media (min-width: 768px) {
+    .regelwerk__grid {
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    }
+}
+
+@media (max-width: 480px) {
+    .regelwerk {
+        padding: 1.5rem 0;
+    }
+
+    .regelwerk h1 {
+        font-size: clamp(1.5rem, 3vw, 2rem);
+        margin-bottom: 2rem;
+    }
+
+    .regelwerk__section {
+        margin-bottom: 2rem;
+        padding: 0 0.75rem;
+    }
+
+    .regelwerk__section h2 {
+        font-size: clamp(1.25rem, 2.5vw, 1.75rem);
+        margin-bottom: 1.5rem;
+    }
+
+    .regelwerk__card,
+    .regelwerk__rule {
+        padding: 1.25rem;
+        border-radius: 12px;
+    }
+
+    .regelwerk__rule h3 {
+        font-size: 1.1rem;
+        margin-bottom: 0.75rem;
+    }
+
+    .sub-rules {
+        padding: 0.75rem;
+        gap: 0.75rem;
+        margin-top: 1rem;
+    }
+
+    .sub-rules p {
+        padding-left: 0.5rem;
+        font-size: 0.9375rem;
+    }
+
+    .regelwerk__fees {
+        display: block;
+        overflow-x: auto;
+        margin: 0.75rem -0.75rem;
+        width: calc(100% + 1.5rem);
+        font-size: 0.9375rem;
+    }
+
+    .regelwerk__fees th,
+    .regelwerk__fees td {
+        padding: 0.875rem;
+        white-space: nowrap;
+    }
+
+    .regelwerk__note {
+        margin-top: 1rem;
+        padding: 0.75rem;
+        font-size: 0.875rem;
+    }
+}
+
+@media (min-width: 481px) and (max-width: 768px) {
+    .regelwerk {
+        padding: 2rem 0;
+    }
+
+    .regelwerk__section {
+        margin-bottom: 2.5rem;
+        padding: 0 1rem;
+    }
+
+    .regelwerk__card,
+    .regelwerk__rule {
+        padding: 1.5rem;
+    }
+
+    .regelwerk__fees {
+        display: block;
+        overflow-x: auto;
+        margin: 1rem -1rem;
+        width: calc(100% + 2rem);
+    }
+
+    .regelwerk__fees th,
+    .regelwerk__fees td {
+        padding: 1rem;
+        white-space: nowrap;
+    }
+}
+
+@media (min-width: 769px) and (max-width: 1024px) {
+    .regelwerk__grid {
+        grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+        gap: 1.5rem;
+        padding: 0 1.5rem;
+    }
+
+    .regelwerk__card,
+    .regelwerk__rule {
+        padding: 1.75rem;
+    }
+
+    .regelwerk__fees {
+        max-width: 90%;
+    }
+}
+
+/* Animations */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes gradientShift {
+    0% {
+        background-position: 0% 50%;
+    }
+    50% {
+        background-position: 100% 50%;
+    }
+    100% {
+        background-position: 0% 50%;
+    }
+}
+
+@keyframes pulseGlow {
+    0% {
+        box-shadow: var(--shadow);
+    }
+    50% {
+        box-shadow: 0 8px 32px rgba(79, 70, 229, 0.2);
+    }
+    100% {
+        box-shadow: var(--shadow);
+    }
+}
+
+.regelwerk__rule:hover {
+    animation: pulseGlow 2s infinite;
+}
+
+.regelwerk__fees tr:hover td {
+    background: rgba(79, 70, 229, 0.08);
+    transform: scale(1.01);
+    transition: all 0.3s ease;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .regelwerk h1,
+    .regelwerk__section,
+    .regelwerk__card,
+    .regelwerk__grid,
+    .regelwerk__rule:hover {
+        animation: none;
+        transform: none;
+    }
+    
+    .regelwerk__fees tr:hover td {
+        transform: none;
+    }
+}
