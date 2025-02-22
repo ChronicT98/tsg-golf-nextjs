@@ -1,11 +1,6 @@
 import { NextResponse } from 'next/server';
-import { writeFile, mkdir } from 'fs/promises';
-import { existsSync } from 'fs';
-import path from 'path';
+import { put } from '@vercel/blob';
 import { customAlphabet } from 'nanoid';
-import sharp from 'sharp';
-import { exec } from 'child_process';
-import { promisify } from 'util';
 
 interface CustomDateEntry {
   date: string;
@@ -20,30 +15,9 @@ interface CustomDates {
   [year: string]: YearData;
 }
 
-const execAsync = promisify(exec);
 const nanoid = customAlphabet('1234567890abcdef', 10);
 
-// Helper function to ensure directory exists
-async function ensureDir(dir: string) {
-  if (!existsSync(dir)) {
-    await mkdir(dir, { recursive: true });
-  }
-}
-
-// Helper function to convert PDF to JPG using ImageMagick
-async function pdfToImage(pdfPath: string, outputPath: string): Promise<void> {
-  await execAsync(`convert -density 300 "${pdfPath}[0]" -quality 85 -trim "${outputPath}"`);
-}
-
-// Helper function to process image
-async function processImage(imageBuffer: Buffer): Promise<Buffer> {
-  return sharp(imageBuffer)
-    .jpeg({ quality: 85 })
-    .trim() // Automatically remove whitespace
-    .toBuffer();
-}
-
-// Helper function to determine target directory
+// Helper function to determine target directory - aligned with migration paths
 function getTargetDirectory(filename: string): string {
   const lowerFilename = filename.toLowerCase();
   if (lowerFilename.includes('blechen')) {
@@ -52,8 +26,10 @@ function getTargetDirectory(filename: string): string {
     return 'scorecard-statistik';
   } else if (lowerFilename.includes('geld')) {
     return 'scorecard-geld';
-  } else {
+  } else if (lowerFilename.includes('spiel')) {
     return 'scorecards';
+  } else {
+    throw new Error('Unrecognized file type');
   }
 }
 
@@ -70,7 +46,7 @@ export async function POST(request: Request) {
         { status: 400 }
       );
     }
-    const publicDir = path.join(process.cwd(), 'public');
+
     const results = [];
     const batchId = nanoid(); // Generate one ID for the entire batch
 
@@ -92,40 +68,6 @@ export async function POST(request: Request) {
     // Process files in sorted order
     for (const file of sortedFiles) {
       try {
-        const bytes = await file.arrayBuffer();
-        const buffer = Buffer.from(bytes);
-        const tempDir = path.join(process.cwd(), 'temp');
-        await ensureDir(tempDir);
-
-        const isPDF = file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf');
-        let imageBuffer: Buffer;
-
-        if (isPDF) {
-          // Save PDF temporarily
-          const tempPdfPath = path.join(tempDir, `${nanoid()}.pdf`);
-          const tempJpgPath = path.join(tempDir, `${nanoid()}.jpg`);
-          await writeFile(tempPdfPath, buffer);
-
-          // Convert PDF to JPG
-          await pdfToImage(tempPdfPath, tempJpgPath);
-          
-          // Read the converted image
-          imageBuffer = await sharp(tempJpgPath)
-            .jpeg({ quality: 85 })
-            .trim()
-            .toBuffer();
-
-          // Clean up temp files
-          await execAsync(`rm "${tempPdfPath}" "${tempJpgPath}"`);
-        } else {
-          // Process existing image
-          imageBuffer = await processImage(buffer);
-        }
-
-        // Determine target directory based on filename
-        const targetDir = path.join(publicDir, getTargetDirectory(file.name));
-        await ensureDir(targetDir);
-
         const baseFilename = file.name.toLowerCase();
         let fileName: string;
         let fileType: 'statistik' | 'blechen' | 'geld' | 'spiel' | null = null;
@@ -152,25 +94,24 @@ export async function POST(request: Request) {
           continue;
         }
 
-    // Ensure target directory exists
-    await ensureDir(targetDir);
+        // Upload to Vercel Blob Storage
+        const targetPath = `${getTargetDirectory(fileName)}/${fileName}`;
+        const blob = await put(targetPath, file, {
+          access: 'public',
+          addRandomSuffix: false,
+          contentType: 'image/jpeg'
+        });
 
-        // Save processed image only if fileName is not empty
-        if (fileName) {
-          const filePath = path.join(targetDir, fileName);
-          await writeFile(filePath, imageBuffer);
-
-          // Add to results only if we actually saved a file
-          results.push({
-            success: true,
-            fileName,
-            path: `/${path.relative(publicDir, filePath).replace(/\\/g, '/')}`
-          });
-        }
+        // Add to results only if we actually uploaded a file
+        results.push({
+          success: true,
+          fileName,
+          path: blob.url
+        });
 
         // Update custom-dates.json for all files with a date
         if (date && fileName) {
-          const customDatesPath = path.join(process.cwd(), 'data', 'custom-dates.json');
+          const customDatesPath = 'data/custom-dates.json';
           let customDates: CustomDates = {};
 
           // Read existing custom dates
@@ -230,11 +171,11 @@ export async function POST(request: Request) {
               break;
           }
 
-      // Ensure data directory exists
-      await ensureDir(path.dirname(customDatesPath));
-
           // Save updated custom dates
-          await writeFile(
+          const fs = require('fs/promises');
+          const path = require('path');
+          await fs.mkdir(path.dirname(customDatesPath), { recursive: true });
+          await fs.writeFile(
             customDatesPath,
             JSON.stringify(customDates, null, 2)
           );
