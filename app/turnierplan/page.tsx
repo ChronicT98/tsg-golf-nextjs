@@ -1,10 +1,9 @@
 'use client';
-import { useState } from 'react';
 import Head from 'next/head';
 import '@/app/styles/turnierplan.css';
 
 export default function EmbeddedPage() {
-  const [url, setUrl] = useState('https://www.golf-eugendorf.at/club/turniere/');
+  const url = 'https://www.golf-eugendorf.at/club/turniere/';
   
   return (
     <div className="turnierplan-container">

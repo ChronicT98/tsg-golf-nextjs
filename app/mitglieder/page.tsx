@@ -1,7 +1,8 @@
 'use client';
 import '@/app/styles/mitglieder.css';
-import { gruendungsmitglieder, ordentlicheMitglieder, inMemoriam, type MemberDetails } from './data';
+import { gruendungsmitglieder, ordentlicheMitglieder, inMemoriam } from './data';
 import { useState } from 'react';
+import Image from 'next/image';
 
 export default function MitgliederPage() {
   const [activeCategory, setActiveCategory] = useState<string>('all');
@@ -44,11 +45,17 @@ export default function MitgliederPage() {
               {gruendungsmitglieder.map((member) => (
                 <div key={member.name} className="mitglieder__card">
                   <div className="mitglieder__image">
-                    <img src={member.imageSrc} alt={member.name} />
+                    <Image 
+                      src={member.imageSrc} 
+                      alt={member.name}
+                      width={200}
+                      height={200}
+                      style={{ objectFit: 'cover' }}
+                    />
                   </div>
                   <h3 className="mitglieder__name">
                     {member.name}
-                    {member.spitzname && <span className="mitglieder__nickname">"{member.spitzname}"</span>}
+                    {member.spitzname && <span className="mitglieder__nickname">&quot;{member.spitzname}&quot;</span>}
                   </h3>
                   <div className="mitglieder__info">
                     <div className="mitglieder__detail">
@@ -99,11 +106,17 @@ export default function MitgliederPage() {
               {ordentlicheMitglieder.map((member) => (
                 <div key={member.name} className="mitglieder__card">
                   <div className="mitglieder__image">
-                    <img src={member.imageSrc} alt={member.name} />
+                    <Image 
+                      src={member.imageSrc} 
+                      alt={member.name}
+                      width={200}
+                      height={200}
+                      style={{ objectFit: 'cover' }}
+                    />
                   </div>
                   <h3 className="mitglieder__name">
                     {member.name}
-                    {member.spitzname && <span className="mitglieder__nickname">"{member.spitzname}"</span>}
+                    {member.spitzname && <span className="mitglieder__nickname">&quot;{member.spitzname}&quot;</span>}
                   </h3>
                   <div className="mitglieder__info">
                     <div className="mitglieder__detail">
@@ -160,11 +173,17 @@ export default function MitgliederPage() {
               {inMemoriam.map((member) => (
                 <div key={member.name} className="mitglieder__card">
                   <div className="mitglieder__image">
-                    <img src={member.imageSrc} alt={member.name} />
+                    <Image 
+                      src={member.imageSrc} 
+                      alt={member.name}
+                      width={200}
+                      height={200}
+                      style={{ objectFit: 'cover' }}
+                    />
                   </div>
                   <h3 className="mitglieder__name">
                     {member.name}
-                    {member.spitzname && <span className="mitglieder__nickname">"{member.spitzname}"</span>}
+                    {member.spitzname && <span className="mitglieder__nickname">&quot;{member.spitzname}&quot;</span>}
                   </h3>
                   <div className="mitglieder__info">
                     <div className="mitglieder__detail">

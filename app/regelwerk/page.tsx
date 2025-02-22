@@ -51,7 +51,7 @@ export default function RegelwerkPage() {
                 <h3>§4. 9-Loch Regelung</h3>
                 <p>
                   9-Loch Turniere sind generell verboten! Bei zu wider Handeln
-                  wird die "Weiber Wies'n" Strafe verhängt.
+                  wird die &quot;Weiber Wies&apos;n&quot; Strafe verhängt.
                 </p>
               </article>
   
@@ -66,7 +66,7 @@ export default function RegelwerkPage() {
               <article className="regelwerk__rule">
                 <h3>§6. Flights</h3>
                 <p>
-                  Es werden die Flights nach der Präsi-Los-Methode
+                  Es werden die Flights nach der &quot;Präsi-Los-Methode&quot;
                   zusammengestellt.
                 </p>
               </article>

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import '@/app/styles/GolfScorecard.css';
 import '@/app/styles/spielergebnisse.css';
 import ImageModal from './image-modal';
+import Image from 'next/image';
 
 interface SpielScorecard {
   id: string;
@@ -138,9 +139,11 @@ const ScorecardViewer: React.FC = () => {
                   .map(card => (
                     <div key={card.id} className="selected-scorecard-container">
                       {card.geldFileName && (
-                        <img
+                        <Image
                           src={card.geldFileName}
                           alt="Geldübersicht"
+                          width={800}
+                          height={1200}
                           className="scorecard-image-geld clickable-image"
                           onClick={() => openModal(card.geldFileName!, "Geldübersicht")}
                           role="button"
@@ -152,9 +155,11 @@ const ScorecardViewer: React.FC = () => {
                           }}
                         />
                       )}
-                      <img
+                      <Image
                         src={card.fileName}
                         alt={`Spielergebnis vom ${card.date}`}
+                        width={800}
+                        height={1200}
                         className="scorecard-image clickable-image"
                         onClick={() => openModal(card.fileName, `Spielergebnis vom ${card.date}`)}
                         role="button"
@@ -170,9 +175,11 @@ const ScorecardViewer: React.FC = () => {
               </>
             ) : (
               currentYearData.static.statistik && (
-                <img
+                <Image
                   src={currentYearData.static.statistik}
                   alt="Statistik"
+                  width={800}
+                  height={1200}
                   className="scorecard-image-stat clickable-image"
                   onClick={() => openModal(currentYearData.static.statistik!, "Statistik")}
                   role="button"
