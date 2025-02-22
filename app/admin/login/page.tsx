@@ -8,7 +8,6 @@ import '@/app/styles/admin.css';
 export default function AdminLogin() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [error, setError] = useState('');
   const router = useRouter();
 
@@ -29,7 +28,7 @@ export default function AdminLogin() {
         router.push('/admin');
         router.refresh();
       }
-    } catch (error) {
+    } catch (_error) {
       setError('Ein Fehler ist aufgetreten');
     }
   };
