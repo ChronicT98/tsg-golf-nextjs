@@ -2,6 +2,7 @@
 import '@/app/styles/blechstatistik.css';
 import { useState, useEffect, useCallback } from 'react';
 import ImageModal from '@/app/components/scorecard-viewer/image-modal';
+import Image from 'next/image';
 
 export default function Blechstatistik() {
   const [selectedYear, setSelectedYear] = useState('2024');
@@ -63,9 +64,11 @@ export default function Blechstatistik() {
         <div className="blech-content">
           <div className="blech-image-container">
             {latestFiles[selectedYear] ? (
-              <img
+              <Image
                 src={latestFiles[selectedYear]}
                 alt={`Blechstatistik ${selectedYear}`}
+                width={800}
+                height={1200}
                 className="scorecard-image-stat clickable-image"
                 onClick={() => openModal(latestFiles[selectedYear], `Blechstatistik ${selectedYear}`)}
                 role="button"

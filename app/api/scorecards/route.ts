@@ -165,15 +165,6 @@ export async function GET() {
   }
 }
 
-// Hilfsfunktion zum Konvertieren des Datums in DD.MM.YYYY Format
-function formatDateToDDMMYYYY(dateStr: string): string {
-  if (dateStr.includes('-')) {
-    const [year, month, day] = dateStr.split('-');
-    return `${day}.${month}.${year}`;
-  }
-  return dateStr; // Bereits im korrekten Format
-}
-
 export async function POST(request: Request) {
   try {
     const { fileName, customDate, geldFile, year } = await request.json();

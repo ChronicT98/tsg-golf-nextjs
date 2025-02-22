@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react';
 import '@/app/styles/image-modal.css';
+import Image from 'next/image';
 
 interface ImageModalProps {
   imageUrl: string;
@@ -57,9 +58,13 @@ const ImageModal: React.FC<ImageModalProps> = ({ imageUrl, alt, onClose }) => {
             <path d="M6 18L18 6M6 6l12 12" />
           </svg>
         </button>
-        <img
+        <Image
           src={imageUrl}
           alt={alt}
+          width={1200}
+          height={1600}
+          style={{ objectFit: 'contain' }}
+          priority
         />
       </div>
     </div>

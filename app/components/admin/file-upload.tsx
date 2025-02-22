@@ -1,13 +1,11 @@
 'use client';
 
 import React, { useState, useRef, DragEvent } from 'react';
-import Image from 'next/image';
 
 interface FileUploadProps {
   onFileSelect: (files: File[], date?: string, year?: string) => void;
   acceptedTypes?: string[];
   allowDateSelection?: boolean;
-  allowTypeSelection?: boolean;
   allowYearSelection?: boolean;
 }
 
@@ -15,14 +13,12 @@ export default function FileUpload({
   onFileSelect,
   acceptedTypes = ['application/pdf', 'image/jpeg', 'image/jpg'],
   allowDateSelection = true,
-  allowTypeSelection = false,
   allowYearSelection = true,
 }: FileUploadProps) {
   const [isDragging, setIsDragging] = useState(false);
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [selectedDate, setSelectedDate] = useState('');
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear().toString());
-  const [previewUrls, setPreviewUrls] = useState<string[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleDragOver = (e: DragEvent<HTMLDivElement>) => {
@@ -105,17 +101,6 @@ export default function FileUpload({
     });
 
     setSelectedFiles(sortedFiles);
-    // Preview first few files
-    const previews = await Promise.all(
-      files.slice(0, 3).map(file => {
-        return new Promise<string>((resolve) => {
-          const reader = new FileReader();
-          reader.onloadend = () => resolve(reader.result as string);
-          reader.readAsDataURL(file);
-        });
-      })
-    );
-    setPreviewUrls(previews);
   };
 
   const formatDate = (dateStr: string): string => {
@@ -131,7 +116,6 @@ export default function FileUpload({
       setSelectedFiles([]);
       setSelectedDate('');
       setSelectedYear(new Date().getFullYear().toString());
-      setPreviewUrls([]);
     }
   };
 

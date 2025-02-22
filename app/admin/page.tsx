@@ -7,7 +7,7 @@ import FileUpload from '@/app/components/admin/file-upload';
 import '@/app/styles/admin.css';
 
 export default function AdminPage() {
-  const { data: session, status } = useSession();
+  const { status } = useSession();
   const router = useRouter();
   const [loading, setLoading] = useState(true);
 
@@ -78,7 +78,6 @@ export default function AdminPage() {
             <FileUpload
               onFileSelect={handleFileUpload}
               allowDateSelection={true}
-              allowTypeSelection={false}
               allowYearSelection={true}
             />
           </div>
