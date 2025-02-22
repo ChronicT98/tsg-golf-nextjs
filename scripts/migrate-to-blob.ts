@@ -11,6 +11,30 @@ const directories = [
 
 const token = "vercel_blob_rw_4JhTLIdImLkNd86E_NHGv4mFk3TGUDN4vOhFbWQ4V1Yvow3";
 
+async function migrateCustomDates() {
+  try {
+    const customDatesPath = path.join(process.cwd(), 'data', 'custom-dates.json');
+    console.log('\nMigrating custom-dates.json...');
+    
+    // Read the custom-dates.json file
+    const customDatesContent = await readFile(customDatesPath, 'utf-8');
+    
+    // Upload to blob storage
+    const blob = await put('data/custom-dates.json', customDatesContent, {
+      access: 'public',
+      addRandomSuffix: false,
+      contentType: 'application/json',
+      token
+    });
+
+    console.log(`Successfully uploaded custom-dates.json: ${blob.url}`);
+    return true;
+  } catch (error) {
+    console.error('Error migrating custom-dates.json:', error);
+    return false;
+  }
+}
+
 async function* getFiles(dir: string): AsyncGenerator<string> {
   const dirents = await readdir(dir, { withFileTypes: true });
   for (const dirent of dirents) {
@@ -71,5 +95,24 @@ async function migrateFiles() {
   console.log('\nMigration complete!');
 }
 
-// Run the migration
-migrateFiles().catch(console.error);
+// Run both migrations
+async function runMigrations() {
+  try {
+    // First migrate all image files
+    await migrateFiles();
+    
+    // Then migrate custom-dates.json
+    console.log('\nStarting custom-dates.json migration...');
+    const success = await migrateCustomDates();
+    if (success) {
+      console.log('Custom dates migration completed successfully');
+    } else {
+      console.log('Custom dates migration failed');
+    }
+  } catch (error) {
+    console.error('Error during migration:', error);
+  }
+}
+
+// Run the migrations
+runMigrations().catch(console.error);
