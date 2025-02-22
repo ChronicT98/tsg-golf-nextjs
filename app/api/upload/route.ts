@@ -111,7 +111,6 @@ export async function POST(request: Request) {
 
         // Update custom-dates.json for all files with a date
         if (date && fileName) {
-          const customDatesPath = 'data/custom-dates.json';
           let customDates: CustomDates = {};
 
           // Read existing custom dates from blob storage
