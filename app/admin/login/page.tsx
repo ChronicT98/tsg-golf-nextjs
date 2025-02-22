@@ -28,7 +28,7 @@ export default function AdminLogin() {
         router.push('/admin');
         router.refresh();
       }
-    } catch (_error) {
+    } catch {
       setError('Ein Fehler ist aufgetreten');
     }
   };
