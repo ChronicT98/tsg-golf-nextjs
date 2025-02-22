@@ -172,10 +172,10 @@ export async function POST(request: Request) {
           }
 
           // Save updated custom dates
-          const fs = require('fs/promises');
-          const path = require('path');
-          await fs.mkdir(path.dirname(customDatesPath), { recursive: true });
-          await fs.writeFile(
+          const { mkdir, writeFile } = await import('fs/promises');
+          const { dirname } = await import('path');
+          await mkdir(dirname(customDatesPath), { recursive: true });
+          await writeFile(
             customDatesPath,
             JSON.stringify(customDates, null, 2)
           );
