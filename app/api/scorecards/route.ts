@@ -1,6 +1,5 @@
 import { NextResponse } from 'next/server';
-import fs from 'fs/promises';
-import path from 'path';
+import { list } from '@vercel/blob';
 
 interface CustomDateEntry {
   date: string;
@@ -36,23 +35,24 @@ interface ResponseData {
   [year: string]: YearData;
 }
 
-const CUSTOM_DATES_PATH = path.join(process.cwd(), 'data', 'custom-dates.json');
-
 // Hilfsfunktion zum Laden der benutzerdefinierten Daten
 async function loadCustomDates(): Promise<CustomDates> {
   try {
-    const data = await fs.readFile(CUSTOM_DATES_PATH, 'utf-8');
-    return JSON.parse(data);
-  } catch {
+    const { list } = await import('@vercel/blob');
+    const customDatesBlob = await list({ prefix: 'data/' });
+    const customDatesFile = customDatesBlob.blobs.find(blob => blob.pathname === 'data/custom-dates.json');
+    
+    if (!customDatesFile) {
+      return {};
+    }
+
+    const response = await fetch(customDatesFile.url);
+    if (!response.ok) throw new Error('Failed to load custom dates');
+    return await response.json();
+  } catch (error) {
+    console.error('Error loading custom dates:', error);
     return {};
   }
-}
-
-// Hilfsfunktion zum Speichern der benutzerdefinierten Daten
-async function saveCustomDates(dates: CustomDates) {
-  const dir = path.dirname(CUSTOM_DATES_PATH);
-  await fs.mkdir(dir, { recursive: true });
-  await fs.writeFile(CUSTOM_DATES_PATH, JSON.stringify(dates, null, 2));
 }
 
 // Hilfsfunktion zum Extrahieren des Jahres aus dem Dateinamen oder Datum
@@ -82,16 +82,10 @@ function parseDate(dateStr: string): Date {
 
 export async function GET() {
   try {
-    const scorecardsDir = path.join(process.cwd(), 'public', 'scorecards');
-    const statistikDir = path.join(process.cwd(), 'public', 'scorecard-statistik');
     const customDates = await loadCustomDates();
     const years = ['2025', '2024', '2023', '2022'];
     
-    const [scorecardFiles, statistikFiles] = await Promise.all([
-      fs.readdir(scorecardsDir),
-      fs.readdir(statistikDir).catch(() => [])
-    ]);
-    
+    // Initialize year data
     const yearData: ResponseData = {};
     years.forEach(year => {
       yearData[year] = {
@@ -100,53 +94,56 @@ export async function GET() {
       };
     });
 
-    // Verarbeite statische Dateien
-    for (const file of statistikFiles) {
-      if (file.toLowerCase().includes('statistik')) {
-        // Finde das Jahr aus dem Dateinamen oder custom-dates.json
-        const year = getYearFromFileOrDate(file, customDates);
-        // Wenn das Jahr in yearData existiert, füge die Statistik hinzu
+    // List all files from blob storage
+    const [scorecardBlobs, statistikBlobs, geldBlobs] = await Promise.all([
+      list({ prefix: 'scorecards/' }),
+      list({ prefix: 'scorecard-statistik/' }),
+      list({ prefix: 'scorecard-geld/' })
+    ]);
+
+    // Process statistik files
+    for (const blob of statistikBlobs.blobs) {
+      const fileName = blob.pathname.split('/').pop() || '';
+      if (fileName.toLowerCase().includes('statistik')) {
+        const year = getYearFromFileOrDate(fileName, customDates);
         if (yearData[year]) {
-          yearData[year].static.statistik = `/scorecard-statistik/${file}`;
+          yearData[year].static.statistik = blob.url;
         }
       }
     }
 
-    // Verarbeite alle JPG-Dateien
-    const spielFiles = scorecardFiles.filter(file => {
-      const lowerFile = file.toLowerCase();
-      // Nur spiel_ Dateien
-      if (lowerFile.startsWith('spiel_') && lowerFile.endsWith('.jpg')) {
-        return true;
-      }
-      // Oder Dateien aus custom-dates.json, die keine geld-Dateien sind
-      for (const year in customDates) {
-        const fileData = customDates[year][file];
-        if (fileData && !file.toLowerCase().includes('geld')) {
-          return true;
-        }
-      }
-      return false;
-    });
+    // Process scorecard files
+    for (const blob of scorecardBlobs.blobs) {
+      const fileName = blob.pathname.split('/').pop() || '';
+      if (fileName.toLowerCase().startsWith('spiel_') && fileName.toLowerCase().endsWith('.jpg')) {
+        const year = getYearFromFileOrDate(fileName, customDates);
+        if (yearData[year]) {
+          const customEntry = customDates[year]?.[fileName];
+          const date = customEntry?.date || new Date().toLocaleDateString('de-DE');
+          const geldFileName = customEntry?.geldFile;
+          
+          // Find matching geld file URL if it exists
+          let geldFileUrl;
+          if (geldFileName) {
+            const matchingGeldBlob = geldBlobs.blobs.find(
+              geldBlob => geldBlob.pathname.endsWith(geldFileName)
+            );
+            if (matchingGeldBlob) {
+              geldFileUrl = matchingGeldBlob.url;
+            }
+          }
 
-    for (const fileName of spielFiles) {
-      const year = getYearFromFileOrDate(fileName, customDates);
-      if (yearData[year]) {
-        const stats = await fs.stat(path.join(scorecardsDir, fileName));
-        const customEntry = customDates[year]?.[fileName];
-        const date = customEntry ? customEntry.date : new Date(stats.mtime).toLocaleDateString('de-DE');
-        const geldFileName = customEntry?.geldFile;
-        
-        yearData[year].spielCards.push({
-          id: fileName,
-          date: date,
-          fileName: `/scorecards/${fileName}`,
-          geldFileName: geldFileName ? `/scorecard-geld/${geldFileName}` : undefined
-        });
+          yearData[year].spielCards.push({
+            id: fileName,
+            date: date,
+            fileName: blob.url,
+            geldFileName: geldFileUrl
+          });
+        }
       }
     }
 
-    // Sortiere die Spielkarten nach Datum für jedes Jahr
+    // Sort spielCards by date for each year
     for (const year in yearData) {
       yearData[year].spielCards.sort((a: SpielScorecard, b: SpielScorecard) => {
         const dateA = parseDate(a.date);
@@ -157,7 +154,7 @@ export async function GET() {
 
     return NextResponse.json(yearData);
   } catch (error) {
-    console.error('Error reading scorecards directory:', error);
+    console.error('Error fetching from blob storage:', error);
     return NextResponse.json(
       { error: 'Fehler beim Laden der Scorecards' },
       { status: 500 }
@@ -191,7 +188,19 @@ export async function POST(request: Request) {
       date: formattedDate,
       geldFile: geldFile
     };
-    await saveCustomDates(customDates);
+
+    // Update custom-dates.json through API
+    const response = await fetch('/api/update-custom-dates', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(customDates)
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to update custom dates');
+    }
 
     return NextResponse.json({ success: true });
   } catch (error) {
