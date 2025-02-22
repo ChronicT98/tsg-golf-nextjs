@@ -114,12 +114,21 @@ export async function POST(request: Request) {
           const customDatesPath = 'data/custom-dates.json';
           let customDates: CustomDates = {};
 
-          // Read existing custom dates
+          // Read existing custom dates from blob storage
           try {
-            const existing = await import('@/data/custom-dates.json');
-            customDates = existing.default;
-          } catch {
-            // File doesn't exist or is empty, use empty object
+            const { list } = await import('@vercel/blob');
+            const customDatesBlob = await list({ prefix: 'data/' });
+            const customDatesFile = customDatesBlob.blobs.find(blob => blob.pathname === 'data/custom-dates.json');
+            
+            if (customDatesFile) {
+              const response = await fetch(customDatesFile.url);
+              if (response.ok) {
+                customDates = await response.json();
+              }
+            }
+          } catch (error) {
+            console.error('Error reading custom dates:', error);
+            // Use empty object if reading fails
           }
 
           // Update custom dates with year information
@@ -171,14 +180,12 @@ export async function POST(request: Request) {
               break;
           }
 
-          // Save updated custom dates
-          const { mkdir, writeFile } = await import('fs/promises');
-          const { dirname } = await import('path');
-          await mkdir(dirname(customDatesPath), { recursive: true });
-          await writeFile(
-            customDatesPath,
-            JSON.stringify(customDates, null, 2)
-          );
+          // Save updated custom dates to blob storage
+          await put('data/custom-dates.json', JSON.stringify(customDates, null, 2), {
+            access: 'public',
+            addRandomSuffix: false,
+            contentType: 'application/json'
+          });
         }
 
       } catch (error) {
