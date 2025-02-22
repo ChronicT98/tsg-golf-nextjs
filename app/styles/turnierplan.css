@@ -1,0 +1,40 @@
+.turnierplan-container {
+    padding: 0 2rem;
+  }
+  .turnierplan-main {
+    font-size: clamp(2rem, 4vw, 3rem);
+    min-height: 100vh;
+    padding: 4rem 0;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    background-size: 200% 200%;
+    background-clip: text;
+    color: transparent;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: fadeIn 0.8s ease-out, gradientShift 8s ease infinite;
+  }
+  .turnierplan-iframeContainer {
+    width: 100%;
+    max-width: 1200px;
+    margin-top: 2rem;
+    border: 1px solid #e5e5e5;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+    border-radius: 10px;
+    overflow: hidden;
+    height: 80vh; /* Höhere Höhe für bessere Nutzbarkeit */
+  }
+  .controls {
+    width: 100%;
+    max-width: 1200px;
+    margin-bottom: 1rem;
+  }
+
+  .embeddedFrame {
+    border: none;
+    width: 100%;
+    height: 100%;
+  }

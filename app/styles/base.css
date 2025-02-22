@@ -82,6 +82,7 @@ html.modern-design .hero__title {
     font-weight: 700;
     margin-bottom: 1.5rem;
     background: linear-gradient(to right, rgba(255, 255, 255, 0.9), #fff);
+    background-clip: text;
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     animation: fadeIn 0.8s ease-out;
@@ -146,6 +147,7 @@ html.modern-design .features__card-title {
     background: linear-gradient(135deg, 
         var(--secondary-color),
         var(--primary-color));
+        background-clip: text;
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
 }
@@ -159,6 +161,7 @@ html.modern-design .features__card-text {
 /* Utility Classes */
 html.modern-design .text-gradient {
     background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    background-clip: text;
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
 }

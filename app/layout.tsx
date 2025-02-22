@@ -5,10 +5,10 @@ import Link from "next/link";
 import Image from "next/image";
 import AdminLink from "@/app/components/admin/admin-link";
 import Navigation from "@/app/components/Navigation";
+import { Providers } from "@/app/providers";
 import "./globals.css";
 import "./styles/base.css";
 import "./styles/layout.css";
-import "./styles/members.css";
 import "./styles/regelwerk.css";
 import "./styles/spielergebnisse.css";
 import "./styles/blechstatistik.css";
@@ -36,7 +36,8 @@ export default function RootLayout({
   return (
     <html lang="de" className="modern-design">
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
-        <header className="main-header">
+        <Providers>
+          <header className="main-header">
           <div className="logo-container">
             <Link href="/">
               <Image
@@ -64,6 +65,7 @@ export default function RootLayout({
             </p>
           </div>
         </footer>
+        </Providers>
       </body>
     </html>
   );

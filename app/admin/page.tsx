@@ -2,29 +2,44 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { useSession, signOut } from 'next-auth/react';
 import FileUpload from '@/app/components/admin/file-upload';
 import '@/app/styles/admin.css';
 
-const isAuthenticated = () => {
-  if (typeof window !== 'undefined') {
-    return sessionStorage.getItem('adminAuthenticated') === 'true';
-  }
-  return false;
-};
-
 export default function AdminPage() {
-  const handleLogout = () => {
-    sessionStorage.removeItem('adminAuthenticated');
+  const { data: session, status } = useSession();
+  const router = useRouter();
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (status === 'unauthenticated') {
+      router.push('/admin/login');
+    } else if (status !== 'loading') {
+      setLoading(false);
+    }
+  }, [status, router]);
+
+  if (loading || status === 'loading') {
+    return <div>Loading...</div>;
+  }
+
+  const handleLogout = async () => {
+    await signOut({ redirect: false });
     router.push('/admin/login');
   };
-  const handleFileUpload = async (file: File, date?: string, type?: string) => {
+
+  const handleFileUpload = async (files: File[], date?: string, year?: string) => {
+    if (files.length === 0) return;
+    
     const formData = new FormData();
-    formData.append('file', file);
+    // Append all files to formData
+    files.forEach(file => {
+      formData.append('file', file);
+    });
     if (date) formData.append('date', date);
-    if (type) formData.append('type', type);
+    if (year) formData.append('year', year);
 
     try {
-      // TODO: Implement actual file upload endpoint
       const response = await fetch('/api/upload', {
         method: 'POST',
         body: formData,
@@ -34,28 +49,17 @@ export default function AdminPage() {
         throw new Error('Upload failed');
       }
 
-      // Refresh data after successful upload
-      // TODO: Implement data refresh
+      // Refresh the page to show new uploads
+      router.refresh();
+      // Add a small delay to ensure server has processed changes
+      setTimeout(() => {
+        window.location.reload();
+      }, 500);
     } catch (error) {
       console.error('Error uploading file:', error);
       alert('Fehler beim Hochladen der Datei');
     }
   };
-  const router = useRouter();
-  const [activeTab, setActiveTab] = useState('scorecards');
-  const [isLoading, setIsLoading] = useState(true);
-
-  useEffect(() => {
-    if (!isAuthenticated()) {
-      router.push('/admin/login');
-    } else {
-      setIsLoading(false);
-    }
-  }, [router]);
-
-  if (isLoading) {
-    return <div>Loading...</div>;
-  }
 
   return (
     <div className="admin-container">
@@ -66,57 +70,23 @@ export default function AdminPage() {
         </button>
       </div>
       
-      <div className="admin-tabs">
-        <button 
-          className={`tab ${activeTab === 'scorecards' ? 'active' : ''}`}
-          onClick={() => setActiveTab('scorecards')}
-        >
-          Spielergebnisse
-        </button>
-        <button 
-          className={`tab ${activeTab === 'statistics' ? 'active' : ''}`}
-          onClick={() => setActiveTab('statistics')}
-        >
-          Statistik
-        </button>
-      </div>
-
       <div className="admin-content">
-        {activeTab === 'scorecards' && (
-          <div className="scorecards-manager">
-            <h2>Spielergebnisse Verwaltung</h2>
-            <div className="upload-section">
-              <h3>Neue Scorecard hochladen</h3>
-              <FileUpload
-                onFileSelect={handleFileUpload}
-                allowDateSelection={true}
-                allowTypeSelection={true}
-              />
-            </div>
-            <div className="existing-cards">
-              <h3>Vorhandene Scorecards</h3>
-              {/* TODO: Add existing scorecards list with edit/delete functionality */}
-            </div>
+        <div className="scorecards-manager">
+          <h2>Spielergebnisse Verwaltung</h2>
+          <div className="upload-section">
+            <h3>Neue Scorecard hochladen</h3>
+            <FileUpload
+              onFileSelect={handleFileUpload}
+              allowDateSelection={true}
+              allowTypeSelection={false}
+              allowYearSelection={true}
+            />
           </div>
-        )}
-
-        {activeTab === 'statistics' && (
-          <div className="statistics-manager">
-            <h2>Statistik Verwaltung</h2>
-            <div className="upload-section">
-              <h3>Neue Statistik hochladen</h3>
-              <FileUpload
-                onFileSelect={(file) => handleFileUpload(file, undefined, 'statistik')}
-                allowDateSelection={false}
-                allowTypeSelection={false}
-              />
-            </div>
-            <div className="existing-statistics">
-              <h3>Vorhandene Statistiken</h3>
-              {/* TODO: Add existing statistics list */}
-            </div>
+          <div className="existing-cards">
+            <h3>Vorhandene Scorecards</h3>
+            {/* TODO: Add existing scorecards list with edit/delete functionality */}
           </div>
-        )}
+        </div>
       </div>
     </div>
   );

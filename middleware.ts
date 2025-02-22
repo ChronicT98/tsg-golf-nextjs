@@ -5,8 +5,8 @@ import { getToken } from 'next-auth/jwt'
 export async function middleware(request: NextRequest) {
   const token = await getToken({ req: request })
   
-  // Check if the request is for an admin route
-  if (request.nextUrl.pathname.startsWith('/admin')) {
+  // Check if the request is for an admin route (excluding login page)
+  if (request.nextUrl.pathname.startsWith('/admin') && !request.nextUrl.pathname.startsWith('/admin/login')) {
     if (!token) {
       // Redirect unauthenticated users to the login page
       const loginUrl = new URL('/admin/login', request.url)

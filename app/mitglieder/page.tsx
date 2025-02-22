@@ -55,10 +55,22 @@ export default function MitgliederPage() {
                       <span>Handicap:</span>
                       <strong>{member.hcp}</strong>
                     </div>
+                    {member.geboren && (
+                      <div className="mitglieder__detail">
+                        <span>Geboren:</span>
+                        <strong>{member.geboren}</strong>
+                      </div>
+                    )}
                     {member.firma && (
                       <div className="mitglieder__detail">
-                        <span>Firma:</span>
+                        <span>Beruf:</span>
                         <strong>{member.firma}</strong>
+                      </div>
+                    )}
+                    {member.handy && (
+                      <div className="mitglieder__detail">
+                        <span>Handy:</span>
+                        <strong>{member.handy}</strong>
                       </div>
                     )}
                   </div>
@@ -73,9 +85,6 @@ export default function MitgliederPage() {
                         Website
                       </a>
                     )}
-                  </div>
-                  <div className="mitglieder__badges">
-                    <span className="mitglieder__badge">Gründungsmitglied</span>
                   </div>
                 </div>
               ))}
@@ -101,10 +110,28 @@ export default function MitgliederPage() {
                       <span>Handicap:</span>
                       <strong>{member.hcp}</strong>
                     </div>
+                    {member.geboren && (
+                      <div className="mitglieder__detail">
+                        <span>Geboren:</span>
+                        <strong>{member.geboren}</strong>
+                      </div>
+                    )}
+                    {member.firma && (
+                      <div className="mitglieder__detail">
+                        <span>Beruf:</span>
+                        <strong>{member.firma}</strong>
+                      </div>
+                    )}
                     {member.beruf && (
                       <div className="mitglieder__detail">
                         <span>Beruf:</span>
                         <strong>{member.beruf}</strong>
+                      </div>
+                    )}
+                    {member.handy && (
+                      <div className="mitglieder__detail">
+                        <span>Handy:</span>
+                        <strong>{member.handy}</strong>
                       </div>
                     )}
                   </div>
@@ -144,16 +171,19 @@ export default function MitgliederPage() {
                       <span>Handicap:</span>
                       <strong>{member.hcp}</strong>
                     </div>
+                    {member.geboren && (
+                      <div className="mitglieder__detail">
+                        <span>Geboren:</span>
+                        <strong>{member.geboren}</strong>
+                      </div>
+                    )}
                     {member.verstorben && (
                       <div className="mitglieder__detail">
-                        <span>Verstorben:</span>
+                        <span className="kreuz">✞</span>
                         <strong>{member.verstorben}</strong>
                       </div>
                     )}
-                  </div>
-                  <div className="mitglieder__badges">
-                    <span className="mitglieder__badge">In Memoriam</span>
-                  </div>
+                  </div> 
                 </div>
               ))}
             </div>
@@ -165,97 +195,43 @@ export default function MitgliederPage() {
           <section className="mitglieder__section">
             <h3 className="mitglieder__category-title">Funktionäre</h3>
             <div className="mitglieder__grid">
-            <div className="mitglieder__card">
-              <div className="mitglieder__image">
-                <img src="/images/Christian.jpg" alt="Christian Kafka" />
-              </div>
-              <h3 className="mitglieder__name">
-                Christian Kafka
-                <span className="mitglieder__nickname">"Präsi"</span>
-              </h3>
-              <div className="mitglieder__info">
-                <div className="mitglieder__detail">
-                  <span>Firma:</span>
-                  <strong>GF 4k Projektmanagement GmbH</strong>
+              <div className="mitglieder__card mitglieder__card--funktionaer">
+                <h3 className="mitglieder__name">Christian Kafka</h3>
+                <div className="mitglieder__badges">
+                  <span className="mitglieder__badge" id="seperator">Präsident</span>
+                  <span className="mitglieder__badge">Auswertung</span>
                 </div>
               </div>
-              <div className="mitglieder__badges">
-                <span className="mitglieder__badge">Präsident</span>
-                <span className="mitglieder__badge">Auswertung</span>
-              </div>
-            </div>
 
-            <div className="mitglieder__card">
-              <div className="mitglieder__image">
-                <img src="/images/ernstl.jpg" alt="Ernst Aigner" />
-              </div>
-              <h3 className="mitglieder__name">
-                Ernst Aigner
-                <span className="mitglieder__nickname">"Ernsti"</span>
-              </h3>
-              <div className="mitglieder__info">
-                <div className="mitglieder__detail">
-                  <span>Firma:</span>
-                  <strong>GF Faimolz Manufaktur GmbH</strong>
+              <div className="mitglieder__card mitglieder__card--funktionaer">
+                <h3 className="mitglieder__name">Ernst Aigner</h3>
+                <div className="mitglieder__badges">
+                  <span className="mitglieder__badge">Kassier</span>
                 </div>
               </div>
-              <div className="mitglieder__badges">
-                <span className="mitglieder__badge">Kassier</span>
-              </div>
-            </div>
 
-            <div className="mitglieder__card">
-              <div className="mitglieder__image">
-                <img src="/images/Wadi_2020.jpg" alt="Peter Konrad" />
-              </div>
-              <h3 className="mitglieder__name">
-                Peter Konrad
-                <span className="mitglieder__nickname">"Wadolino"</span>
-              </h3>
-              <div className="mitglieder__info">
-                <div className="mitglieder__detail">
-                  <span>Firma:</span>
-                  <strong>GP Planungs- und VertriebsGmbH</strong>
+              <div className="mitglieder__card mitglieder__card--funktionaer">
+                <h3 className="mitglieder__name">Peter Konrad</h3>
+                <div className="mitglieder__badges">
+                  <span className="mitglieder__badge" id="seperator">Kassaprüfer</span>
+                  <span className="mitglieder__badge">Turnierkarten</span>
                 </div>
               </div>
-              <div className="mitglieder__badges">
-                <span className="mitglieder__badge">Kassaprüfer</span>
-                <span className="mitglieder__badge">Turnierkarten</span>
-              </div>
-            </div>
 
-            <div className="mitglieder__card">
-              <h3 className="mitglieder__name">Tobias Kafka</h3>
-              <div className="mitglieder__info">
-                <div className="mitglieder__detail">
-                  <span>Rolle:</span>
-                  <strong>Webentwicklung</strong>
+              <div className="mitglieder__card mitglieder__card--funktionaer">
+                <h3 className="mitglieder__name">Tobias Kafka</h3>
+                <div className="mitglieder__badges">
+                  <span className="mitglieder__badge">Homepage</span>
                 </div>
               </div>
-              <div className="mitglieder__badges">
-                <span className="mitglieder__badge">Homepage</span>
-              </div>
-            </div>
 
-            <div className="mitglieder__card">
-              <div className="mitglieder__image">
-                <img src="/images/Berni.jpg" alt="Bernhard Anderle" />
-              </div>
-              <h3 className="mitglieder__name">
-                Bernhard Anderle
-                <span className="mitglieder__nickname">"Berni"</span>
-              </h3>
-              <div className="mitglieder__info">
-                <div className="mitglieder__detail">
-                  <span>Beruf:</span>
-                  <strong>Privatier</strong>
+              <div className="mitglieder__card mitglieder__card--funktionaer">
+                <h3 className="mitglieder__name">Bernhard Anderle</h3>
+                <div className="mitglieder__badges">
+                  <span className="mitglieder__badge" id="seperator">Medien</span>
+                  <span className="mitglieder__badge">Marketing</span>
                 </div>
               </div>
-              <div className="mitglieder__badges">
-                <span className="mitglieder__badge">Medien</span>
-                <span className="mitglieder__badge">Marketing</span>
-              </div>
-            </div>
             </div>
           </section>
         )}

@@ -1,118 +1,185 @@
 {
+  "2022": {
+    "blechen_95a258399a.jpg": {
+      "date": "21.02.2025"
+    },
+    "spiel_78e363394f.jpg": {
+      "date": "2022-07-13",
+      "geldFile": "geld_78e363394f.jpg"
+    }
+  },
+  "2023": {
+    "spiel_c3952b9251.jpg": {
+      "date": "2023-07-14",
+      "geldFile": "geld_c3952b9251.jpg"
+    },
+    "spiel_fe057893dc.jpg": {
+      "date": "2023-05-16",
+      "geldFile": "geld_fe057893dc.jpg"
+    }
+  },
+  "2024": {
     "spiel_01.jpg": {
-        "date": "19.03.2024",
-        "geldFile": "geld_01.jpg"
+      "date": "19.03.2024",
+      "geldFile": "geld_01.jpg"
     },
     "spiel_02.jpg": {
-        "date": "26.03.2024",
-        "geldFile": "geld_02.jpg"
+      "date": "26.03.2024",
+      "geldFile": "geld_02.jpg"
     },
     "spiel_03.jpg": {
-        "date": "09.04.2024",
-        "geldFile": "geld_03.jpg"
+      "date": "02.04.2024",
+      "geldFile": "geld_03.jpg"
     },
     "spiel_04.jpg": {
-        "date": "16.04.2024",
-        "geldFile": "geld_04.jpg"
+      "date": "09.04.2024",
+      "geldFile": "geld_04.jpg"
     },
     "spiel_05.jpg": {
-        "date": "30.04.2024",
-        "geldFile": "geld_05.jpg"
-    },
-    "spiel_06.jpg": {
-        "date": "07.05.2024",
-        "geldFile": "geld_06.jpg"
+      "date": "16.04.2024",
+      "geldFile": "geld_05.jpg"
     },
     "spiel_07.jpg": {
-        "date": "14.05.2024",
-        "geldFile": "geld_07.jpg"
+      "date": "30.04.2024",
+      "geldFile": "geld_07.jpg"
     },
     "spiel_08.jpg": {
-        "date": "21.05.2024",
-        "geldFile": "geld_08.jpg"
+      "date": "07.05.2024",
+      "geldFile": "geld_08.jpg"
     },
     "spiel_09.jpg": {
-        "date": "28.05.2024",
-        "geldFile": "geld_09.jpg"
+      "date": "14.05.2024",
+      "geldFile": "geld_09.jpg"
     },
     "spiel_10.jpg": {
-        "date": "18.06.2024",
-        "geldFile": "geld_10.jpg"
+      "date": "21.05.2024",
+      "geldFile": "geld_10.jpg"
     },
     "spiel_11.jpg": {
-        "date": "09.07.2024",
-        "geldFile": "geld_11.jpg"
+      "date": "28.05.2024",
+      "geldFile": "geld_11.jpg"
     },
     "spiel_12.jpg": {
-        "date": "16.07.2024",
-        "geldFile": "geld_12.jpg"
-    },
-    "spiel_13.jpg": {
-        "date": "23.07.2024",
-        "geldFile": "geld_13.jpg"
+      "date": "04.06.2024",
+      "geldFile": "geld_12.jpg"
     },
     "spiel_14.jpg": {
-        "date": "30.07.2024",
-        "geldFile": "geld_14.jpg"
+      "date": "18.06.2024",
+      "geldFile": "geld_14.jpg"
     },
     "spiel_15.jpg": {
-        "date": "13.08.2024",
-        "geldFile": "geld_15.jpg"
+      "date": "25.06.2024",
+      "geldFile": "geld_15.jpg"
     },
     "spiel_16.jpg": {
-        "date": "27.08.2024",
-        "geldFile": "geld_16.jpg"
+      "date": "02.07.2024",
+      "geldFile": "geld_16.jpg"
     },
     "spiel_17.jpg": {
-        "date": "03.09.2024",
-        "geldFile": "geld_17.jpg"
+      "date": "09.07.2024",
+      "geldFile": "geld_17.jpg"
     },
     "spiel_18.jpg": {
-        "date": "10.09.2024",
-        "geldFile": "geld_18.jpg"
+      "date": "16.07.2024",
+      "geldFile": "geld_18.jpg"
     },
     "spiel_19.jpg": {
-        "date": "24.09.2024",
-        "geldFile": "geld_19.jpg"
+      "date": "23.07.2024",
+      "geldFile": "geld_19.jpg"
     },
     "spiel_20.jpg": {
-        "date": "01.10.2024",
-        "geldFile": "geld_20.jpg"
-    },
-    "spiel_21.jpg": {
-        "date": "08.10.2024",
-        "geldFile": "geld_21.jpg"
+      "date": "30.07.2024",
+      "geldFile": "geld_20.jpg"
     },
     "spiel_22.jpg": {
-        "date": "15.10.2024",
-        "geldFile": "geld_22.jpg"
+      "date": "13.08.2024",
+      "geldFile": "geld_22.jpg"
     },
     "spiel_23.jpg": {
-        "date": "22.10.2024",
-        "geldFile": "geld_23.jpg"
+      "date": "20.08.2024",
+      "geldFile": "geld_23.jpg"
     },
     "spiel_24.jpg": {
-        "date": "29.10.2024",
-        "geldFile": "geld_24.jpg"
+      "date": "27.08.2024",
+      "geldFile": "geld_24.jpg"
     },
     "spiel_25.jpg": {
-        "date": "05.11.2024",
-        "geldFile": "geld_25.jpg"
+      "date": "03.09.2024",
+      "geldFile": "geld_25.jpg"
     },
     "spiel_26.jpg": {
-        "date": "12.11.2024",
-        "geldFile": "geld_26.jpg"
-    },
-    "spiel_27.jpg": {
-        "date": "19.11.2024",
-        "geldFile": "geld_27.jpg"
+      "date": "10.09.2024",
+      "geldFile": "geld_26.jpg"
     },
     "spiel_28.jpg": {
-        "date": "26.11.2024",
-        "geldFile": "geld_28.jpg"
+      "date": "24.09.2024",
+      "geldFile": "geld_28.jpg"
     },
     "spiel_29.jpg": {
-        "date": "03.12.2024",
-        "geldFile": "geld_29.jpg"
+      "date": "01.10.2024",
+      "geldFile": "geld_29.jpg"
+    },
+    "geld_4cfdffd10f.jpg": {
+      "date": "01.10.2024",
+      "geldFile": "geld_4cfdffd10f.jpg"
+    },
+    "blechen_b2375fa256.jpg": {
+      "date": "22.12.2024"
+    },
+    "blechen_aa983946d7.jpg": {
+      "date": "01.10.2024"
     }
+  },
+  "2025": {
+    "geld_9c4f729a97.jpg": {
+      "date": "18.02.2025",
+      "geldFile": "geld_9c4f729a97.jpg"
+    },
+    "spiel_5f7dc90f2e.jpg": {
+      "date": "18.02.2025"
+    },
+    "statistik_2025.jpg": {
+      "date": "04.02.2025"
+    },
+    "blechen_3337294a77.jpg": {
+      "date": "10.02.2025"
+    },
+    "blechen_ae8855c55f.jpg": {
+      "date": "10.02.2025"
+    },
+    "spiel_666a5ec53f.jpg": {
+      "date": "06.02.2025"
+    },
+    "blechen_84ca2a756e.jpg": {
+      "date": "27.02.2025"
+    },
+    "spiel_9293d9b265.jpg": {
+      "date": "14.02.2025",
+      "geldFile": "geld_9293d9b265.jpg"
+    },
+    "spiel_c4660db144.jpg": {
+      "date": "19.02.2025",
+      "geldFile": "geld_c4660db144.jpg"
+    },
+    "spiel_f1aa13db88.jpg": {
+      "date": "17.02.2025",
+      "geldFile": "geld_f1aa13db88.jpg"
+    },
+    "spiel_16642ab2dc.jpg": {
+      "date": "20.02.2025",
+      "geldFile": "geld_16642ab2dc.jpg"
+    },
+    "spiel_211446d5c6.jpg": {
+      "date": "18.02.2025",
+      "geldFile": "geld_211446d5c6.jpg"
+    },
+    "spiel_9df4ed9d55.jpg": {
+      "date": "2025-02-28",
+      "geldFile": "geld_9df4ed9d55.jpg"
+    },
+    "spiel_8cca785476.jpg": {
+      "date": "27.02.2025",
+      "geldFile": "geld_8cca785476.jpg"
+    }
+  }
 }

@@ -2,9 +2,11 @@
 
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { signIn } from 'next-auth/react';
 import '@/app/styles/admin.css';
 
 export default function AdminLogin() {
+  const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const router = useRouter();
@@ -13,13 +15,21 @@ export default function AdminLogin() {
     e.preventDefault();
     setError('');
 
-    // Simple password check - this should be replaced with proper authentication
-    if (password === 'TSG2024!') {
-      // Set authentication state
-      sessionStorage.setItem('adminAuthenticated', 'true');
-      router.push('/admin');
-    } else {
-      setError('Falsches Passwort');
+    try {
+      const result = await signIn('credentials', {
+        username,
+        password,
+        redirect: false,
+      });
+
+      if (result?.error) {
+        setError('Ungültige Anmeldedaten');
+      } else {
+        router.push('/admin');
+        router.refresh();
+      }
+    } catch (error) {
+      setError('Ein Fehler ist aufgetreten');
     }
   };
 
@@ -29,6 +39,17 @@ export default function AdminLogin() {
         <h1>Admin Login</h1>
         <form onSubmit={handleSubmit} className="login-form">
           <div className="form-group">
+            <label htmlFor="username">Benutzername:</label>
+            <input
+              type="text"
+              id="username"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              className="username-input"
+              required
+            />
+          </div>
+          <div className="form-group">
             <label htmlFor="password">Passwort:</label>
             <input
               type="password"
@@ -36,7 +57,7 @@ export default function AdminLogin() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               className="password-input"
-              autoComplete="new-password"
+              autoComplete="current-password"
               required
             />
           </div>

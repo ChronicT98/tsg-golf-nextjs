@@ -7,8 +7,12 @@ interface CustomDateEntry {
   geldFile?: string;
 }
 
-interface CustomDates {
+interface FileData {
   [filename: string]: CustomDateEntry;
+}
+
+interface CustomDates {
+  [year: string]: FileData;
 }
 
 interface SpielScorecard {
@@ -51,16 +55,29 @@ async function saveCustomDates(dates: CustomDates) {
   await fs.writeFile(CUSTOM_DATES_PATH, JSON.stringify(dates, null, 2));
 }
 
-// Hilfsfunktion zum Extrahieren des Jahres aus dem Dateinamen
-function getYearFromFileName(fileName: string): string {
+// Hilfsfunktion zum Extrahieren des Jahres aus dem Dateinamen oder Datum
+function getYearFromFileOrDate(fileName: string, customDates: CustomDates): string {
+  // Zuerst in custom-dates.json nachschauen
+  for (const year in customDates) {
+    if (customDates[year][fileName]) {
+      return year;
+    }
+  }
+  
+  // Dann nach Jahr im Dateinamen suchen
   const yearMatch = fileName.match(/_(20\d{2})/);
   return yearMatch ? yearMatch[1] : "2024";
 }
 
-// Hilfsfunktion zum Konvertieren eines deutschen Datums in ein Date-Objekt
-function germanDateToDate(dateStr: string): Date {
-  const [day, month, year] = dateStr.split('.').map(num => parseInt(num, 10));
-  return new Date(year, month - 1, day);
+// Hilfsfunktion zum Konvertieren eines Datums in ein Date-Objekt
+function parseDate(dateStr: string): Date {
+  // Prüfen ob deutsches Datumsformat (DD.MM.YYYY)
+  if (dateStr.includes('.')) {
+    const [day, month, year] = dateStr.split('.').map(num => parseInt(num, 10));
+    return new Date(year, month - 1, day);
+  }
+  // ISO Format (YYYY-MM-DD)
+  return new Date(dateStr);
 }
 
 export async function GET() {
@@ -68,43 +85,55 @@ export async function GET() {
     const scorecardsDir = path.join(process.cwd(), 'public', 'scorecards');
     const statistikDir = path.join(process.cwd(), 'public', 'scorecard-statistik');
     const customDates = await loadCustomDates();
+    const years = ['2025', '2024', '2023', '2022'];
     
     const [scorecardFiles, statistikFiles] = await Promise.all([
       fs.readdir(scorecardsDir),
       fs.readdir(statistikDir).catch(() => [])
     ]);
     
-    const yearData: ResponseData = {
-      "2024": {
+    const yearData: ResponseData = {};
+    years.forEach(year => {
+      yearData[year] = {
         static: {},
         spielCards: []
-      },
-      "2025": {
-        static: {},
-        spielCards: []
-      }
-    };
+      };
+    });
 
     // Verarbeite statische Dateien
     for (const file of statistikFiles) {
-      const year = getYearFromFileName(file);
-      if (yearData[year] && file.toLowerCase().includes('statistik')) {
-        yearData[year].static.statistik = `/scorecard-statistik/${file}`;
+      if (file.toLowerCase().includes('statistik')) {
+        // Finde das Jahr aus dem Dateinamen oder custom-dates.json
+        const year = getYearFromFileOrDate(file, customDates);
+        // Wenn das Jahr in yearData existiert, füge die Statistik hinzu
+        if (yearData[year]) {
+          yearData[year].static.statistik = `/scorecard-statistik/${file}`;
+        }
       }
     }
 
-    // Verarbeite Spiel-Dateien
-    const spielFiles = scorecardFiles.filter(file => 
-      file.toLowerCase().startsWith('spiel') && 
-      !file.toLowerCase().includes('geld') &&
-      file.toLowerCase().endsWith('.jpg')
-    );
+    // Verarbeite alle JPG-Dateien
+    const spielFiles = scorecardFiles.filter(file => {
+      const lowerFile = file.toLowerCase();
+      // Nur spiel_ Dateien
+      if (lowerFile.startsWith('spiel_') && lowerFile.endsWith('.jpg')) {
+        return true;
+      }
+      // Oder Dateien aus custom-dates.json, die keine geld-Dateien sind
+      for (const year in customDates) {
+        const fileData = customDates[year][file];
+        if (fileData && !file.toLowerCase().includes('geld')) {
+          return true;
+        }
+      }
+      return false;
+    });
 
     for (const fileName of spielFiles) {
-      const year = getYearFromFileName(fileName);
+      const year = getYearFromFileOrDate(fileName, customDates);
       if (yearData[year]) {
         const stats = await fs.stat(path.join(scorecardsDir, fileName));
-        const customEntry = customDates[fileName];
+        const customEntry = customDates[year]?.[fileName];
         const date = customEntry ? customEntry.date : new Date(stats.mtime).toLocaleDateString('de-DE');
         const geldFileName = customEntry?.geldFile;
         
@@ -112,7 +141,7 @@ export async function GET() {
           id: fileName,
           date: date,
           fileName: `/scorecards/${fileName}`,
-          geldFileName: geldFileName ? `/scorecards/${geldFileName}` : undefined
+          geldFileName: geldFileName ? `/scorecard-geld/${geldFileName}` : undefined
         });
       }
     }
@@ -120,8 +149,8 @@ export async function GET() {
     // Sortiere die Spielkarten nach Datum für jedes Jahr
     for (const year in yearData) {
       yearData[year].spielCards.sort((a: SpielScorecard, b: SpielScorecard) => {
-        const dateA = germanDateToDate(a.date);
-        const dateB = germanDateToDate(b.date);
+        const dateA = parseDate(a.date);
+        const dateB = parseDate(b.date);
         return dateA.getTime() - dateB.getTime();
       });
     }
@@ -136,20 +165,39 @@ export async function GET() {
   }
 }
 
+// Hilfsfunktion zum Konvertieren des Datums in DD.MM.YYYY Format
+function formatDateToDDMMYYYY(dateStr: string): string {
+  if (dateStr.includes('-')) {
+    const [year, month, day] = dateStr.split('-');
+    return `${day}.${month}.${year}`;
+  }
+  return dateStr; // Bereits im korrekten Format
+}
+
 export async function POST(request: Request) {
   try {
-    const { fileName, customDate, geldFile } = await request.json();
+    const { fileName, customDate, geldFile, year } = await request.json();
     
-    if (!fileName || !customDate) {
+    if (!fileName || !customDate || !year) {
       return NextResponse.json(
-        { error: 'Dateiname und Datum sind erforderlich' },
+        { error: 'Dateiname, Datum und Jahr sind erforderlich' },
         { status: 400 }
       );
     }
 
+    // Stelle sicher, dass das Datum im DD.MM.YYYY Format ist
+    let formattedDate = customDate;
+    if (customDate.includes('-')) {
+      const [year, month, day] = customDate.split('-');
+      formattedDate = `${day}.${month}.${year}`;
+    }
+
     const customDates = await loadCustomDates();
-    customDates[fileName] = {
-      date: customDate,
+    if (!customDates[year]) {
+      customDates[year] = {};
+    }
+    customDates[year][fileName] = {
+      date: formattedDate,
       geldFile: geldFile
     };
     await saveCustomDates(customDates);

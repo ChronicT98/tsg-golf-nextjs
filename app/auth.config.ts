@@ -1,9 +1,8 @@
-import type { Session, User } from "next-auth"
+import type { AuthOptions, Session, User } from "next-auth"
 import type { JWT } from "next-auth/jwt"
 import CredentialsProvider from "next-auth/providers/credentials"
-import { kv } from '@vercel/kv'
 
-export const authConfig = {
+export const authConfig: AuthOptions = {
   providers: [
     CredentialsProvider({
       credentials: {
@@ -16,7 +15,6 @@ export const authConfig = {
           password: string
         }
 
-        // In production, you would want to store these securely in KV
         const validUsername = process.env.ADMIN_USERNAME
         const validPassword = process.env.ADMIN_PASSWORD
 
@@ -33,6 +31,10 @@ export const authConfig = {
       },
     }),
   ],
+  session: {
+    strategy: "jwt" as const,
+    maxAge: 24 * 60 * 60, // 24 hours
+  },
   callbacks: {
     async jwt({ token, user }: { token: JWT; user?: User }) {
       if (user) {

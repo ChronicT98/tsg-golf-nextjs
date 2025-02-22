@@ -4,21 +4,24 @@ import React, { useState, useRef, DragEvent } from 'react';
 import Image from 'next/image';
 
 interface FileUploadProps {
-  onFileSelect: (files: File[], date?: string) => void;
+  onFileSelect: (files: File[], date?: string, year?: string) => void;
   acceptedTypes?: string[];
   allowDateSelection?: boolean;
   allowTypeSelection?: boolean;
+  allowYearSelection?: boolean;
 }
 
 export default function FileUpload({
   onFileSelect,
-  acceptedTypes = ['application/pdf'],
+  acceptedTypes = ['application/pdf', 'image/jpeg', 'image/jpg'],
   allowDateSelection = true,
   allowTypeSelection = false,
+  allowYearSelection = true,
 }: FileUploadProps) {
   const [isDragging, setIsDragging] = useState(false);
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [selectedDate, setSelectedDate] = useState('');
+  const [selectedYear, setSelectedYear] = useState(new Date().getFullYear().toString());
   const [previewUrls, setPreviewUrls] = useState<string[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -44,21 +47,34 @@ export default function FileUpload({
 
   const handleItems = async (items: DataTransferItem[]) => {
     const files: File[] = [];
+    const seenNames = new Set<string>();
     
     const processEntry = async (entry: FileSystemEntry) => {
       if (entry.isFile) {
         const file = await new Promise<File>((resolve) => {
           (entry as FileSystemFileEntry).file(resolve);
         });
-        if (acceptedTypes.includes(file.type)) {
-          files.push(file);
+        const lowerName = file.name.toLowerCase();
+        
+        // Check if this is a valid file type
+        if (acceptedTypes.includes(file.type) || 
+            lowerName.endsWith('.jpg') || 
+            lowerName.endsWith('.jpeg') ||
+            lowerName.endsWith('.pdf')) {
+          
+          // Extract type prefix and number
+          const typeMatch = lowerName.match(/(statistik|blechen|geld|spiel)_(\d+)/i);
+          if (typeMatch) {
+            const [, type, number] = typeMatch;
+            const key = `${type.toLowerCase()}_${number}`;
+            
+            // If we haven't seen this combination before, add it
+            if (!seenNames.has(key)) {
+              seenNames.add(key);
+              files.push(file);
+            }
+          }
         }
-      } else if (entry.isDirectory) {
-        const reader = (entry as FileSystemDirectoryEntry).createReader();
-        const entries = await new Promise<FileSystemEntry[]>((resolve) => {
-          reader.readEntries(resolve);
-        });
-        await Promise.all(entries.map(processEntry));
       }
     };
 
@@ -67,11 +83,28 @@ export default function FileUpload({
     );
 
     if (files.length === 0) {
-      alert('Bitte nur PDF-Dateien hochladen.');
+      alert('Bitte nur PDF oder JPG-Dateien hochladen.');
       return;
     }
 
-    setSelectedFiles(files);
+    // Sort files by type to ensure consistent order
+    const sortedFiles = files.sort((a, b) => {
+      const aName = a.name.toLowerCase();
+      const bName = b.name.toLowerCase();
+      
+      // Sort by file type first
+      if (aName.includes('statistik') && !bName.includes('statistik')) return -1;
+      if (!aName.includes('statistik') && bName.includes('statistik')) return 1;
+      if (aName.includes('blechen') && !bName.includes('blechen')) return -1;
+      if (!aName.includes('blechen') && bName.includes('blechen')) return 1;
+      if (aName.includes('geld') && !bName.includes('geld')) return -1;
+      if (!aName.includes('geld') && bName.includes('geld')) return 1;
+      
+      // Then by name
+      return aName.localeCompare(bName);
+    });
+
+    setSelectedFiles(sortedFiles);
     // Preview first few files
     const previews = await Promise.all(
       files.slice(0, 3).map(file => {
@@ -85,14 +118,26 @@ export default function FileUpload({
     setPreviewUrls(previews);
   };
 
+  const formatDate = (dateStr: string): string => {
+    if (!dateStr) return '';
+    const [year, month, day] = dateStr.split('-');
+    return `${day}.${month}.${year}`;
+  };
+
   const handleSubmit = () => {
     if (selectedFiles.length > 0) {
-      onFileSelect(selectedFiles, selectedDate);
+      onFileSelect(selectedFiles, formatDate(selectedDate), selectedYear);
       // Reset form
       setSelectedFiles([]);
       setSelectedDate('');
+      setSelectedYear(new Date().getFullYear().toString());
       setPreviewUrls([]);
     }
+  };
+
+  const handleClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    fileInputRef.current?.click();
   };
 
   return (
@@ -102,7 +147,7 @@ export default function FileUpload({
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
         onDrop={handleDrop}
-        onClick={() => fileInputRef.current?.click()}
+        onClick={handleClick}
       >
         {selectedFiles.length === 0 ? (
           <div className="upload-instructions">
@@ -121,8 +166,8 @@ export default function FileUpload({
               <polyline points="17 8 12 3 7 8" />
               <line x1="12" y1="3" x2="12" y2="15" />
             </svg>
-            <p className="primary-text">Datei hier ablegen oder klicken zum Auswählen</p>
-            <p className="secondary-text">Erlaubte Dateitypen: PDF (Ordner Upload möglich)</p>
+            <p className="primary-text">Dateien hier ablegen oder klicken zum Auswählen</p>
+            <p className="secondary-text">Erlaubte Dateitypen: PDF, JPG (Mehrfachauswahl möglich)</p>
           </div>
         ) : (
           <div className="preview-container">
@@ -160,28 +205,44 @@ export default function FileUpload({
       <input
         type="file"
         ref={fileInputRef}
-        className="hidden"
         accept={acceptedTypes.join(',')}
         multiple
-        {...{ directory: "", webkitdirectory: "", mozdirectory: "" } as any}
+        style={{ display: 'none' }}
         onChange={(e) => {
           if (e.target.files) {
             const files = Array.from(e.target.files).filter(file => 
               acceptedTypes.includes(file.type) || 
-              file.name.toLowerCase().endsWith('.pdf')
+              file.name.toLowerCase().endsWith('.pdf') ||
+              file.name.toLowerCase().endsWith('.jpg') ||
+              file.name.toLowerCase().endsWith('.jpeg')
             );
             if (files.length > 0) {
               setSelectedFiles(files);
             } else {
-              alert('Bitte nur PDF-Dateien hochladen.');
+              alert('Bitte nur PDF oder JPG-Dateien hochladen.');
             }
           }
         }}
-        style={{ display: 'none' }}
       />
 
       {selectedFiles.length > 0 && (
         <div className="file-details">
+          {allowYearSelection && (
+            <div className="form-group">
+              <label htmlFor="year">Jahr:</label>
+              <select
+                id="year"
+                value={selectedYear}
+                onChange={(e) => setSelectedYear(e.target.value)}
+                required
+              >
+                <option value="2025">2025</option>
+                <option value="2024">2024</option>
+                <option value="2023">2023</option>
+                <option value="2022">2022</option>
+              </select>
+            </div>
+          )}
           {allowDateSelection && (
             <div className="form-group">
               <label htmlFor="date">Datum:</label>
@@ -194,7 +255,6 @@ export default function FileUpload({
               />
             </div>
           )}
-
 
           <button
             className="btn btn-primary"

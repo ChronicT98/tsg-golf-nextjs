@@ -10,9 +10,10 @@
     font-size: clamp(2rem, 4vw, 3rem);
     background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
     background-size: 200% 200%;
+    background-clip: text;
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
-    animation: fadeIn 0.8s ease-out, gradientShift 8s ease infinite;
+    animation: fadeIn 0.8s ease-out, gradientShift 6s ease infinite;
 }
 
 .mitglieder__filters {
@@ -91,6 +92,7 @@
     margin: 3rem 0 2rem;
     text-align: center;
     background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    background-clip: text;
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     animation: fadeIn 0.8s ease-out;
@@ -114,6 +116,25 @@
     gap: 1rem;
     min-height: 320px;
     height: 100%;
+}
+
+/* Special styles for Funktionäre cards */
+.mitglieder__card--funktionaer {
+    min-height: auto !important;
+    padding: 1.25rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: 1rem;
+}
+
+.mitglieder__card--funktionaer .mitglieder__name {
+    margin-bottom: 0.5rem;
+    text-align: center;
+}
+
+.mitglieder__card--funktionaer .mitglieder__badges {
+    justify-content: center;
 }
 
 .mitglieder__image {
@@ -215,6 +236,14 @@
     min-width: 80px;
 }
 
+.mitglieder__detail .kreuz{
+display: flex;
+align-items: center;
+justify-content: flex-start;
+max-height: 10px;
+font-size: 30px;
+}
+
 .mitglieder__detail strong {
     color: var(--text-color);
     flex: 1;
@@ -230,7 +259,7 @@
     flex-wrap: wrap;
     gap: 0.5rem;
     grid-row: 4;
-    align-self: end;
+    align-self: start;
 }
 
 .mitglieder__badges a.mitglieder__badge {
@@ -247,12 +276,50 @@
 
 .mitglieder__badge {
     padding: 0.5rem 1rem;
+    margin-right: 6px;
     background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
     color: white;
-    border-radius: 20px;
+    border-radius: 8px;
     font-size: 0.875rem;
     font-weight: 500;
     transition: var(--transition);
+}
+
+.mitglieder__card--funktionaer .mitglieder__badge {
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    background-size: 200% 200%;
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    font-size: 1.25rem;
+    padding: 0.5rem 0;
+    border-radius: 0;
+    margin-right: 0;
+    animation: gradientShift 6s ease infinite;
+    
+}
+
+.mitglieder__card--funktionaer .mitglieder__badge:hover {
+    pointer-events: none;
+
+}
+
+#seperator {
+    position: relative; /* Wichtig für die Positionierung! */
+    border-right: none; /* Entferne den Standard-Border */
+    padding-right: 8px; /* Behalte den Padding bei */
+    height: 100%; /* Volle Höhe des Containers */
+}
+
+#seperator::after {
+    content: ""; /* Erforderlich, damit das Pseudo-Element erscheint */
+    position: absolute;
+    right: 0;
+    top: 10px; /* 10px von oben */
+    height: calc(100% - 20px); /* 10px von oben, 10px von unten */
+    width: 2px; /* Die Breite des Borders */
+    background-color: var(--secondary-color); /* Die Farbe des Borders */
+    transform: translateX(50%);
 }
 
 .mitglieder__badge:hover {

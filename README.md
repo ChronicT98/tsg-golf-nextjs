@@ -1,36 +1,85 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# TSG Golf Website
 
-## Getting Started
+Eine Next.js-basierte Website für den TSG Golf Club mit geschütztem Admin-Bereich.
 
-First, run the development server:
+## Lokale Entwicklung
+
+Zuerst die Abhängigkeiten installieren:
+
+```bash
+npm install
+```
+
+Dann den Entwicklungsserver starten:
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Öffnen Sie [http://localhost:3000](http://localhost:3000) im Browser.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Deployment auf Vercel
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### 1. Vorbereitung
 
-## Learn More
+Stellen Sie sicher, dass Sie ein [Vercel-Konto](https://vercel.com/signup) haben.
 
-To learn more about Next.js, take a look at the following resources:
+### 2. Repository verbinden
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+1. Pushen Sie Ihren Code zu einem Git-Repository (GitHub, GitLab, oder Bitbucket)
+2. Gehen Sie zu [Vercel New Project](https://vercel.com/new)
+3. Importieren Sie Ihr Repository
+4. Wählen Sie das Framework-Preset "Next.js"
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+### 3. Blob Storage einrichten
 
-## Deploy on Vercel
+Für die Datei-Uploads (Scorecards, Bilder, etc.):
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+1. Gehen Sie zu Ihrem Projekt-Dashboard in Vercel
+2. Navigieren Sie zu "Storage"
+3. Wählen Sie "Blob"
+4. Klicken Sie auf "Create Blob Store"
+5. Kopieren Sie den generierten `BLOB_READ_WRITE_TOKEN`
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+### 4. Umgebungsvariablen konfigurieren
+
+In Ihrem Vercel Projekt unter "Settings" > "Environment Variables" folgende Variablen setzen:
+
+```
+NEXTAUTH_SECRET=<generiert mit: openssl rand -base64 32>
+ADMIN_USERNAME=<gewünschter Admin-Benutzername>
+ADMIN_PASSWORD=<sicheres Admin-Passwort>
+BLOB_READ_WRITE_TOKEN=<von Blob Storage kopiert>
+```
+
+NEXTAUTH_URL wird von Vercel automatisch gesetzt.
+
+### 5. Deployment
+
+1. Committen und pushen Sie Ihre Änderungen
+2. Vercel wird automatisch ein neues Deployment starten
+3. Nach erfolgreichem Deployment ist Ihre Seite unter `https://ihre-domain.vercel.app` erreichbar
+
+### 6. Admin-Bereich
+
+Der Admin-Bereich ist unter `/admin` erreichbar. Verwenden Sie die konfigurierten Zugangsdaten (ADMIN_USERNAME/ADMIN_PASSWORD) für den Login.
+
+## Funktionen
+
+- Geschützter Admin-Bereich mit Login
+- Sichere Datei-Uploads mit Vercel Blob Storage
+- JWT-basierte Authentifizierung
+- Responsive Design
+- Optimierte Bildverarbeitung
+
+## Technologie-Stack
+
+- [Next.js 15](https://nextjs.org/)
+- [React 19](https://react.dev/)
+- [NextAuth.js](https://next-auth.js.org/) für Authentifizierung
+- [Vercel Blob Storage](https://vercel.com/docs/storage/vercel-blob) für Datei-Uploads
+- [Tailwind CSS](https://tailwindcss.com/) für Styling
+
+## Support
+
+Bei Fragen oder Problemen öffnen Sie bitte ein Issue im Repository oder kontaktieren Sie den Administrator.

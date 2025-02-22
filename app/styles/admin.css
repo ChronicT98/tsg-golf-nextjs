@@ -339,3 +339,64 @@
   font-size: 0.9rem;
   padding: 0.5rem 1rem;
 }
+
+/* Upload Dialog Styles */
+.upload-dialog {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.upload-dialog-content {
+  background: white;
+  padding: 2rem;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  width: 90%;
+  max-width: 400px;
+}
+
+.upload-dialog-content h3 {
+  color: #333;
+  margin-bottom: 1.5rem;
+  text-align: center;
+  font-size: 1.2rem;
+}
+
+.upload-dialog-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.upload-dialog-buttons button {
+  width: 100%;
+  padding: 0.75rem;
+  font-size: 1rem;
+}
+
+.upload-dialog-buttons .btn-primary {
+  background: #1a73e8;
+  color: white;
+}
+
+.upload-dialog-buttons .btn-secondary {
+  background: #f8f9fa;
+  color: #333;
+  border: 1px solid #ddd;
+}
+
+.upload-dialog-buttons .btn-primary:hover {
+  background: #1557b0;
+}
+
+.upload-dialog-buttons .btn-secondary:hover {
+  background: #e9ecef;
+}

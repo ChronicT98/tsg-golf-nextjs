@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import '@/app/styles/GolfScorecard.css';
+import '@/app/styles/spielergebnisse.css';
 import ImageModal from './image-modal';
 
 interface SpielScorecard {
@@ -35,6 +36,7 @@ const ScorecardViewer: React.FC = () => {
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const years = ['2025', '2024', '2023', '2022'];
   const [modalState, setModalState] = useState<ModalState>({
     isOpen: false,
     imageUrl: '',
@@ -94,27 +96,21 @@ const ScorecardViewer: React.FC = () => {
     <div className="scorecard-container">
  {/* Jahr Auswahl */}
 <div className="year-selector">
-<button
-    onClick={() => {
-      setSelectedYear('2025');
-      setSelectedDate(null); // Setzt das ausgewählte Datum zurück
-    }}
-    className={`year-button ${selectedYear === '2025' ? 'active' : ''}`}
-  >
-    Meisterschaft 2025
-  </button>
-  <button
-    onClick={() => {
-      setSelectedYear('2024');
-      setSelectedDate(null); // Setzt das ausgewählte Datum zurück
-    }}
-    className={`year-button ${selectedYear === '2024' ? 'active' : ''}`}
-  >
-    Meisterschaft 2024
-  </button>
+  {years.map((year) => (
+    <button
+      key={year}
+      onClick={() => {
+        setSelectedYear(year);
+        setSelectedDate(null); // Setzt das ausgewählte Datum zurück
+      }}
+      className={`year-button ${selectedYear === year ? 'active' : ''}`}
+    >
+      Meisterschaft {year}
+    </button>
+  ))}
 </div>
 
-      {currentYearData ? (
+      {currentYearData && currentYearData.spielCards.length > 0 ? (
         <div className="content-grid">
           {/* Datumsbuttons */}
           <div className="button-grid">
@@ -192,8 +188,9 @@ const ScorecardViewer: React.FC = () => {
           </div>
         </div>
       ) : (
-        <div className="no-data-message">
-          Noch keine Daten für {selectedYear} verfügbar.
+        <div className="coming-soon">
+          <h2>Meisterschaft {selectedYear}</h2>
+          <p>Noch keine Statistik verfügbar.</p>
         </div>
       )}
       {modalState.isOpen && (
