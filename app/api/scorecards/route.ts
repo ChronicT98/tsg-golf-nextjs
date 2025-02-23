@@ -39,19 +39,32 @@ interface ResponseData {
 async function loadCustomDates(): Promise<CustomDates> {
   try {
     const { list } = await import('@vercel/blob');
+    console.log('Listing blobs with data/ prefix...');
     const customDatesBlob = await list({ prefix: 'data/' });
+    
+    console.log('Found blobs:', customDatesBlob.blobs.map(b => b.pathname));
     const customDatesFile = customDatesBlob.blobs.find(blob => blob.pathname === 'data/custom-dates.json');
     
     if (!customDatesFile) {
-      return {};
+      console.error('custom-dates.json not found in blob storage');
+      throw new Error('custom-dates.json not found');
     }
 
+    console.log('Found custom-dates.json at:', customDatesFile.url);
     const response = await fetch(customDatesFile.url);
-    if (!response.ok) throw new Error('Failed to load custom dates');
-    return await response.json();
+    
+    if (!response.ok) {
+      console.error('Failed to fetch custom-dates.json:', response.status, response.statusText);
+      throw new Error(`Failed to load custom dates: ${response.status} ${response.statusText}`);
+    }
+
+    const data = await response.json();
+    console.log('Successfully loaded custom dates with years:', Object.keys(data));
+    return data;
   } catch (error) {
     console.error('Error loading custom dates:', error);
-    return {};
+    // Instead of returning empty object, throw error to trigger 500 response
+    throw error;
   }
 }
 
@@ -82,7 +95,16 @@ function parseDate(dateStr: string): Date {
 
 export async function GET() {
   try {
-    const customDates = await loadCustomDates();
+    let customDates: CustomDates;
+    try {
+      customDates = await loadCustomDates();
+    } catch (error) {
+      console.error('Failed to load custom dates:', error);
+      return NextResponse.json(
+        { error: 'Fehler beim Laden der benutzerdefinierten Daten' },
+        { status: 500 }
+      );
+    }
     const years = ['2025', '2024', '2023', '2022'];
     
     // Initialize year data
