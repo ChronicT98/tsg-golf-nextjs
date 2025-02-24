@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import Image from 'next/image';
 import FileUpload from './file-upload';
 
 interface PdfConverterProps {
@@ -118,11 +119,15 @@ export default function PdfConverter({ onConversionComplete }: PdfConverterProps
       {previewUrl && !isConverting && (
         <div className="preview-container">
           <h4>Vorschau:</h4>
-          <img 
-            src={previewUrl} 
-            alt="Konvertierte PDF" 
-            style={{ maxWidth: '100%', height: 'auto' }} 
-          />
+          <div style={{ position: 'relative', width: '100%', maxWidth: '800px', height: 'auto', aspectRatio: '1/1.414' }}>
+            <Image 
+              src={previewUrl} 
+              alt="Konvertierte PDF"
+              fill
+              style={{ objectFit: 'contain' }}
+              unoptimized
+            />
+          </div>
         </div>
       )}
 

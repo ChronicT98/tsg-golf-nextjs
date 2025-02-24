@@ -15,7 +15,7 @@ export async function POST(request: Request) {
       const fileContent = await readFile(customDatesPath, 'utf-8');
       existingContent = JSON.parse(fileContent);
       console.log('Successfully read existing custom-dates.json');
-    } catch (error) {
+    } catch {
       console.log('No existing custom-dates.json found, starting fresh');
       existingContent = {
         "2022": {},

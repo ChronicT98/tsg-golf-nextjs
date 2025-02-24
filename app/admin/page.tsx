@@ -3,9 +3,14 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useSession, signOut } from 'next-auth/react';
-import FileUpload from '@/app/components/admin/file-upload';
 import PdfConverter from '@/app/components/admin/pdf-converter';
 import ScorecardManager from '@/app/components/admin/scorecard-manager';
+
+interface UploadResult {
+  success: boolean;
+  fileName: string;
+  error?: string;
+}
 import '@/app/styles/admin.css';
 
 export default function AdminPage() {
@@ -58,12 +63,12 @@ export default function AdminPage() {
       }
 
       // Check results for any failures
-      const results = data.results || [];
-      const failures = results.filter((r: any) => !r.success);
+      const results: UploadResult[] = data.results || [];
+      const failures = results.filter((r) => !r.success);
       
       if (failures.length > 0) {
         const failureMessages = failures
-          .map((f: any) => `${f.fileName}: ${f.error}`)
+          .map((f) => `${f.fileName}: ${f.error}`)
           .join('\n');
         setUploadStatus({
           message: `Einige Dateien konnten nicht hochgeladen werden:\n${failureMessages}`,

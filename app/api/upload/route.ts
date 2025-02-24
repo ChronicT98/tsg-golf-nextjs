@@ -1,9 +1,6 @@
 import { NextResponse } from 'next/server';
 import { put } from '@vercel/blob';
-import { customAlphabet } from 'nanoid';
 import { getFileNumberFor2024Date } from '@/app/utils/dateMapping';
-
-const nanoid = customAlphabet('1234567890abcdef', 10);
 
 // Helper function to determine target directory - aligned with migration paths
 function getTargetDirectory(filename: string): string {
@@ -36,7 +33,6 @@ export async function POST(request: Request) {
     }
 
     const results: Array<{ success: boolean; fileName: string; path?: string; error?: string }> = [];
-    const batchId = nanoid();
 
     // Sort files by type
     const sortedFiles = files.sort((a, b) => {

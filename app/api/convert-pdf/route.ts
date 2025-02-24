@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from 'next/server';
 import CloudConvert from 'cloudconvert';
 import { Readable } from 'stream';
 import { put } from '@vercel/blob';
-import { customAlphabet } from 'nanoid';
 
 interface CustomDateEntry {
   date: string;
@@ -13,12 +12,12 @@ interface YearData {
   [fileName: string]: CustomDateEntry;
 }
 
-interface CustomDates {
-  [year: string]: YearData;
+interface ApiErrorResponse {
+  response?: {
+    data?: unknown;
+  };
+  message?: string;
 }
-
-// Initialize nanoid for batch IDs
-const nanoid = customAlphabet('1234567890abcdef', 10);
 
 // Helper function to determine target directory - aligned with migration paths
 function getTargetDirectory(filename: string): string {
@@ -67,11 +66,7 @@ export async function POST(request: NextRequest) {
 
     console.log('Creating conversion job for file:', file.name);
 
-    // Get batchId from formData if provided
-    const batchId = formData.get('batchId') as string;
     const baseFilename = file.name.toLowerCase();
-    const numberMatch = baseFilename.match(/[_-](\d+)\./);
-    const fileNumber = numberMatch ? numberMatch[1] : null;
 
     // Determine output filename based on file type
     let fileName: string;
@@ -266,7 +261,7 @@ export async function POST(request: NextRequest) {
     });
 
     // Check if it's an Axios error with response data
-    const axiosError = error as any;
+    const axiosError = error as ApiErrorResponse;
     if (axiosError.response?.data) {
       console.error('API Error Response:', axiosError.response.data);
     }
