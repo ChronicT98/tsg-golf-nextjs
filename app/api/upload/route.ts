@@ -99,7 +99,14 @@ export async function POST(request: Request) {
           continue;
         }
 
-        let blobUrl: string;
+        // For direct image uploads
+        const targetPath = `${getTargetDirectory(fileName)}/${fileName}`;
+        const arrayBuffer = await file.arrayBuffer();
+        const buffer = Buffer.from(arrayBuffer);
+        
+        if (buffer.length === 0) {
+          throw new Error('File is empty');
+        }
 
         if (file.type === 'application/pdf') {
           // Handle PDF conversion
@@ -133,15 +140,7 @@ export async function POST(request: Request) {
           continue;
         }
 
-        // For direct image uploads
-        const targetPath = `${getTargetDirectory(fileName)}/${fileName}`;
-        const arrayBuffer = await file.arrayBuffer();
-        const buffer = Buffer.from(arrayBuffer);
-        
-        if (buffer.length === 0) {
-          throw new Error('File is empty');
-        }
-
+        // Upload the file to blob storage
         const blob = await put(targetPath, buffer, {
           access: 'public',
           addRandomSuffix: false,
@@ -149,7 +148,7 @@ export async function POST(request: Request) {
           token: process.env.BLOB_READ_WRITE_TOKEN
         });
 
-        blobUrl = blob.url;
+        const blobUrl = blob.url;
 
         // Verify upload
         const verifyResponse = await fetch(blobUrl);

@@ -3,15 +3,6 @@ import CloudConvert from 'cloudconvert';
 import { Readable } from 'stream';
 import { put } from '@vercel/blob';
 
-interface CustomDateEntry {
-  date: string;
-  geldFile?: string;
-}
-
-interface YearData {
-  [fileName: string]: CustomDateEntry;
-}
-
 interface ApiErrorResponse {
   response?: {
     data?: unknown;
