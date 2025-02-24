@@ -12,6 +12,7 @@ interface SpielScorecard {
 interface StaticFiles {
   geld?: string;
   statistik?: string;
+  blechen?: string;
 }
 
 interface YearData {
@@ -60,14 +61,16 @@ export async function GET() {
       yearData['2024'].spielCards.push(spielCard);
     });
 
-    // Add 2024 statistics file
+    // Add 2024 static files
     yearData['2024'].static.statistik = '/scorecard-statistik/statistik_2024.jpg';
+    yearData['2024'].static.blechen = '/blechen/blechen_2024.jpg';
 
     // Get data from blob storage for other years
-    const [scorecardBlobs, geldBlobs, statistikBlobs] = await Promise.all([
+    const [scorecardBlobs, geldBlobs, statistikBlobs, blechenBlobs] = await Promise.all([
       list({ prefix: 'scorecards/', token: process.env.BLOB_READ_WRITE_TOKEN }),
       list({ prefix: 'scorecard-geld/', token: process.env.BLOB_READ_WRITE_TOKEN }),
-      list({ prefix: 'scorecard-statistik/', token: process.env.BLOB_READ_WRITE_TOKEN })
+      list({ prefix: 'scorecard-statistik/', token: process.env.BLOB_READ_WRITE_TOKEN }),
+      list({ prefix: 'blechen/', token: process.env.BLOB_READ_WRITE_TOKEN })
     ]);
 
     // Create a map of geld files by date for dynamic years
@@ -82,7 +85,25 @@ export async function GET() {
         }
       });
 
-    // Process statistics files first
+    // Process Blechstatistik files
+    blechenBlobs?.blobs
+      .filter(blob => blob.pathname.endsWith('.jpg'))
+      .forEach(blob => {
+        const filename = blob.pathname.split('/').pop() || '';
+        const yearMatch = filename.match(/blechen_(\d{4})\.jpg$/);
+        if (yearMatch) {
+          const year = yearMatch[1];
+          if (!yearData[year]) {
+            yearData[year] = {
+              static: {},
+              spielCards: []
+            };
+          }
+          yearData[year].static.blechen = blob.url;
+        }
+      });
+
+    // Process statistics files
     statistikBlobs?.blobs
       .filter(blob => blob.pathname.endsWith('.jpg'))
       .forEach(blob => {

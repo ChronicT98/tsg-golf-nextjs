@@ -6,6 +6,7 @@ import Image from 'next/image';
 interface StaticFiles {
   geld?: string;
   statistik?: string;
+  blechen?: string;
 }
 
 interface SpielScorecard {
@@ -112,6 +113,23 @@ export default function ScorecardManager() {
               </div>
             </div>
           )}
+
+          {scorecards[selectedYear].static.blechen && (
+            <div className="statistics-card">
+              <h5>Blechstatistik</h5>
+              <div className="card-preview">
+                <Image
+                  src={scorecards[selectedYear].static.blechen}
+                  alt={`Blechstatistik ${selectedYear}`}
+                  width={200}
+                  height={150}
+                  style={{ objectFit: 'contain' }}
+                />
+              </div>
+            </div>
+          )}
+          
+          
 
           <div className="cards-grid">
             {scorecards[selectedYear].spielCards.map((card) => (

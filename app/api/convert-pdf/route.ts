@@ -26,12 +26,12 @@ function getTargetDirectory(filename: string): string {
   }
 }
 
-// Check for API key and initialize CloudConvert in sandbox mode
+// Initialize CloudConvert with live mode API key
 const apiKey = process.env.CLOUDCONVERT_API_KEY;
 if (!apiKey) {
   throw new Error('CloudConvert API key is not set');
 }
-const cloudConvert = new CloudConvert(apiKey, true); // Enable sandbox mode
+const cloudConvert = new CloudConvert(apiKey); // Live mode (sandbox disabled)
 
 // Helper function to convert Buffer to Stream
 function bufferToStream(buffer: Buffer): Readable {

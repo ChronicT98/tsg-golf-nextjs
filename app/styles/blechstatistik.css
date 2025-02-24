@@ -59,6 +59,8 @@
 
 .blech-image-container {
   width: 100%;
+  display: flex;
+  justify-content: center;
 }
 
 .clickable-image {
@@ -81,7 +83,7 @@
 }
 
 .scorecard-image-stat {
-  width: 100%;
+  width: 90%;
   height: auto;
   margin: 0 auto;
   display: block;
@@ -305,7 +307,7 @@
 
 @media (min-width: 769px) and (max-width: 1024px) {
   .blech-content {
-    max-width: 90%;
+    max-width: 95%;
   }
 
   .blech-table-container {
@@ -319,5 +321,13 @@
   .blech-table td,
   .blech-table th {
     padding: 1rem 0.75rem;
+  }
+
+  .scorecard-image-stat {
+    width: 100%;
+    padding-right: 5px;
+    padding-left: 5px;
+    margin: 0 auto;
+    margin-bottom: 40px;
   }
 }
