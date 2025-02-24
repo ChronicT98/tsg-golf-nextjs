@@ -4,12 +4,18 @@ import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useSession, signOut } from 'next-auth/react';
 import FileUpload from '@/app/components/admin/file-upload';
+import PdfConverter from '@/app/components/admin/pdf-converter';
+import ScorecardManager from '@/app/components/admin/scorecard-manager';
 import '@/app/styles/admin.css';
 
 export default function AdminPage() {
   const { status } = useSession();
   const router = useRouter();
   const [loading, setLoading] = useState(true);
+  const [uploadStatus, setUploadStatus] = useState<{
+    message: string;
+    type: 'success' | 'error' | 'none';
+  }>({ message: '', type: 'none' });
 
   useEffect(() => {
     if (status === 'unauthenticated') {
@@ -31,8 +37,8 @@ export default function AdminPage() {
   const handleFileUpload = async (files: File[], date?: string, year?: string) => {
     if (files.length === 0) return;
     
+    setUploadStatus({ message: 'Dateien werden hochgeladen...', type: 'none' });
     const formData = new FormData();
-    // Append all files to formData
     files.forEach(file => {
       formData.append('file', file);
     });
@@ -45,19 +51,41 @@ export default function AdminPage() {
         body: formData,
       });
 
+      const data = await response.json();
+
       if (!response.ok) {
-        throw new Error('Upload failed');
+        throw new Error(data.error || 'Upload failed');
       }
 
-      // Refresh the page to show new uploads
-      router.refresh();
-      // Add a small delay to ensure server has processed changes
-      setTimeout(() => {
-        window.location.reload();
-      }, 500);
+      // Check results for any failures
+      const results = data.results || [];
+      const failures = results.filter((r: any) => !r.success);
+      
+      if (failures.length > 0) {
+        const failureMessages = failures
+          .map((f: any) => `${f.fileName}: ${f.error}`)
+          .join('\n');
+        setUploadStatus({
+          message: `Einige Dateien konnten nicht hochgeladen werden:\n${failureMessages}`,
+          type: 'error'
+        });
+      } else {
+        setUploadStatus({
+          message: 'Alle Dateien wurden erfolgreich hochgeladen!',
+          type: 'success'
+        });
+        // Refresh the page to show new uploads after a success message
+        setTimeout(() => {
+          router.refresh();
+          window.location.reload();
+        }, 2000);
+      }
     } catch (error) {
-      console.error('Error uploading file:', error);
-      alert('Fehler beim Hochladen der Datei');
+      console.error('Error uploading files:', error);
+      setUploadStatus({
+        message: error instanceof Error ? error.message : 'Fehler beim Hochladen der Dateien',
+        type: 'error'
+      });
     }
   };
 
@@ -73,17 +101,25 @@ export default function AdminPage() {
       <div className="admin-content">
         <div className="scorecards-manager">
           <h2>Spielergebnisse Verwaltung</h2>
-          <div className="upload-section">
-            <h3>Neue Scorecard hochladen</h3>
-            <FileUpload
-              onFileSelect={handleFileUpload}
-              allowDateSelection={true}
-              allowYearSelection={true}
-            />
+
+          <div className="upload-tools">
+            <div className="converter-section">
+              <h3>PDF Hochladen und Konvertieren</h3>
+              <p>Lade PDF-Dateien hoch. Diese werden automatisch in JPEG konvertiert und in den entsprechenden Ordner gespeichert.</p>
+              <PdfConverter onConversionComplete={handleFileUpload} />
+              {uploadStatus.type !== 'none' && (
+                <div className={`upload-status ${uploadStatus.type}`}>
+                  {uploadStatus.message.split('\n').map((line, i) => (
+                    <p key={i}>{line}</p>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
+
           <div className="existing-cards">
             <h3>Vorhandene Scorecards</h3>
-            {/* TODO: Add existing scorecards list with edit/delete functionality */}
+            <ScorecardManager />
           </div>
         </div>
       </div>

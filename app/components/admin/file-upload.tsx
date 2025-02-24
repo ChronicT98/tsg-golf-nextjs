@@ -111,6 +111,18 @@ export default function FileUpload({
 
   const handleSubmit = () => {
     if (selectedFiles.length > 0) {
+      // Check if any of the selected files are geld or spiel files
+      const hasGeldOrSpielFiles = selectedFiles.some(file => {
+        const lowerName = file.name.toLowerCase();
+        return lowerName.includes('geld') || lowerName.includes('spiel');
+      });
+
+      // Require date for geld or spiel files
+      if (hasGeldOrSpielFiles && !selectedDate) {
+        alert('Bitte wählen Sie ein Datum für die Geld- oder Spiel-Dateien aus.');
+        return;
+      }
+
       onFileSelect(selectedFiles, formatDate(selectedDate), selectedYear);
       // Reset form
       setSelectedFiles([]);
@@ -151,7 +163,7 @@ export default function FileUpload({
               <line x1="12" y1="3" x2="12" y2="15" />
             </svg>
             <p className="primary-text">Dateien hier ablegen oder klicken zum Auswählen</p>
-            <p className="secondary-text">Erlaubte Dateitypen: PDF, JPG (Mehrfachauswahl möglich)</p>
+            <p className="secondary-text">Erlaubte Dateitypen: PDF (Mehrfachauswahl möglich)</p>
           </div>
         ) : (
           <div className="preview-container">
@@ -243,7 +255,10 @@ export default function FileUpload({
           <button
             className="btn btn-primary"
             onClick={handleSubmit}
-            disabled={allowDateSelection && !selectedDate}
+            disabled={allowDateSelection && selectedFiles.some(file => {
+              const lowerName = file.name.toLowerCase();
+              return (lowerName.includes('geld') || lowerName.includes('spiel')) && !selectedDate;
+            })}
           >
             Hochladen
           </button>

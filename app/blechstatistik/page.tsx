@@ -69,6 +69,7 @@ export default function Blechstatistik() {
                 alt={`Blechstatistik ${selectedYear}`}
                 width={800}
                 height={1200}
+                priority
                 className="scorecard-image-stat clickable-image"
                 onClick={() => openModal(latestFiles[selectedYear], `Blechstatistik ${selectedYear}`)}
                 role="button"

@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import '@/app/styles/image-modal.css';
 import Image from 'next/image';
 
@@ -9,6 +9,9 @@ interface ImageModalProps {
 }
 
 const ImageModal: React.FC<ImageModalProps> = ({ imageUrl, alt, onClose }) => {
+  const [isLoading, setIsLoading] = useState(true);
+  const [hasError, setHasError] = useState(false);
+
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
@@ -58,14 +61,53 @@ const ImageModal: React.FC<ImageModalProps> = ({ imageUrl, alt, onClose }) => {
             <path d="M6 18L18 6M6 6l12 12" />
           </svg>
         </button>
-        <Image
-          src={imageUrl}
-          alt={alt}
-          width={1200}
-          height={1600}
-          style={{ objectFit: 'contain' }}
-          priority
-        />
+
+        {isLoading && !hasError && (
+          <div className="loading-overlay">
+            <div className="loading-spinner"></div>
+            <p>Bild wird geladen...</p>
+          </div>
+        )}
+
+        {hasError ? (
+          <div className="error-message">
+            <p>Fehler beim Laden des Bildes</p>
+            <button onClick={onClose} className="btn btn-secondary">
+              Schließen
+            </button>
+          </div>
+        ) : (
+          imageUrl.endsWith('.pdf') ? (
+            <object
+              data={imageUrl}
+              type="application/pdf"
+              style={{ width: '100%', height: '100%', maxWidth: '1200px', maxHeight: '1600px' }}
+              onLoad={() => setIsLoading(false)}
+              onError={() => {
+                console.error('Failed to load PDF:', imageUrl);
+                setHasError(true);
+                setIsLoading(false);
+              }}
+            >
+              <p>PDF konnte nicht geladen werden</p>
+            </object>
+          ) : (
+            <Image
+              src={imageUrl}
+              alt={alt}
+              width={1200}
+              height={1600}
+              style={{ objectFit: 'contain' }}
+              priority
+              onLoadingComplete={() => setIsLoading(false)}
+              onError={() => {
+                console.error('Failed to load image:', imageUrl);
+                setHasError(true);
+                setIsLoading(false);
+              }}
+            />
+          )
+        )}
       </div>
     </div>
   );

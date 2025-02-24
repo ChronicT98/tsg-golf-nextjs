@@ -1,19 +1,7 @@
 import { NextResponse } from 'next/server';
 import { put } from '@vercel/blob';
 import { customAlphabet } from 'nanoid';
-
-interface CustomDateEntry {
-  date: string;
-  geldFile?: string;
-}
-
-interface YearData {
-  [fileName: string]: CustomDateEntry;
-}
-
-interface CustomDates {
-  [year: string]: YearData;
-}
+import { getFileNumberFor2024Date } from '@/app/utils/dateMapping';
 
 const nanoid = customAlphabet('1234567890abcdef', 10);
 
@@ -47,10 +35,10 @@ export async function POST(request: Request) {
       );
     }
 
-    const results = [];
-    const batchId = nanoid(); // Generate one ID for the entire batch
+    const results: Array<{ success: boolean; fileName: string; path?: string; error?: string }> = [];
+    const batchId = nanoid();
 
-    // First, sort files by type to ensure consistent processing order
+    // Sort files by type
     const sortedFiles = files.sort((a, b) => {
       const aName = a.name.toLowerCase();
       const bName = b.name.toLowerCase();
@@ -65,127 +53,119 @@ export async function POST(request: Request) {
       return aName.localeCompare(bName);
     });
 
-    // Process files in sorted order
+    // Format date for filename (DD.MM.YYYY)
+    const formatDateForFilename = (dateStr: string) => {
+      if (!dateStr) return '';
+      if (dateStr.includes('.')) {
+        return dateStr; // Already in correct format
+      }
+      if (dateStr.includes('-')) {
+        const [year, month, day] = dateStr.split('-');
+        return `${day}.${month}.${year}`;
+      }
+      return dateStr;
+    };
+
+    // Process files
     for (const file of sortedFiles) {
       try {
         const baseFilename = file.name.toLowerCase();
         let fileName: string;
-        let fileType: 'statistik' | 'blechen' | 'geld' | 'spiel' | null = null;
 
-        // Extract number from filename (e.g., "spiel_01.jpg" -> "01")
-        const numberMatch = baseFilename.match(/[_-](\d+)\./);
-        const fileNumber = numberMatch ? numberMatch[1] : null;
+        // Skip files that were already processed
+        if (baseFilename.match(/_([\d.]+)\.jpg$/)) {
+          console.log('Skipping already processed file:', file.name);
+          continue;
+        }
 
-        // Determine file type and generate filename
+        // Determine file name and process file
         if (baseFilename.includes('statistik')) {
-          fileType = 'statistik';
-          fileName = `statistik_${fileNumber || year}.jpg`;
+          fileName = `statistik_${year}.jpg`;
         } else if (baseFilename.includes('blechen')) {
-          fileType = 'blechen';
-          fileName = `blechen_${fileNumber || batchId}.jpg`;
-        } else if (baseFilename.includes('geld')) {
-          fileType = 'geld';
-          fileName = `geld_${fileNumber || batchId}.jpg`;
-        } else if (baseFilename.includes('spiel')) {
-          fileType = 'spiel';
-          fileName = `spiel_${fileNumber || batchId}.jpg`;
+          fileName = `blechen_${year}.jpg`;
+        } else if (baseFilename.includes('geld') || baseFilename.includes('spiel')) {
+          const prefix = baseFilename.includes('geld') ? 'geld' : 'spiel';
+          const dateStr = formatDateForFilename(date || '');
+          
+          if (year === '2024') {
+            // For 2024, use file numbers
+            const fileNumber = getFileNumberFor2024Date(dateStr);
+            if (!fileNumber) {
+              throw new Error(`Invalid date for 2024: ${dateStr}`);
+            }
+            fileName = `${prefix}_${fileNumber}.jpg`;
+          } else {
+            // For other years, use the full date
+            fileName = `${prefix}_${dateStr}.jpg`;
+          }
         } else {
           console.warn('Unrecognized file type:', file.name);
           continue;
         }
 
-        // Upload to Vercel Blob Storage
+        let blobUrl: string;
+
+        if (file.type === 'application/pdf') {
+          // Handle PDF conversion
+          const pdfFormData = new FormData();
+          pdfFormData.append('file', file);
+          pdfFormData.append('date', date || '');
+          pdfFormData.append('year', year);
+
+          const protocol = process.env.NODE_ENV === 'development' ? 'http' : 'https';
+          const host = request.headers.get('host') || 'localhost:3000';
+          const response = await fetch(`${protocol}://${host}/api/convert-pdf`, {
+            method: 'POST',
+            body: pdfFormData,
+          });
+
+          if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.error || errorData.details || 'Failed to convert PDF file');
+          }
+
+          const data = await response.json();
+          if (!data.success) {
+            throw new Error(data.error || 'PDF conversion failed');
+          }
+
+          results.push({
+            success: true,
+            fileName: data.fileName,
+            path: data.url
+          });
+          continue;
+        }
+
+        // For direct image uploads
         const targetPath = `${getTargetDirectory(fileName)}/${fileName}`;
-        const blob = await put(targetPath, file, {
+        const arrayBuffer = await file.arrayBuffer();
+        const buffer = Buffer.from(arrayBuffer);
+        
+        if (buffer.length === 0) {
+          throw new Error('File is empty');
+        }
+
+        const blob = await put(targetPath, buffer, {
           access: 'public',
           addRandomSuffix: false,
-          contentType: 'image/jpeg'
+          contentType: 'image/jpeg',
+          token: process.env.BLOB_READ_WRITE_TOKEN
         });
 
-        // Add to results only if we actually uploaded a file
+        blobUrl = blob.url;
+
+        // Verify upload
+        const verifyResponse = await fetch(blobUrl);
+        if (!verifyResponse.ok) {
+          throw new Error(`Failed to verify upload: ${verifyResponse.status}`);
+        }
+
         results.push({
           success: true,
-          fileName,
-          path: blob.url
+          fileName: fileName,
+          path: blobUrl
         });
-
-        // Update custom-dates.json for all files with a date
-        if (date && fileName) {
-          let customDates: CustomDates = {};
-
-          // Read existing custom dates from blob storage
-          try {
-            const { list } = await import('@vercel/blob');
-            const customDatesBlob = await list({ prefix: 'data/' });
-            const customDatesFile = customDatesBlob.blobs.find(blob => blob.pathname === 'data/custom-dates.json');
-            
-            if (customDatesFile) {
-              const response = await fetch(customDatesFile.url);
-              if (response.ok) {
-                customDates = await response.json();
-              }
-            }
-          } catch (error) {
-            console.error('Error reading custom dates:', error);
-            // Use empty object if reading fails
-          }
-
-          // Update custom dates with year information
-          const yearData = customDates[year] || {};
-
-          // Update custom dates based on file type
-          switch (fileType) {
-            case 'statistik':
-            case 'blechen':
-              customDates = {
-                ...customDates,
-                [year]: {
-                  ...yearData,
-                  [fileName]: {
-                    date: date
-                  }
-                }
-              };
-              break;
-            
-            case 'spiel':
-              // For spiel files, look for matching geld file
-              const geldFileName = fileNumber ? `geld_${fileNumber}.jpg` : `geld_${batchId}.jpg`;
-              const hasMatchingGeld = sortedFiles.some(f => {
-                const fName = f.name.toLowerCase();
-                if (!fName.includes('geld')) return false;
-                
-                // Try to match by number first
-                const fNumber = fName.match(/[_-](\d+)\./)?.[1];
-                if (fNumber && fileNumber) {
-                  return fNumber === fileNumber;
-                }
-                
-                // Fallback to name comparison
-                return fName.replace('geld', '').toLowerCase() === 
-                       baseFilename.replace('spiel', '').toLowerCase();
-              });
-              
-              customDates = {
-                ...customDates,
-                [year]: {
-                  ...yearData,
-                  [fileName]: {
-                    date: date,
-                    ...(hasMatchingGeld ? { geldFile: geldFileName } : {})
-                  }
-                }
-              };
-              break;
-          }
-
-          // Save updated custom dates to blob storage
-          await put('data/custom-dates.json', JSON.stringify(customDates, null, 2), {
-            access: 'public',
-            addRandomSuffix: false,
-            contentType: 'application/json'
-          });
-        }
 
       } catch (error) {
         console.error('Error processing file:', file.name, error);
