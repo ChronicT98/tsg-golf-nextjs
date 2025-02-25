@@ -44,7 +44,7 @@ function getPathFromUrl(url: string): string {
   try {
     const urlObj = new URL(url);
     return urlObj.pathname.startsWith('/') ? urlObj.pathname.slice(1) : urlObj.pathname;
-  } catch (e) {
+  } catch {
     return url;
   }
 }
