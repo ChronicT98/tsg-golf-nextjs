@@ -104,13 +104,18 @@ export async function POST(request: NextRequest) {
           input_format: 'pdf',
           page_range: '1',
           density: '150', // Reduzierte Auflösung für stabilere Konvertierung
-          quality: '90', // Leicht reduzierte Qualität für kleinere Dateigröße
+          quality: '100', // Leicht reduzierte Qualität für kleinere Dateigröße
           filename: fileName,
           fit: 'max',
           strip: true, // Entfernt Metadaten für kleinere Dateigröße
-          trim: true,
-          trim_margin: 5 
         },
+      'trim-whitespace': {
+      operation: 'command',
+      input: 'convert-my-file',
+      engine: 'imagemagick',
+      command: 'convert',
+      arguments: '/input/convert-my-file/*.jpg -trim +repage /output/'
+    },
         'export-my-file': {
           operation: 'export/url',
           input: 'convert-my-file',
