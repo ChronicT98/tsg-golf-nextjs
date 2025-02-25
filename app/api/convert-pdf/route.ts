@@ -118,7 +118,7 @@ export async function POST(request: NextRequest) {
     },
         'export-my-file': {
           operation: 'export/url',
-          input: 'convert-my-file',
+          input: 'trim-whitespace',
           inline: false,
           archive_multiple_files: false
         }
