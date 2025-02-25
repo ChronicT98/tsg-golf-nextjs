@@ -114,7 +114,7 @@ export async function POST(request: NextRequest) {
       input: 'convert-my-file',
       engine: 'imagemagick',
       command: 'convert',
-      arguments: '/input/convert-my-file/*.jpg -trim +repage /output/'
+      arguments: '/input/convert-my-file/*.jpg -trim +repage /output/trimmed.jpg'
     },
         'export-my-file': {
           operation: 'export/url',
