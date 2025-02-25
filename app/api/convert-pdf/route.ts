@@ -108,7 +108,8 @@ export async function POST(request: NextRequest) {
           filename: fileName,
           fit: 'max',
           strip: true, // Entfernt Metadaten für kleinere Dateigröße
-          trim: false
+          trim: true,
+          trim_margin: 5 
         },
         'export-my-file': {
           operation: 'export/url',
