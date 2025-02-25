@@ -5,6 +5,9 @@ import { useRouter } from 'next/navigation';
 import { useSession, signOut } from 'next-auth/react';
 import PdfConverter from '@/app/components/admin/pdf-converter';
 import ScorecardManager from '@/app/components/admin/scorecard-manager';
+import MemberEditor from '@/app/components/admin/member-editor';
+import { gruendungsmitglieder, ordentlicheMitglieder, inMemoriam } from '@/app/mitglieder/data';
+import type { MemberDetails } from '@/app/types/members';
 
 interface UploadResult {
   success: boolean;
@@ -13,10 +16,19 @@ interface UploadResult {
 }
 import '@/app/styles/admin.css';
 
+interface SelectedMember {
+  member?: MemberDetails;
+  category: 'gruendungsmitglieder' | 'ordentlicheMitglieder' | 'inMemoriam';
+}
+
+type AdminSection = 'scorecards' | 'members';
+
 export default function AdminPage() {
   const { status } = useSession();
   const router = useRouter();
   const [loading, setLoading] = useState(true);
+  const [selectedMember, setSelectedMember] = useState<SelectedMember | null>(null);
+  const [activeSection, setActiveSection] = useState<AdminSection>('scorecards');
   const [uploadStatus, setUploadStatus] = useState<{
     message: string;
     type: 'success' | 'error' | 'none';
@@ -99,29 +111,153 @@ export default function AdminPage() {
       </div>
       
       <div className="admin-content">
-        <div className="scorecards-manager">
-          <h2>Spielergebnisse Verwaltung</h2>
+        <div className="section-toggles">
+          <button
+            className={`toggle-button ${activeSection === 'scorecards' ? 'active' : ''}`}
+            onClick={() => setActiveSection('scorecards')}
+          >
+            Spielergebnisse Verwaltung
+          </button>
+          <button
+            className={`toggle-button ${activeSection === 'members' ? 'active' : ''}`}
+            onClick={() => setActiveSection('members')}
+          >
+            Mitglieder Verwaltung
+          </button>
+        </div>
 
-          <div className="upload-tools">
-            <div className="converter-section">
-              <h3>PDF Hochladen und Konvertieren</h3>
-              <p>Lade PDF-Dateien hoch. Diese werden automatisch in JPEG konvertiert und in den entsprechenden Ordner gespeichert.</p>
-              <PdfConverter onConversionComplete={handleFileUpload} />
-              {uploadStatus.type !== 'none' && (
-                <div className={`upload-status ${uploadStatus.type}`}>
-                  {uploadStatus.message.split('\n').map((line, i) => (
-                    <p key={i}>{line}</p>
-                  ))}
+        {activeSection === 'members' && (
+          <div className="members-manager">
+          <h2>Mitglieder Verwaltung</h2>
+          <div className="member-categories">
+            <div className="member-category">
+              <h3>Gründungsmitglieder</h3>
+              {gruendungsmitglieder.map((member) => (
+                <div key={member.name} className="member-row">
+                  <span>{member.name}</span>
+                  <button 
+                    onClick={() => setSelectedMember({ member, category: 'gruendungsmitglieder' })}
+                    className="edit-button"
+                  >
+                    Bearbeiten
+                  </button>
                 </div>
-              )}
+              ))}
+              <button 
+                onClick={() => setSelectedMember({ member: undefined, category: 'gruendungsmitglieder' })}
+                className="add-button"
+              >
+                + Neues Mitglied
+              </button>
+            </div>
+
+            <div className="member-category">
+              <h3>Mitglieder</h3>
+              {ordentlicheMitglieder.map((member) => (
+                <div key={member.name} className="member-row">
+                  <span>{member.name}</span>
+                  <button 
+                    onClick={() => setSelectedMember({ member, category: 'ordentlicheMitglieder' })}
+                    className="edit-button"
+                  >
+                    Bearbeiten
+                  </button>
+                </div>
+              ))}
+              <button 
+                onClick={() => setSelectedMember({ member: undefined, category: 'ordentlicheMitglieder' })}
+                className="add-button"
+              >
+                + Neues Mitglied
+              </button>
+            </div>
+
+            <div className="member-category">
+              <h3>In Memoriam</h3>
+              {inMemoriam.map((member) => (
+                <div key={member.name} className="member-row">
+                  <span>{member.name}</span>
+                  <button 
+                    onClick={() => setSelectedMember({ member, category: 'inMemoriam' })}
+                    className="edit-button"
+                  >
+                    Bearbeiten
+                  </button>
+                </div>
+              ))}
+              <button 
+                onClick={() => setSelectedMember({ member: undefined, category: 'inMemoriam' })}
+                className="add-button"
+              >
+                + Neues Mitglied
+              </button>
             </div>
           </div>
 
-          <div className="existing-cards">
-            <h3>Vorhandene Scorecards</h3>
-            <ScorecardManager />
-          </div>
+          {selectedMember && (
+            <div className="modal-overlay">
+              <div className="modal-content">
+                <MemberEditor
+                  member={selectedMember.member}
+                  category={selectedMember.category}
+                  onSave={async (updatedMember, category) => {
+                    try {
+                      const response = await fetch('/api/members', {
+                        method: 'PUT',
+                        headers: {
+                          'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                          member: updatedMember,
+                          category,
+                        }),
+                      });
+
+                      if (!response.ok) {
+                        throw new Error('Failed to update member');
+                      }
+
+                      setSelectedMember(null);
+                      window.location.reload();
+                    } catch (error) {
+                      console.error('Error saving member:', error);
+                      alert('Fehler beim Speichern des Mitglieds');
+                    }
+                  }}
+                  onCancel={() => setSelectedMember(null)}
+                />
+              </div>
+            </div>
+          )}
         </div>
+
+        )}
+
+        {activeSection === 'scorecards' && (
+          <div className="scorecards-manager">
+            <h2>Spielergebnisse Verwaltung</h2>
+
+            <div className="upload-tools">
+              <div className="converter-section">
+                <h3>PDF Hochladen und Konvertieren</h3>
+                <p>Lade PDF-Dateien hoch. Diese werden automatisch in JPEG konvertiert und in den entsprechenden Ordner gespeichert.</p>
+                <PdfConverter onConversionComplete={handleFileUpload} />
+                {uploadStatus.type !== 'none' && (
+                  <div className={`upload-status ${uploadStatus.type}`}>
+                    {uploadStatus.message.split('\n').map((line, i) => (
+                      <p key={i}>{line}</p>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+
+            <div className="existing-cards">
+              <h3>Vorhandene Scorecards</h3>
+              <ScorecardManager />
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

@@ -79,10 +79,10 @@ export default function MitgliederPage() {
                         <strong>{member.geboren}</strong>
                       </div>
                     )}
-                    {member.firma && (
+                    {member.beruf && (
                       <div className="mitglieder__detail">
                         <span>Beruf:</span>
-                        <strong>{member.firma}</strong>
+                        <strong>{member.beruf}</strong>
                       </div>
                     )}
                     {member.handy && (
@@ -147,12 +147,6 @@ export default function MitgliederPage() {
                       <div className="mitglieder__detail">
                         <span>Geboren:</span>
                         <strong>{member.geboren}</strong>
-                      </div>
-                    )}
-                    {member.firma && (
-                      <div className="mitglieder__detail">
-                        <span>Beruf:</span>
-                        <strong>{member.firma}</strong>
                       </div>
                     )}
                     {member.beruf && (
