@@ -15,17 +15,6 @@ export interface MemberDetails {
   
   export const gruendungsmitglieder: MemberDetails[] = [
     {
-      name: "Peter Konrad",
-      hcp: "-25,2",
-      spitzname: "Wadolino",
-      geboren: "08.10.1962",
-      firma: "GP Planungs- und VertriebsGmbH",
-      handy: "0676 3288882",
-      email: "peterkonrad@aon.at",
-      web: "www.brandl-rhz.com",
-      imageSrc: "/images/Wadi_2020.jpg"
-    },
-    {
       name: "Christian Kafka",
       hcp: "-11,8",
       spitzname: "Präsi",
@@ -35,6 +24,17 @@ export interface MemberDetails {
       email: "christian.kafka@4kp.at",
       web: "www.4kp.at",
       imageSrc: "/images/Christian.jpg"
+    },
+    {
+      name: "Peter Konrad",
+      hcp: "-25,2",
+      spitzname: "Wadolino",
+      geboren: "08.10.1962",
+      firma: "GP Planungs- und VertriebsGmbH",
+      handy: "0676 3288882",
+      email: "peterkonrad@aon.at",
+      web: "www.brandl-rhz.com",
+      imageSrc: "/images/Wadi_2020.jpg"
     },
     {
       name: "Fritz Guggenberger",

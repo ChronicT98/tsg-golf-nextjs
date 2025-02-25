@@ -3,14 +3,16 @@ import '@/app/styles/mitglieder.css';
 import { gruendungsmitglieder, ordentlicheMitglieder, inMemoriam } from './data';
 import { useState } from 'react';
 import Image from 'next/image';
+import MemberImageModal from '@/app/components/member-image-modal';
 
 export default function MitgliederPage() {
   const [activeCategory, setActiveCategory] = useState<string>('all');
+  const [selectedImage, setSelectedImage] = useState<{ url: string; alt: string } | null>(null);
 
   const filterCategories = [
     { id: 'all', label: 'Alle Mitglieder' },
     { id: 'gruendung', label: 'Gründungsmitglieder' },
-    { id: 'ordentlich', label: 'Ordentliche Mitglieder' },
+    { id: 'ordentlich', label: 'Mitglieder' },
     { id: 'memoriam', label: 'In Memoriam' },
     { id: 'funktionaere', label: 'Funktionäre' },
   ];
@@ -44,13 +46,22 @@ export default function MitgliederPage() {
             <div className="mitglieder__grid">
               {gruendungsmitglieder.map((member) => (
                 <div key={member.name} className="mitglieder__card">
-                  <div className="mitglieder__image">
+                  <div 
+                    className="mitglieder__image" 
+                    onClick={() => setSelectedImage({ url: member.imageSrc, alt: member.name })}
+                    role="button"
+                    tabIndex={0}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        setSelectedImage({ url: member.imageSrc, alt: member.name });
+                      }
+                    }}
+                  >
                     <Image 
                       src={member.imageSrc} 
                       alt={member.name}
-                      width={200}
-                      height={200}
-                      style={{ objectFit: 'cover' }}
+                      fill
+                      sizes="(max-width: 768px) 100px, 200px"
                     />
                   </div>
                   <h3 className="mitglieder__name">
@@ -101,17 +112,26 @@ export default function MitgliederPage() {
 
           {shouldShowCategory('ordentlich') && (
             <div className="mitglieder__category">
-            <h3 className="mitglieder__category-title">Ordentliche Mitglieder</h3>
+            <h3 className="mitglieder__category-title">Mitglieder</h3>
             <div className="mitglieder__grid">
               {ordentlicheMitglieder.map((member) => (
                 <div key={member.name} className="mitglieder__card">
-                  <div className="mitglieder__image">
+                  <div 
+                    className="mitglieder__image"
+                    onClick={() => setSelectedImage({ url: member.imageSrc, alt: member.name })}
+                    role="button"
+                    tabIndex={0}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        setSelectedImage({ url: member.imageSrc, alt: member.name });
+                      }
+                    }}
+                  >
                     <Image 
                       src={member.imageSrc} 
                       alt={member.name}
-                      width={200}
-                      height={200}
-                      style={{ objectFit: 'cover' }}
+                      fill
+                      sizes="(max-width: 768px) 100px, 200px"
                     />
                   </div>
                   <h3 className="mitglieder__name">
@@ -172,13 +192,22 @@ export default function MitgliederPage() {
             <div className="mitglieder__grid">
               {inMemoriam.map((member) => (
                 <div key={member.name} className="mitglieder__card">
-                  <div className="mitglieder__image">
+                  <div 
+                    className="mitglieder__image"
+                    onClick={() => setSelectedImage({ url: member.imageSrc, alt: member.name })}
+                    role="button"
+                    tabIndex={0}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        setSelectedImage({ url: member.imageSrc, alt: member.name });
+                      }
+                    }}
+                  >
                     <Image 
                       src={member.imageSrc} 
                       alt={member.name}
-                      width={200}
-                      height={200}
-                      style={{ objectFit: 'cover' }}
+                      fill
+                      sizes="(max-width: 768px) 100px, 200px"
                     />
                   </div>
                   <h3 className="mitglieder__name">
@@ -255,6 +284,13 @@ export default function MitgliederPage() {
           </section>
         )}
       </div>
+      {selectedImage && (
+        <MemberImageModal
+          imageUrl={selectedImage.url}
+          alt={selectedImage.alt}
+          onClose={() => setSelectedImage(null)}
+        />
+      )}
     </div>
   );
 }

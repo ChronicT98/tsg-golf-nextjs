@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { list } from '@vercel/blob';
+import { list, del } from '@vercel/blob';
 import { dateMapping2024 } from '@/app/utils/dateMapping';
 
 interface SpielScorecard {
@@ -37,6 +37,16 @@ function parseDynamicDate(filename: string): { date: string; year: string } | nu
     };
   }
   return null;
+}
+
+// Helper function to get URL path from full URL
+function getPathFromUrl(url: string): string {
+  try {
+    const urlObj = new URL(url);
+    return urlObj.pathname.startsWith('/') ? urlObj.pathname.slice(1) : urlObj.pathname;
+  } catch (e) {
+    return url;
+  }
 }
 
 export async function GET() {
@@ -165,6 +175,68 @@ export async function GET() {
     console.error('Error fetching scorecards:', error);
     return NextResponse.json(
       { error: 'Fehler beim Laden der Scorecards' },
+      { status: 500 }
+    );
+  }
+}
+
+export async function DELETE(request: Request) {
+  try {
+    const { searchParams } = new URL(request.url);
+    const year = searchParams.get('year');
+    const id = searchParams.get('id');
+
+    if (!year || !id) {
+      return NextResponse.json(
+        { error: 'Jahr und ID sind erforderlich' },
+        { status: 400 }
+      );
+    }
+
+    // For 2024, we don't delete from blob storage as these are static files
+    if (year === '2024') {
+      return NextResponse.json({ success: true });
+    }
+
+    // For other years, delete from blob storage
+    const [scorecardBlobs, geldBlobs] = await Promise.all([
+      list({ prefix: 'scorecards/', token: process.env.BLOB_READ_WRITE_TOKEN }),
+      list({ prefix: 'scorecard-geld/', token: process.env.BLOB_READ_WRITE_TOKEN })
+    ]);
+
+    // Find the scorecard blob
+    const scorecardBlob = scorecardBlobs.blobs.find(blob => 
+      blob.pathname.endsWith(id)
+    );
+
+    if (!scorecardBlob) {
+      return NextResponse.json(
+        { error: 'Scorecard nicht gefunden' },
+        { status: 404 }
+      );
+    }
+
+    // Delete the scorecard from blob storage
+    await del(getPathFromUrl(scorecardBlob.url), { token: process.env.BLOB_READ_WRITE_TOKEN });
+
+    // Find and delete corresponding geld file if it exists
+    const dateInfo = parseDynamicDate(id);
+    if (dateInfo) {
+      const geldBlob = geldBlobs.blobs.find(blob => {
+        const filename = blob.pathname.split('/').pop() || '';
+        return filename.includes(dateInfo.date);
+      });
+
+      if (geldBlob) {
+        await del(getPathFromUrl(geldBlob.url), { token: process.env.BLOB_READ_WRITE_TOKEN });
+      }
+    }
+
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    console.error('Error deleting scorecard:', error);
+    return NextResponse.json(
+      { error: 'Fehler beim Löschen der Scorecard' },
       { status: 500 }
     );
   }

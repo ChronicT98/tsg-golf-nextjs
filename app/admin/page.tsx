@@ -79,11 +79,6 @@ export default function AdminPage() {
           message: 'Alle Dateien wurden erfolgreich hochgeladen!',
           type: 'success'
         });
-        // Refresh the page to show new uploads after a success message
-        setTimeout(() => {
-          router.refresh();
-          window.location.reload();
-        }, 2000);
       }
     } catch (error) {
       console.error('Error uploading files:', error);
