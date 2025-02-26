@@ -18,7 +18,7 @@ const uploadMemberImage = async (file: File, memberId: string): Promise<string |
     const buffer = Buffer.from(arrayBuffer);
     
     // Hochladen zur Supabase Storage
-    const { data, error } = await supabase.storage
+    const { error } = await supabase.storage
       .from('memberimages') // Der Name deines Supabase Storage Buckets
       .upload(filePath, buffer, {
         contentType: file.type,
