@@ -6,47 +6,71 @@ import Image from 'next/image';
 import '@/app/styles/admin.css';
 import { supabase } from '@/app/utils/supabase';
 
-// Funktion zum Hochladen des Bildes
+// Verbesserte Funktion zum Hochladen des Bildes mit besserer Fehlerbehandlung
 const uploadMemberImage = async (file: File, memberId: string): Promise<string | null> => {
   try {
-    // Generiere einen eindeutigen Dateinamen basierend auf memberId und Timestamp
-    const fileName = `${memberId}_${Date.now()}.${file.name.split('.').pop()}`;
+    // Überprüfen, ob die Datei eine Bilddatei ist
+    if (!file.type.startsWith('image/')) {
+      throw new Error('Die ausgewählte Datei ist keine Bilddatei.');
+    }
+
+    // Generiere einen eindeutigen Dateinamen mit Timestamp und zufälliger ID
+    const fileExt = file.name.split('.').pop();
+    const fileName = `${memberId}_${Date.now()}_${Math.random().toString(36).substring(2, 15)}.${fileExt}`;
     const filePath = `members/${fileName}`;
     
     // Datei in ArrayBuffer umwandeln
     const arrayBuffer = await file.arrayBuffer();
     const buffer = Buffer.from(arrayBuffer);
     
-    // Hochladen zur Supabase Storage
-    const { error } = await supabase.storage
-      .from('memberimages') // Der Name deines Supabase Storage Buckets
+    console.log('Starte Upload zu Supabase Storage:', filePath);
+    console.log('Dateidetails:', {
+      name: file.name,
+      type: file.type,
+      size: buffer.length,
+      bucket: 'member-images',
+      path: filePath
+    });
+    
+    // Hochladen zur Supabase Storage mit Fehlerbehandlung
+    const { data, error } = await supabase.storage
+      .from('member-images') // Der Name deines Supabase Storage Buckets
       .upload(filePath, buffer, {
         contentType: file.type,
         cacheControl: '3600',
-        upsert: false
+        upsert: false // Wichtig: Setze auf true, wenn du bestehende Dateien überschreiben möchtest
       });
     
     if (error) {
       console.error('Fehler beim Hochladen des Bildes:', error);
-      return null;
+      throw new Error(`Upload fehlgeschlagen: ${error.message}`);
     }
+    
+    if (!data || !data.path) {
+      throw new Error('Keine Daten vom Upload erhalten');
+    }
+    
+    console.log('Upload erfolgreich:', data);
     
     // Öffentliche URL für das Bild generieren
     const { data: { publicUrl } } = supabase.storage
-      .from('memberimages')
-      .getPublicUrl(filePath);
+      .from('member-images')
+      .getPublicUrl(data.path);
+    
+    console.log('Generierte öffentliche URL:', publicUrl);
     
     return publicUrl;
   } catch (err) {
     console.error('Fehler beim Bildupload:', err);
-    return null;
+    throw err; // Fehler weiterwerfen für bessere Fehlerbehandlung
   }
 };
 
-// Komponente für den Bildupload
+// Verbesserte Komponente für den Bildupload mit Fortschrittsanzeige und besserer Fehlerbehandlung
 const ImageUploadField = ({ onImageUploaded }: { onImageUploaded: (url: string) => void }) => {
   const [uploading, setUploading] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
+  const [progress, setProgress] = useState(0);
   
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files || e.target.files.length === 0) {
@@ -60,21 +84,26 @@ const ImageUploadField = ({ onImageUploaded }: { onImageUploaded: (url: string) 
     }
     
     setUploading(true);
+    setProgress(10);
     setUploadError(null);
     
     // Temporäre ID für Dateibenennung
     const tempId = 'temp_' + Date.now();
     
     try {
+      setProgress(30);
       const imageUrl = await uploadMemberImage(file, tempId);
+      setProgress(90);
+      
       if (imageUrl) {
         onImageUploaded(imageUrl);
+        setProgress(100);
       } else {
         setUploadError('Fehler beim Hochladen des Bildes.');
       }
     } catch (err) {
       console.error('Upload fehlgeschlagen:', err);
-      setUploadError('Upload fehlgeschlagen. Bitte versuche es erneut.');
+      setUploadError(err instanceof Error ? err.message : 'Upload fehlgeschlagen. Bitte versuche es erneut.');
     } finally {
       setUploading(false);
     }
@@ -83,7 +112,7 @@ const ImageUploadField = ({ onImageUploaded }: { onImageUploaded: (url: string) 
   return (
     <div className="image-upload-field">
       <label htmlFor="member-image" className="upload-button">
-        {uploading ? 'Wird hochgeladen...' : 'Bild hochladen'}
+        {uploading ? `Wird hochgeladen... ${progress}%` : 'Bild hochladen'}
         <input
           type="file"
           id="member-image"
@@ -94,6 +123,15 @@ const ImageUploadField = ({ onImageUploaded }: { onImageUploaded: (url: string) 
         />
       </label>
       {uploadError && <p className="error-message">{uploadError}</p>}
+      
+      {uploading && (
+        <div className="progress-bar-container">
+          <div 
+            className="progress-bar" 
+            style={{ width: `${progress}%` }}
+          ></div>
+        </div>
+      )}
       
       <style jsx>{`
         .image-upload-field {
@@ -115,6 +153,19 @@ const ImageUploadField = ({ onImageUploaded }: { onImageUploaded: (url: string) 
           color: #dc3545;
           margin-top: 0.5rem;
           font-size: 0.875rem;
+        }
+        .progress-bar-container {
+          margin-top: 0.5rem;
+          background-color: #f0f0f0;
+          border-radius: 4px;
+          height: 8px;
+          width: 100%;
+        }
+        .progress-bar {
+          height: 100%;
+          background: linear-gradient(to right, #1a73e8, #34a853);
+          border-radius: 4px;
+          transition: width 0.3s ease;
         }
       `}</style>
     </div>
@@ -151,6 +202,13 @@ export default function MemberEditor({ member, category, onSave, onCancel }: Mem
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Validierung der erforderlichen Felder
+    if (!formData.name || !formData.hcp || !formData.imagesrc) {
+      alert('Bitte fülle alle erforderlichen Felder aus.');
+      return;
+    }
+    
     // Stelle sicher, dass die Kategorie gesetzt ist
     const updatedMember = {
       ...formData,
@@ -298,7 +356,7 @@ export default function MemberEditor({ member, category, onSave, onCancel }: Mem
             Du kannst entweder eine URL manuell eingeben oder das Bild direkt hochladen:
           </p>
           
-          {/* Hier die neue Komponente einfügen */}
+          {/* Verbesserte Bildupload-Komponente */}
           <ImageUploadField onImageUploaded={handleImageUploaded} />
         </div>
 
