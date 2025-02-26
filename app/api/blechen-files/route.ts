@@ -17,6 +17,8 @@ export async function GET() {
       '2022': ''
     };
 
+    const timestamp = Date.now(); // HINZUGEFÜGT: Timestamp für Cache-Busting
+
     // List all files in the blechen directory from blob storage
     const blobFiles = await list({ 
       prefix: 'blechen/',
@@ -31,7 +33,7 @@ export async function GET() {
         const year = parseYearFromFilename(filename);
         
         if (year && latestFiles.hasOwnProperty(year)) {
-          latestFiles[year] = blob.url;
+          latestFiles[year] = `${blob.url}?v=${timestamp}`; // HINZUGEFÜGT: ?v= Parameter
         }
       });
 
