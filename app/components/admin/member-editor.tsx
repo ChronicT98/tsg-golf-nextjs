@@ -8,7 +8,7 @@ import '@/app/styles/admin.css';
 interface MemberEditorProps {
   member?: MemberDetails;
   category: 'gruendungsmitglieder' | 'ordentlicheMitglieder' | 'inMemoriam';
-  onSave: (updatedMember: MemberDetails, category: string) => void;
+  onSave: (updatedMember: MemberDetails) => void;
   onCancel: () => void;
 }
 
@@ -16,7 +16,8 @@ export default function MemberEditor({ member, category, onSave, onCancel }: Mem
   const [formData, setFormData] = useState<MemberDetails>({
     name: '',
     hcp: '',
-    imageSrc: '',
+    imagesrc: '',
+    category: category,
     spitzname: '',
     geboren: '',
     beruf: '',
@@ -34,7 +35,12 @@ export default function MemberEditor({ member, category, onSave, onCancel }: Mem
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    onSave(formData, category);
+    // Stelle sicher, dass die Kategorie gesetzt ist
+    const updatedMember = {
+      ...formData,
+      category
+    };
+    onSave(updatedMember);
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -155,21 +161,21 @@ export default function MemberEditor({ member, category, onSave, onCancel }: Mem
         )}
 
         <div className="form-group">
-          <label htmlFor="imageSrc">Bild URL *</label>
+          <label htmlFor="imagesrc">Bild URL *</label>
           <input
             type="text"
-            id="imageSrc"
-            name="imageSrc"
-            value={formData.imageSrc}
+            id="imagesrc"
+            name="imagesrc"
+            value={formData.imagesrc}
             onChange={handleInputChange}
             required
           />
         </div>
 
-        {formData.imageSrc && (
+        {formData.imagesrc && (
           <div className="image-preview">
             <Image
-              src={formData.imageSrc}
+              src={formData.imagesrc}
               alt={formData.name || 'Vorschau'}
               width={100}
               height={100}

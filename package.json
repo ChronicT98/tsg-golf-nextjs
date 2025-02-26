@@ -2,14 +2,18 @@
   "name": "tsg-golf-nextjs",
   "version": "0.1.0",
   "private": true,
+  "type": "module",
   "scripts": {
     "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "migrate-to-blob": "ts-node -r tsconfig-paths/register scripts/migrate-to-blob.ts"
+    "migrate-to-blob": "ts-node -r tsconfig-paths/register scripts/migrate-to-blob.ts",
+    "upload-images": "ts-node -r tsconfig-paths/register scripts/upload-images.ts"
   },
   "dependencies": {
+    "@hello-pangea/dnd": "^18.0.1",
+    "@supabase/supabase-js": "^2.49.1",
     "@vercel/blob": "^0.27.1",
     "@vercel/edge-config": "^1.4.0",
     "@vercel/kv": "^3.0.0",
@@ -28,10 +32,12 @@
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
+    "@types/dotenv": "^6.1.1",
     "@types/html2canvas": "^0.5.35",
-    "@types/node": "^20",
+    "@types/node": "^20.17.19",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "dotenv": "^16.4.7",
     "eslint": "^9",
     "eslint-config-next": "15.1.7",
     "postcss": "^8",

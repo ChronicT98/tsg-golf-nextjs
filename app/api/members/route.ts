@@ -1,114 +1,104 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { MemberDetails } from '@/app/types/members';
-import fs from 'fs/promises';
-import path from 'path';
+import { NextResponse } from 'next/server';
+import { supabase } from '@/app/utils/supabase';
 import { getServerSession } from 'next-auth';
-import { authConfig } from '@/app/auth.config';
 
-export async function PUT(request: NextRequest) {
+// GET /api/members
+export async function GET() {
   try {
-    // Check authentication
-    const session = await getServerSession(authConfig);
+    const { data: members, error } = await supabase
+      .from('members')
+      .select('*')
+      .order('order', { ascending: true });
+
+    if (error) {
+      throw error;
+    }
+
+    console.log('Members data:', members);
+    return NextResponse.json(members);
+  } catch (error) {
+    console.error('Error fetching members:', error);
+    return NextResponse.json(
+      { error: 'Failed to fetch members' },
+      { status: 500 }
+    );
+  }
+}
+
+// PUT /api/members
+export async function PUT(request: Request) {
+  try {
+    // Überprüfen der Authentifizierung
+    const session = await getServerSession();
     if (!session) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      return NextResponse.json(
+        { error: 'Unauthorized' },
+        { status: 401 }
+      );
     }
 
     const { member, category } = await request.json();
 
-    // Validate input
-    if (!member || !category) {
+    // Validiere erforderliche Felder
+    if (!member.name || !member.hcp || !member.imagesrc) {
       return NextResponse.json(
-        { error: 'Missing required fields' },
+        { error: 'Name, Handicap und Bild URL sind erforderlich' },
         { status: 400 }
       );
     }
 
-    // Validate member data
-    if (!member.name || !member.hcp || !member.imageSrc) {
-      return NextResponse.json(
-        { error: 'Missing required member fields' },
-        { status: 400 }
-      );
+    // Aktualisieren oder Erstellen des Mitglieds
+    const { data, error } = await supabase
+      .from('members')
+      .upsert({
+        ...member,
+        category,
+        updated_at: new Date().toISOString(),
+      })
+      .select();
+
+    if (error) {
+      throw error;
     }
 
-    // Read the current data file
-    const dataFilePath = path.join(process.cwd(), 'app/mitglieder/data.ts');
-    const fileContent = await fs.readFile(dataFilePath, 'utf-8');
-
-    // Parse the content to get the arrays
-    const gruendungsmitgliederMatch = fileContent.match(/export const gruendungsmitglieder: MemberDetails\[\] = \[([\s\S]*?)\];/);
-    const ordentlicheMitgliederMatch = fileContent.match(/export const ordentlicheMitglieder: MemberDetails\[\] = \[([\s\S]*?)\];/);
-    const inMemoriamMatch = fileContent.match(/export const inMemoriam: MemberDetails\[\] = \[([\s\S]*?)\];/);
-
-    if (!gruendungsmitgliederMatch || !ordentlicheMitgliederMatch || !inMemoriamMatch) {
-      return NextResponse.json(
-        { error: 'Failed to parse data file' },
-        { status: 500 }
-      );
-    }
-
-    // Convert the content to actual arrays
-    const gruendungsmitglieder: MemberDetails[] = eval(`[${gruendungsmitgliederMatch[1]}]`);
-    const ordentlicheMitglieder: MemberDetails[] = eval(`[${ordentlicheMitgliederMatch[1]}]`);
-    const inMemoriam: MemberDetails[] = eval(`[${inMemoriamMatch[1]}]`);
-
-    // Update the appropriate array
-    let targetArray;
-    switch (category) {
-      case 'gruendungsmitglieder':
-        targetArray = gruendungsmitglieder;
-        break;
-      case 'ordentlicheMitglieder':
-        targetArray = ordentlicheMitglieder;
-        break;
-      case 'inMemoriam':
-        targetArray = inMemoriam;
-        break;
-      default:
-        return NextResponse.json(
-          { error: 'Invalid category' },
-          { status: 400 }
-        );
-    }
-
-    // Find and update the member
-    const index = targetArray.findIndex(m => m.name === member.name);
-    if (index === -1) {
-      targetArray.push(member);
-    } else {
-      targetArray[index] = member;
-    }
-
-    // Create the new file content
-    const newContent = `// app/mitglieder/data.ts
-export interface MemberDetails {
-  name: string;
-  hcp: string;
-  spitzname?: string;
-  geboren?: string;
-  firma?: string;
-  beruf?: string;
-  handy?: string;
-  email?: string;
-  web?: string;
-  imageSrc: string;
-  verstorben?: string;
-}
-
-export const gruendungsmitglieder: MemberDetails[] = ${JSON.stringify(gruendungsmitglieder, null, 2)};
-
-export const ordentlicheMitglieder: MemberDetails[] = ${JSON.stringify(ordentlicheMitglieder, null, 2)};
-
-export const inMemoriam: MemberDetails[] = ${JSON.stringify(inMemoriam, null, 2)};`;
-
-    // Write the updated content back to the file
-    await fs.writeFile(dataFilePath, newContent, 'utf-8');
-
-    return NextResponse.json({ success: true });
+    return NextResponse.json(data);
   } catch (error) {
     console.error('Error updating member:', error);
     return NextResponse.json(
-      { error: 'Internal server error' },
+      { error: 'Failed to update member' },
+      { status: 500 }
+    );
+  }
+}
+
+// DELETE /api/members
+export async function DELETE(request: Request) {
+  try {
+    // Überprüfen der Authentifizierung
+    const session = await getServerSession();
+    if (!session) {
+      return NextResponse.json(
+        { error: 'Unauthorized' },
+        { status: 401 }
+      );
+    }
+
+    const { id } = await request.json();
+
+    const { error } = await supabase
+      .from('members')
+      .delete()
+      .eq('id', id);
+
+    if (error) {
+      throw error;
+    }
+
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    console.error('Error deleting member:', error);
+    return NextResponse.json(
+      { error: 'Failed to delete member' },
       { status: 500 }
     );
   }

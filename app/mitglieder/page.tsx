@@ -1,12 +1,48 @@
 'use client';
 import '@/app/styles/mitglieder.css';
-import { gruendungsmitglieder, ordentlicheMitglieder, inMemoriam } from './data';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import type { MemberDetails } from '@/app/types/members';
 import Image from 'next/image';
 import MemberImageModal from '@/app/components/member-image-modal';
 
 export default function MitgliederPage() {
   const [activeCategory, setActiveCategory] = useState<string>('all');
+  const [gruendungsmitglieder, setGruendungsmitglieder] = useState<MemberDetails[]>([]);
+  const [ordentlicheMitglieder, setOrdentlicheMitglieder] = useState<MemberDetails[]>([]);
+  const [inMemoriam, setInMemoriam] = useState<MemberDetails[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    async function loadMembers() {
+      try {
+        const response = await fetch('/api/members');
+        if (!response.ok) {
+          throw new Error('Failed to fetch members');
+        }
+        
+        const members = await response.json();
+        console.log('Received members:', members);
+        
+        // Sortiere die Mitglieder in ihre Kategorien
+        setGruendungsmitglieder(
+          members.filter((m: MemberDetails) => m.category === 'gruendungsmitglieder')
+        );
+        setOrdentlicheMitglieder(
+          members.filter((m: MemberDetails) => m.category === 'ordentlicheMitglieder')
+        );
+        setInMemoriam(
+          members.filter((m: MemberDetails) => m.category === 'inMemoriam')
+        );
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Ein Fehler ist aufgetreten');
+      } finally {
+        setIsLoading(false);
+      }
+    }
+
+    loadMembers();
+  }, []);
   const [selectedImage, setSelectedImage] = useState<{ url: string; alt: string } | null>(null);
 
   const filterCategories = [
@@ -45,24 +81,27 @@ export default function MitgliederPage() {
             <h3 className="mitglieder__category-title">Gründungsmitglieder</h3>
             <div className="mitglieder__grid">
               {gruendungsmitglieder.map((member) => (
-                <div key={member.name} className="mitglieder__card">
+                <div key={member.id} className="mitglieder__card">
                   <div 
                     className="mitglieder__image" 
-                    onClick={() => setSelectedImage({ url: member.imageSrc, alt: member.name })}
+                    onClick={() => member.imagesrc && setSelectedImage({ url: member.imagesrc, alt: member.name })}
                     role="button"
                     tabIndex={0}
                     onKeyDown={(e) => {
-                      if (e.key === 'Enter' || e.key === ' ') {
-                        setSelectedImage({ url: member.imageSrc, alt: member.name });
+                      if ((e.key === 'Enter' || e.key === ' ') && member.imagesrc) {
+                        setSelectedImage({ url: member.imagesrc, alt: member.name });
                       }
                     }}
                   >
-                    <Image 
-                      src={member.imageSrc} 
-                      alt={member.name}
-                      fill
-                      sizes="(max-width: 768px) 100px, 200px"
-                    />
+                    {member.imagesrc && (
+                      <Image 
+                        src={member.imagesrc}
+                        alt={member.name}
+                        fill
+                        sizes="(max-width: 768px) 100px, 200px"
+                        priority={true}
+                      />
+                    )}
                   </div>
                   <h3 className="mitglieder__name">
                     {member.name}
@@ -115,24 +154,26 @@ export default function MitgliederPage() {
             <h3 className="mitglieder__category-title">Mitglieder</h3>
             <div className="mitglieder__grid">
               {ordentlicheMitglieder.map((member) => (
-                <div key={member.name} className="mitglieder__card">
+                <div key={member.id} className="mitglieder__card">
                   <div 
                     className="mitglieder__image"
-                    onClick={() => setSelectedImage({ url: member.imageSrc, alt: member.name })}
+                    onClick={() => member.imagesrc && setSelectedImage({ url: member.imagesrc, alt: member.name })}
                     role="button"
                     tabIndex={0}
                     onKeyDown={(e) => {
-                      if (e.key === 'Enter' || e.key === ' ') {
-                        setSelectedImage({ url: member.imageSrc, alt: member.name });
+                      if ((e.key === 'Enter' || e.key === ' ') && member.imagesrc) {
+                        setSelectedImage({ url: member.imagesrc, alt: member.name });
                       }
                     }}
                   >
-                    <Image 
-                      src={member.imageSrc} 
-                      alt={member.name}
-                      fill
-                      sizes="(max-width: 768px) 100px, 200px"
-                    />
+                    {member.imagesrc && (
+                      <Image 
+                        src={member.imagesrc}
+                        alt={member.name}
+                        fill
+                        sizes="(max-width: 768px) 100px, 200px"
+                      />
+                    )}
                   </div>
                   <h3 className="mitglieder__name">
                     {member.name}
@@ -185,24 +226,26 @@ export default function MitgliederPage() {
             <h3 className="mitglieder__category-title">In Memoriam</h3>
             <div className="mitglieder__grid">
               {inMemoriam.map((member) => (
-                <div key={member.name} className="mitglieder__card">
+                <div key={member.id} className="mitglieder__card">
                   <div 
                     className="mitglieder__image"
-                    onClick={() => setSelectedImage({ url: member.imageSrc, alt: member.name })}
+                    onClick={() => member.imagesrc && setSelectedImage({ url: member.imagesrc, alt: member.name })}
                     role="button"
                     tabIndex={0}
                     onKeyDown={(e) => {
-                      if (e.key === 'Enter' || e.key === ' ') {
-                        setSelectedImage({ url: member.imageSrc, alt: member.name });
+                      if ((e.key === 'Enter' || e.key === ' ') && member.imagesrc) {
+                        setSelectedImage({ url: member.imagesrc, alt: member.name });
                       }
                     }}
                   >
-                    <Image 
-                      src={member.imageSrc} 
-                      alt={member.name}
-                      fill
-                      sizes="(max-width: 768px) 100px, 200px"
-                    />
+                    {member.imagesrc && (
+                      <Image 
+                        src={member.imagesrc}
+                        alt={member.name}
+                        fill
+                        sizes="(max-width: 768px) 100px, 200px"
+                      />
+                    )}
                   </div>
                   <h3 className="mitglieder__name">
                     {member.name}

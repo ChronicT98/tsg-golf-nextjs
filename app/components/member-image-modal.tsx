@@ -55,20 +55,22 @@ const MemberImageModal: React.FC<MemberImageModalProps> = ({ imageUrl, alt, onCl
           overflow: 'hidden',
         }}
       >
-        <Image
-          src={imageUrl}
-          alt={alt}
-          width={2000}
-          height={2000}
-          style={{
-            width: 'auto',
-            height: 'auto',
-            maxWidth: '100%',
-            maxHeight: '98vh',
-            objectFit: 'contain',
-          }}
-          priority
-        />
+        {imageUrl && (
+          <Image
+            src={imageUrl}
+            alt={alt}
+            width={2000}
+            height={2000}
+            style={{
+              width: 'auto',
+              height: 'auto',
+              maxWidth: '100%',
+              maxHeight: '98vh',
+              objectFit: 'contain',
+            }}
+            priority
+          />
+        )}
       </div>
     </div>
   );

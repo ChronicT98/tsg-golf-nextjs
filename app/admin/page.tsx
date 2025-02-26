@@ -3,10 +3,10 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useSession, signOut } from 'next-auth/react';
+import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 import PdfConverter from '@/app/components/admin/pdf-converter';
 import ScorecardManager from '@/app/components/admin/scorecard-manager';
 import MemberEditor from '@/app/components/admin/member-editor';
-import { gruendungsmitglieder, ordentlicheMitglieder, inMemoriam } from '@/app/mitglieder/data';
 import type { MemberDetails } from '@/app/types/members';
 
 interface UploadResult {
@@ -25,6 +25,119 @@ type AdminSection = 'scorecards' | 'members';
 
 export default function AdminPage() {
   const { status } = useSession();
+  const [gruendungsmitglieder, setGruendungsmitglieder] = useState<MemberDetails[]>([]);
+  const [ordentlicheMitglieder, setOrdentlicheMitglieder] = useState<MemberDetails[]>([]);
+  const [inMemoriam, setInMemoriam] = useState<MemberDetails[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const handleDragEnd = async (result: any) => {
+    if (!result.destination) return;
+
+    const sourceCategory = result.source.droppableId;
+    const destinationCategory = result.destination.droppableId;
+
+    // Nur Reordering innerhalb der gleichen Kategorie erlauben
+    if (sourceCategory !== destinationCategory) return;
+
+    let items: MemberDetails[];
+    let setItems: React.Dispatch<React.SetStateAction<MemberDetails[]>>;
+
+    switch (sourceCategory) {
+      case 'gruendungsmitglieder':
+        items = [...gruendungsmitglieder];
+        setItems = setGruendungsmitglieder;
+        break;
+      case 'ordentlicheMitglieder':
+        items = [...ordentlicheMitglieder];
+        setItems = setOrdentlicheMitglieder;
+        break;
+      case 'inMemoriam':
+        items = [...inMemoriam];
+        setItems = setInMemoriam;
+        break;
+      default:
+        return;
+    }
+
+    // Element verschieben
+    const [reorderedItem] = items.splice(result.source.index, 1);
+    items.splice(result.destination.index, 0, reorderedItem);
+
+    // Neue Reihenfolge setzen
+    items.forEach((item, index) => {
+      item.order = index;
+    });
+
+    // State aktualisieren
+    setItems(items);
+
+    try {
+      // Alle Änderungen an die API senden
+      const updates = items.map((member) => ({
+        id: member.id,
+        order: member.order
+      }));
+
+      const response = await fetch('/api/members/reorder', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          category: sourceCategory,
+          updates
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to update order');
+      }
+    } catch (error) {
+      console.error('Error updating order:', error);
+      // Optionally revert the state if the API call fails
+    }
+  };
+
+  // Lade Mitgliederdaten
+  useEffect(() => {
+    async function loadMembers() {
+      try {
+        const response = await fetch('/api/members');
+        if (!response.ok) {
+          throw new Error('Failed to fetch members');
+        }
+        
+        const members = await response.json();
+        
+        // Sortiere die Mitglieder in ihre Kategorien und nach order
+        setGruendungsmitglieder(
+          members
+            .filter((m: MemberDetails) => m.category === 'gruendungsmitglieder')
+            .sort((a: MemberDetails, b: MemberDetails) => (a.order || 0) - (b.order || 0))
+        );
+        setOrdentlicheMitglieder(
+          members
+            .filter((m: MemberDetails) => m.category === 'ordentlicheMitglieder')
+            .sort((a: MemberDetails, b: MemberDetails) => (a.order || 0) - (b.order || 0))
+        );
+        setInMemoriam(
+          members
+            .filter((m: MemberDetails) => m.category === 'inMemoriam')
+            .sort((a: MemberDetails, b: MemberDetails) => (a.order || 0) - (b.order || 0))
+        );
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Ein Fehler ist aufgetreten');
+        console.error('Error loading members:', err);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+
+    if (status === 'authenticated') {
+      loadMembers();
+    }
+  }, [status]);
   const router = useRouter();
   const [loading, setLoading] = useState(true);
   const [selectedMember, setSelectedMember] = useState<SelectedMember | null>(null);
@@ -129,20 +242,44 @@ export default function AdminPage() {
         {activeSection === 'members' && (
           <div className="members-manager">
           <h2>Mitglieder Verwaltung</h2>
-          <div className="member-categories">
-            <div className="member-category">
-              <h3>Gründungsmitglieder</h3>
-              {gruendungsmitglieder.map((member) => (
-                <div key={member.name} className="member-row">
-                  <span>{member.name}</span>
-                  <button 
-                    onClick={() => setSelectedMember({ member, category: 'gruendungsmitglieder' })}
-                    className="edit-button"
-                  >
-                    Bearbeiten
-                  </button>
-                </div>
-              ))}
+          <DragDropContext onDragEnd={handleDragEnd}>
+            <div className="member-categories">
+              <div className="member-category">
+                <h3>Gründungsmitglieder</h3>
+                <Droppable droppableId="gruendungsmitglieder">
+                  {(provided) => (
+                    <div
+                      ref={provided.innerRef}
+                      {...provided.droppableProps}
+                    >
+                      {gruendungsmitglieder.map((member, index) => (
+                        <Draggable
+                          key={member.id?.toString() || index.toString()}
+                          draggableId={member.id?.toString() || index.toString()}
+                          index={index}
+                        >
+                          {(provided) => (
+                            <div
+                              ref={provided.innerRef}
+                              {...provided.draggableProps}
+                              {...provided.dragHandleProps}
+                              className="member-row"
+                            >
+                              <span>{member.name}</span>
+                              <button 
+                                onClick={() => setSelectedMember({ member, category: 'gruendungsmitglieder' })}
+                                className="edit-button"
+                              >
+                                Bearbeiten
+                              </button>
+                            </div>
+                          )}
+                        </Draggable>
+                      ))}
+                      {provided.placeholder}
+                    </div>
+                  )}
+                </Droppable>
               <button 
                 onClick={() => setSelectedMember({ member: undefined, category: 'gruendungsmitglieder' })}
                 className="add-button"
@@ -151,19 +288,42 @@ export default function AdminPage() {
               </button>
             </div>
 
-            <div className="member-category">
-              <h3>Mitglieder</h3>
-              {ordentlicheMitglieder.map((member) => (
-                <div key={member.name} className="member-row">
-                  <span>{member.name}</span>
-                  <button 
-                    onClick={() => setSelectedMember({ member, category: 'ordentlicheMitglieder' })}
-                    className="edit-button"
-                  >
-                    Bearbeiten
-                  </button>
-                </div>
-              ))}
+              <div className="member-category">
+                <h3>Mitglieder</h3>
+                <Droppable droppableId="ordentlicheMitglieder">
+                  {(provided) => (
+                    <div
+                      ref={provided.innerRef}
+                      {...provided.droppableProps}
+                    >
+                      {ordentlicheMitglieder.map((member, index) => (
+                        <Draggable
+                          key={member.id?.toString() || index.toString()}
+                          draggableId={member.id?.toString() || index.toString()}
+                          index={index}
+                        >
+                          {(provided) => (
+                            <div
+                              ref={provided.innerRef}
+                              {...provided.draggableProps}
+                              {...provided.dragHandleProps}
+                              className="member-row"
+                            >
+                              <span>{member.name}</span>
+                              <button 
+                                onClick={() => setSelectedMember({ member, category: 'ordentlicheMitglieder' })}
+                                className="edit-button"
+                              >
+                                Bearbeiten
+                              </button>
+                            </div>
+                          )}
+                        </Draggable>
+                      ))}
+                      {provided.placeholder}
+                    </div>
+                  )}
+                </Droppable>
               <button 
                 onClick={() => setSelectedMember({ member: undefined, category: 'ordentlicheMitglieder' })}
                 className="add-button"
@@ -172,19 +332,42 @@ export default function AdminPage() {
               </button>
             </div>
 
-            <div className="member-category">
-              <h3>In Memoriam</h3>
-              {inMemoriam.map((member) => (
-                <div key={member.name} className="member-row">
-                  <span>{member.name}</span>
-                  <button 
-                    onClick={() => setSelectedMember({ member, category: 'inMemoriam' })}
-                    className="edit-button"
-                  >
-                    Bearbeiten
-                  </button>
-                </div>
-              ))}
+              <div className="member-category">
+                <h3>In Memoriam</h3>
+                <Droppable droppableId="inMemoriam">
+                  {(provided) => (
+                    <div
+                      ref={provided.innerRef}
+                      {...provided.droppableProps}
+                    >
+                      {inMemoriam.map((member, index) => (
+                        <Draggable
+                          key={member.id?.toString() || index.toString()}
+                          draggableId={member.id?.toString() || index.toString()}
+                          index={index}
+                        >
+                          {(provided) => (
+                            <div
+                              ref={provided.innerRef}
+                              {...provided.draggableProps}
+                              {...provided.dragHandleProps}
+                              className="member-row"
+                            >
+                              <span>{member.name}</span>
+                              <button 
+                                onClick={() => setSelectedMember({ member, category: 'inMemoriam' })}
+                                className="edit-button"
+                              >
+                                Bearbeiten
+                              </button>
+                            </div>
+                          )}
+                        </Draggable>
+                      ))}
+                      {provided.placeholder}
+                    </div>
+                  )}
+                </Droppable>
               <button 
                 onClick={() => setSelectedMember({ member: undefined, category: 'inMemoriam' })}
                 className="add-button"
@@ -193,6 +376,7 @@ export default function AdminPage() {
               </button>
             </div>
           </div>
+          </DragDropContext>
 
           {selectedMember && (
             <div className="modal-overlay">
@@ -200,7 +384,7 @@ export default function AdminPage() {
                 <MemberEditor
                   member={selectedMember.member}
                   category={selectedMember.category}
-                  onSave={async (updatedMember, category) => {
+                  onSave={async (updatedMember: MemberDetails) => {
                     try {
                       const response = await fetch('/api/members', {
                         method: 'PUT',
@@ -209,7 +393,7 @@ export default function AdminPage() {
                         },
                         body: JSON.stringify({
                           member: updatedMember,
-                          category,
+                          category: selectedMember.category
                         }),
                       });
 

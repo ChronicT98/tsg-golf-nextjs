@@ -1,19 +1,17 @@
 export interface MemberDetails {
+  id?: number;
   name: string;
   hcp: string;
   spitzname?: string;
   geboren?: string;
-  firma?: string;
   beruf?: string;
   handy?: string;
   email?: string;
   web?: string;
-  imageSrc: string;
+  imagesrc: string;
   verstorben?: string;
-}
-
-export interface MemberData {
-  gruendungsmitglieder: MemberDetails[];
-  ordentlicheMitglieder: MemberDetails[];
-  inMemoriam: MemberDetails[];
+  category: 'gruendungsmitglieder' | 'ordentlicheMitglieder' | 'inMemoriam';
+  created_at?: string;
+  updated_at?: string;
+  order?: number;
 }
