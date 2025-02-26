@@ -314,15 +314,40 @@ export default function MemberEditor({ member, category, onSave, onCancel }: Mem
           </div>
         )}
 
-        <div className="button-group">
-          <button type="submit" className="save-button">
-            Speichern
-          </button>
-          <button type="button" onClick={onCancel} className="cancel-button">
-            Abbrechen
-          </button>
-        </div>
-      </form>
-    </div>
-  );
-}
+          <div className="button-group">
+            <button type="submit" className="save-button">
+              Speichern
+            </button>
+            <button type="button" onClick={onCancel} className="cancel-button">
+              Abbrechen
+            </button>
+            {member && member.id && (
+              <button 
+                type="button" 
+                onClick={() => {
+                  if (window.confirm(`Möchten Sie ${member.name} wirklich löschen?`)) {
+                    // Hier rufen wir die API auf, um das Mitglied zu löschen
+                    fetch('/api/members', {
+                      method: 'DELETE',
+                      headers: {
+                        'Content-Type': 'application/json',
+                      },
+                      body: JSON.stringify({ id: member.id }),
+                    })
+                      .then(response => {
+                        if (!response.ok) throw new Error('Failed to delete member');
+                        onCancel(); // Dialog schließen
+                        window.location.reload(); // Seite neu laden
+                      })
+                      .catch(error => {
+                        console.error('Error deleting member:', error);
+                        alert('Fehler beim Löschen des Mitglieds');
+                      });
+                  }
+                }}
+                className="delete-button"
+              >
+                Löschen
+              </button>
+            )}
+          </div>
