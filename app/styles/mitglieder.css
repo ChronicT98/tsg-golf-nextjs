@@ -64,9 +64,7 @@
     color: white;
     border: none;
     box-shadow: var(--shadow-lg);
-    transform: translateY(-2px);
     font-weight: 600;
-    letter-spacing: 0.02em;
 }
 
 .mitglieder__section {
