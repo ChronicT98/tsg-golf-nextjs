@@ -41,8 +41,8 @@ export default function MitgliederPage() {
   }, []);
   const [selectedImage, setSelectedImage] = useState<{ url: string; alt: string } | null>(null);
 
+  // Entferne die "Alle Mitglieder" Option
   const filterCategories = [
-    { id: 'all', label: 'Alle Mitglieder' },
     { id: 'gruendung', label: 'Gründungsmitglieder' },
     { id: 'ordentlich', label: 'Mitglieder' },
     { id: 'memoriam', label: 'In Memoriam' },
