@@ -45,7 +45,7 @@
     border-radius: 12px;
     color: var(--text-color);
     font-size: 0.9375rem;
-    font-weight: 600;
+    font-weight: 500;
     transition: all 0.3s ease;
     cursor: pointer;
     position: relative;
@@ -64,7 +64,7 @@
     color: white;
     border: none;
     box-shadow: var(--shadow-lg);
-    font-weight: 600;
+    font-weight: 500;
 }
 
 .mitglieder__section {
