@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useSession, signOut } from 'next-auth/react';
-import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
+import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea/dnd';
 import PdfConverter from '@/app/components/admin/pdf-converter';
 import ScorecardManager from '@/app/components/admin/scorecard-manager';
 import MemberEditor from '@/app/components/admin/member-editor';
@@ -28,10 +28,7 @@ export default function AdminPage() {
   const [gruendungsmitglieder, setGruendungsmitglieder] = useState<MemberDetails[]>([]);
   const [ordentlicheMitglieder, setOrdentlicheMitglieder] = useState<MemberDetails[]>([]);
   const [inMemoriam, setInMemoriam] = useState<MemberDetails[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  const handleDragEnd = async (result: any) => {
+  const handleDragEnd = async (result: DropResult) => {
     if (!result.destination) return;
 
     const sourceCategory = result.source.droppableId;
@@ -127,10 +124,7 @@ export default function AdminPage() {
             .sort((a: MemberDetails, b: MemberDetails) => (a.order || 0) - (b.order || 0))
         );
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'Ein Fehler ist aufgetreten');
         console.error('Error loading members:', err);
-      } finally {
-        setIsLoading(false);
       }
     }
 

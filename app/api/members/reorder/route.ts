@@ -3,9 +3,9 @@ import { supabase } from '@/app/utils/supabase';
 
 export async function PUT(request: Request) {
   try {
-    const { category, updates } = await request.json();
+    const { updates } = await request.json();
 
-    // Aktualisiere jeden Member einzeln
+    // Update each member individually
     for (const update of updates) {
       const { error: updateError } = await supabase
         .from('members')

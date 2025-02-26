@@ -10,8 +10,6 @@ export default function MitgliederPage() {
   const [gruendungsmitglieder, setGruendungsmitglieder] = useState<MemberDetails[]>([]);
   const [ordentlicheMitglieder, setOrdentlicheMitglieder] = useState<MemberDetails[]>([]);
   const [inMemoriam, setInMemoriam] = useState<MemberDetails[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     async function loadMembers() {
@@ -35,9 +33,7 @@ export default function MitgliederPage() {
           members.filter((m: MemberDetails) => m.category === 'inMemoriam')
         );
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'Ein Fehler ist aufgetreten');
-      } finally {
-        setIsLoading(false);
+        console.error('Error loading members:', err);
       }
     }
 
