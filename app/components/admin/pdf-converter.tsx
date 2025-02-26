@@ -41,9 +41,10 @@ export default function PdfConverter({ onConversionComplete }: PdfConverterProps
 
       const imageBlob = await imageResponse.blob();
       
-      // Create preview URL
-      const previewUrl = URL.createObjectURL(imageBlob);
-      setPreviewUrl(previewUrl);
+      // Create preview URL with cache-busting parameter
+      const timestamp = Date.now();
+      const cacheUrl = `${data.url}?v=${timestamp}`;
+      setPreviewUrl(cacheUrl);
 
       // Return as File object
       return new File([imageBlob], data.filename || pdfFile.name.replace('.pdf', '.jpg'), {
