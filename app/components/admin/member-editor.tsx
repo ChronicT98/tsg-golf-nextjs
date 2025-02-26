@@ -314,7 +314,7 @@ export default function MemberEditor({ member, category, onSave, onCancel }: Mem
           </div>
         )}
 
-          <div className="button-group">
+         <div className="button-group">
             <button type="submit" className="save-button">
               Speichern
             </button>
@@ -351,3 +351,7 @@ export default function MemberEditor({ member, category, onSave, onCancel }: Mem
               </button>
             )}
           </div>
+      </form>
+    </div>
+  );
+}
