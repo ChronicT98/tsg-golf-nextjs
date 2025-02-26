@@ -53,6 +53,9 @@ export async function GET() {
   try {
     // Initialize empty response structure
     const yearData: ResponseData = {};
+    
+    // Add timestamp for cache busting
+    const timestamp = Date.now();
 
     // Initialize 2024 with empty structure
     yearData['2024'] = {
@@ -60,20 +63,20 @@ export async function GET() {
       spielCards: []
     };
 
-    // Add fixed 2024 data
+    // Add fixed 2024 data with cache busting
     Object.entries(dateMapping2024).forEach(([fileNumber, date]) => {
       const spielCard: SpielScorecard = {
         id: `spiel_${fileNumber}`,
         date: date,
-        fileName: `/scorecards/spiel_${fileNumber}.jpg`,
-        geldFileName: `/scorecard-geld/geld_${fileNumber}.jpg`
+        fileName: `/scorecards/spiel_${fileNumber}.jpg?v=${timestamp}`,
+        geldFileName: `/scorecard-geld/geld_${fileNumber}.jpg?v=${timestamp}`
       };
       yearData['2024'].spielCards.push(spielCard);
     });
 
-    // Add 2024 static files
-    yearData['2024'].static.statistik = '/scorecard-statistik/statistik_2024.jpg';
-    yearData['2024'].static.blechen = '/blechen/blechen_2024.jpg';
+    // Add 2024 static files with cache busting
+    yearData['2024'].static.statistik = `/scorecard-statistik/statistik_2024.jpg?v=${timestamp}`;
+    yearData['2024'].static.blechen = `/blechen/blechen_2024.jpg?v=${timestamp}`;
 
     // Get data from blob storage for other years
     const [scorecardBlobs, geldBlobs, statistikBlobs, blechenBlobs] = await Promise.all([
@@ -83,7 +86,7 @@ export async function GET() {
       list({ prefix: 'blechen/', token: process.env.BLOB_READ_WRITE_TOKEN })
     ]);
 
-    // Create a map of geld files by date for dynamic years
+    // Create a map of geld files by date for dynamic years (with cache busting)
     const geldFilesByDate = new Map<string, string>();
     geldBlobs.blobs
       .filter(blob => blob.pathname.endsWith('.jpg'))
@@ -91,11 +94,11 @@ export async function GET() {
         const filename = blob.pathname.split('/').pop() || '';
         const dateInfo = parseDynamicDate(filename);
         if (dateInfo && dateInfo.year !== '2024') {
-          geldFilesByDate.set(dateInfo.date, blob.url);
+          geldFilesByDate.set(dateInfo.date, `${blob.url}?v=${timestamp}`);
         }
       });
 
-    // Process Blechstatistik files
+    // Process Blechstatistik files (with cache busting)
     blechenBlobs?.blobs
       .filter(blob => blob.pathname.endsWith('.jpg'))
       .forEach(blob => {
@@ -109,11 +112,11 @@ export async function GET() {
               spielCards: []
             };
           }
-          yearData[year].static.blechen = blob.url;
+          yearData[year].static.blechen = `${blob.url}?v=${timestamp}`;
         }
       });
 
-    // Process statistics files
+    // Process statistics files (with cache busting)
     statistikBlobs?.blobs
       .filter(blob => blob.pathname.endsWith('.jpg'))
       .forEach(blob => {
@@ -128,11 +131,11 @@ export async function GET() {
               spielCards: []
             };
           }
-          yearData[year].static.statistik = blob.url;
+          yearData[year].static.statistik = `${blob.url}?v=${timestamp}`;
         }
       });
 
-    // Process spiel files
+    // Process spiel files (with cache busting)
     scorecardBlobs.blobs
       .filter(blob => blob.pathname.endsWith('.jpg'))
       .forEach(blob => {
@@ -151,7 +154,7 @@ export async function GET() {
           const spielCard: SpielScorecard = {
             id: filename,
             date: dateInfo.date,
-            fileName: blob.url,
+            fileName: `${blob.url}?v=${timestamp}`,
             geldFileName: geldFilesByDate.get(dateInfo.date)
           };
           
