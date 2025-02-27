@@ -21,17 +21,39 @@ export default function PdfConverter({ onConversionComplete }: PdfConverterProps
         if (year) formData.append('year', year);
 
         const response = await fetch('/api/convert-pdf', {
-        method: 'POST',
-        body: formData,
-      });
+          method: 'POST',
+          body: formData,
+        });
 
-      const data = await response.json();
-      
-      if (!response.ok) {
-        const errorMessage = data.details || data.error || 'Konvertierung fehlgeschlagen';
-        console.error('Konvertierungsfehler:', data);
-        throw new Error(errorMessage);
-      }
+        // First check if the response is OK
+        if (!response.ok) {
+          // Try to parse as JSON first
+          let errorMessage = 'Konvertierung fehlgeschlagen';
+          try {
+            const errorData = await response.clone().json();
+            errorMessage = errorData.details || errorData.error || errorMessage;
+            console.error('Konvertierungsfehler:', errorData);
+          } catch (jsonError) {
+            // If JSON parsing fails, try to get the response as text
+            try {
+              const errorText = await response.text();
+              errorMessage = errorText || errorMessage;
+              console.error('Konvertierungsfehler (Text):', errorText);
+            } catch (textError) {
+              console.error('Fehler beim Lesen der Fehlermeldung:', textError);
+            }
+          }
+          throw new Error(errorMessage);
+        }
+
+        // If response is OK, then try to parse JSON
+        let data;
+        try {
+          data = await response.json();
+        } catch (jsonError) {
+          console.error('Fehler beim Parsen der JSON-Antwort:', jsonError);
+          throw new Error('Die Serverantwort konnte nicht verarbeitet werden.');
+        }
       
       // Download the converted file from CloudConvert
       const imageResponse = await fetch(data.url);

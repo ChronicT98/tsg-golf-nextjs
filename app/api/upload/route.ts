@@ -113,11 +113,32 @@ export async function POST(request: Request) {
           });
 
           if (!response.ok) {
-            const errorData = await response.json();
-            throw new Error(errorData.error || errorData.details || 'Failed to convert PDF file');
+            let errorMessage = 'Failed to convert PDF file';
+            try {
+              // Try to parse the error response as JSON
+              const errorData = await response.clone().json();
+              errorMessage = errorData.error || errorData.details || errorMessage;
+            } catch (jsonError) {
+              // If JSON parsing fails, try to get the response as text
+              try {
+                const errorText = await response.text();
+                errorMessage = errorText || errorMessage;
+                console.error('PDF conversion error (text):', errorText);
+              } catch (textError) {
+                console.error('Error reading error response:', textError);
+              }
+            }
+            throw new Error(errorMessage);
           }
 
-          const data = await response.json();
+          // Parse the successful response
+          let data;
+          try {
+            data = await response.json();
+          } catch (jsonError) {
+            console.error('Error parsing convert-pdf response:', jsonError);
+            throw new Error('Die Serverantwort konnte nicht verarbeitet werden');
+          }
           if (!data.success) {
             throw new Error(data.error || 'PDF conversion failed');
           }

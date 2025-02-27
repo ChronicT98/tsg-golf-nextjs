@@ -308,12 +308,31 @@ export async function POST(request: NextRequest) {
       console.error('API Error Response:', axiosError.response.data);
     }
 
-    return NextResponse.json(
-      { 
+    // Ensure we return a properly formatted JSON response with appropriate headers
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    
+    // Create a sanitized error message that's guaranteed to be safe for JSON
+    let sanitizedError = errorMessage;
+    try {
+      // Test if we can serialize and parse the error message
+      JSON.parse(JSON.stringify({ message: errorMessage }));
+    } catch (jsonError) {
+      // If serialization fails, use a generic message
+      console.error('Error message contains invalid JSON characters:', errorMessage);
+      sanitizedError = 'Fehler bei der Konvertierung (Details nicht verfügbar)';
+    }
+    
+    return new NextResponse(
+      JSON.stringify({ 
         error: 'Fehler bei der Konvertierung',
-        details: error instanceof Error ? error.message : 'Unknown error'
-      },
-      { status: 500 }
+        details: sanitizedError
+      }),
+      { 
+        status: 500,
+        headers: {
+          'Content-Type': 'application/json',
+        }
+      }
     );
   }
 }
