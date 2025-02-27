@@ -2,14 +2,21 @@
 .mitglieder {
     padding: 4rem 0;
     background: linear-gradient(to bottom, var(--background-color), rgba(79, 70, 229, 0.05));
+    width: 100%;
+    overflow-x: hidden;
+}
+
+.mitglieder .container {
+    width: 100%;
+    box-sizing: border-box;
 }
 
 .mitglieder h1 {
     text-align: center;
     margin-bottom: 3rem;
     font-size: clamp(2rem, 4vw, 3rem);
-    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
-    background-size: 200% 200%;
+    background: var(--primary-gradient);
+    background-size: var(--text-gradient-props);
     background-clip: text;
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
@@ -46,7 +53,7 @@
     color: var(--text-color);
     font-size: 0.9375rem;
     font-weight: 500;
-    transition: all 0.3s ease;
+    transition: var(--transition);
     cursor: pointer;
     position: relative;
     overflow: hidden;
@@ -60,7 +67,7 @@
 }
 
 .mitglieder__filter.active {
-    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    background: var(--primary-gradient);
     color: white;
     border: none;
     box-shadow: var(--shadow-lg);
@@ -89,7 +96,7 @@
     font-weight: 600;
     margin: 3rem 0 2rem;
     text-align: center;
-    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    background: var(--primary-gradient);
     background-clip: text;
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
@@ -173,11 +180,9 @@
 .mitglieder__card::before {
     content: '';
     position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
+    inset: 0 0 auto 0;
     height: 4px;
-    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    background: var(--primary-gradient);
     opacity: 0;
     transition: var(--transition);
 }
@@ -237,12 +242,12 @@
     min-width: 80px;
 }
 
-.mitglieder__detail .kreuz{
-display: flex;
-align-items: center;
-justify-content: flex-start;
-max-height: 10px;
-font-size: 30px;
+.mitglieder__detail .kreuz {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    max-height: 10px;
+    font-size: 30px;
 }
 
 .mitglieder__detail strong {
@@ -265,20 +270,20 @@ font-size: 30px;
 
 .mitglieder__badges a.mitglieder__badge {
     text-decoration: none;
-    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    background: var(--primary-gradient);
     color: white;
 }
 
 .mitglieder__badges a.mitglieder__badge:hover {
     transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(79, 70, 229, 0.2);
+    box-shadow: var(--shadow-lg);
     filter: brightness(1.1);
 }
 
 .mitglieder__badge {
     padding: 0.5rem 1rem;
     margin-right: 6px;
-    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    background: var(--primary-gradient);
     color: white;
     border-radius: 8px;
     font-size: 0.875rem;
@@ -287,8 +292,8 @@ font-size: 30px;
 }
 
 .mitglieder__card--funktionaer .mitglieder__badge {
-    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
-    background-size: 200% 200%;
+    background: var(--primary-gradient);
+    background-size: var(--text-gradient-props);
     background-clip: text;
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
@@ -297,35 +302,33 @@ font-size: 30px;
     border-radius: 0;
     margin-right: 0;
     animation: gradientShift 6s ease infinite;
-    
 }
 
 .mitglieder__card--funktionaer .mitglieder__badge:hover {
     pointer-events: none;
-
 }
 
 #seperator {
-    position: relative; /* Wichtig für die Positionierung! */
-    border-right: none; /* Entferne den Standard-Border */
-    padding-right: 8px; /* Behalte den Padding bei */
-    height: 100%; /* Volle Höhe des Containers */
+    position: relative;
+    border-right: none;
+    padding-right: 8px;
+    height: 100%;
 }
 
 #seperator::after {
-    content: ""; /* Erforderlich, damit das Pseudo-Element erscheint */
+    content: "";
     position: absolute;
     right: 0;
-    top: 10px; /* 10px von oben */
-    height: calc(100% - 20px); /* 10px von oben, 10px von unten */
-    width: 2px; /* Die Breite des Borders */
-    background-color: var(--secondary-color); /* Die Farbe des Borders */
+    top: 10px;
+    height: calc(100% - 20px);
+    width: 2px;
+    background-color: var(--secondary-color);
     transform: translateX(50%);
 }
 
 .mitglieder__badge:hover {
     transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(79, 70, 229, 0.2);
+    box-shadow: var(--shadow-lg);
 }
 
 /* Responsive Grid Layout */
@@ -478,41 +481,5 @@ font-size: 30px;
     .mitglieder__filter:hover {
         animation: none;
         transform: none;
-    }
-}
-
-/* Animations */
-@keyframes fadeIn {
-    from {
-        opacity: 0;
-        transform: translateY(20px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-@keyframes gradientShift {
-    0% {
-        background-position: 0% 50%;
-    }
-    50% {
-        background-position: 100% 50%;
-    }
-    100% {
-        background-position: 0% 50%;
-    }
-}
-
-@keyframes pulseGlow {
-    0% {
-        box-shadow: var(--shadow);
-    }
-    50% {
-        box-shadow: 0 8px 32px rgba(79, 70, 229, 0.2);
-    }
-    100% {
-        box-shadow: var(--shadow);
     }
 }
