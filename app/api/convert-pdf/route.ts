@@ -147,7 +147,7 @@ export async function POST(request: NextRequest) {
     input: 'trim-whitespace',
     engine: 'imagemagick',
     command: 'convert',
-    arguments: '/input/trim-whitespace/*.jpg -strip -quality 95 -resize 1400x /output/optimized.jpg'
+    arguments: '/input/trim-whitespace/*.jpg -strip -quality 90 -resize 1200x -interlace Plane /output/optimized.jpg'
   },
         'export-my-file': {
           operation: 'export/url',
