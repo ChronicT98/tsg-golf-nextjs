@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import CloudConvert from 'cloudconvert';
 import { Readable } from 'stream';
-import { put } from '@vercel/blob';
+import { put, del, list } from '@vercel/blob';
 
 interface ApiErrorResponse {
   response?: {
@@ -75,6 +75,19 @@ export async function POST(request: NextRequest) {
       const formattedDate = date && date.includes('-') 
         ? date.split('-').reverse().join('.')
         : (date || '');
+      
+      // Ensure date is provided for geld files - but don't log warning for already processed files
+      if (!formattedDate) {
+        // Only show error if this isn't a converted file
+        if (!file.name.match(/\.pdf$/i)) {
+          console.warn(`Fehlendes Datum für geld-Datei: ${file.name}`);
+          return NextResponse.json(
+            { error: 'Bitte ein Datum für die geld-Datei auswählen' },
+            { status: 400 }
+          );
+        }
+      }
+      
       fileName = `geld_${formattedDate}.jpg`;
     } else if (baseFilename.includes('spiel')) {
       fileType = 'spiel';
@@ -82,6 +95,19 @@ export async function POST(request: NextRequest) {
       const formattedDate = date && date.includes('-') 
         ? date.split('-').reverse().join('.')
         : (date || '');
+      
+      // Ensure date is provided for spiel files - but don't log warning for already processed files
+      if (!formattedDate) {
+        // Only show error if this isn't a converted file
+        if (!file.name.match(/\.pdf$/i)) {
+          console.warn(`Fehlendes Datum für spiel-Datei: ${file.name}`);
+          return NextResponse.json(
+            { error: 'Bitte ein Datum für die spiel-Datei auswählen' },
+            { status: 400 }
+          );
+        }
+      }
+      
       fileName = `spiel_${formattedDate}.jpg`;
     } else {
       return NextResponse.json(
@@ -116,9 +142,16 @@ export async function POST(request: NextRequest) {
       command: 'convert',
       arguments: '/input/convert-my-file/*.jpg -trim +repage /output/trimmed.jpg'
     },
+    'optimize-size': {
+    operation: 'command',
+    input: 'trim-whitespace',
+    engine: 'imagemagick',
+    command: 'convert',
+    arguments: '/input/trim-whitespace/*.jpg -strip -quality 95 -resize 1400x /output/optimized.jpg'
+  },
         'export-my-file': {
           operation: 'export/url',
-          input: 'trim-whitespace',
+          input: 'optimize-size',
           inline: false,
           archive_multiple_files: false
         }
@@ -207,11 +240,8 @@ export async function POST(request: NextRequest) {
     const convertedFileBuffer = await convertedFileResponse.arrayBuffer();
     const targetPath = `${getTargetDirectory(fileName)}/${fileName}`;
 
-    console.log('Uploading converted file to Blob storage:', targetPath);
-
-    // Für statistik und blechen: Prüfen ob eine Datei mit dem Jahr bereits existiert
+    // Für statistik und blechen: Prüfen ob eine Datei mit dem Jahr bereits existiert und explizit löschen
     if (fileType === 'statistik' || fileType === 'blechen') {
-      const { list } = await import('@vercel/blob');
       const existingFiles = await list({
         prefix: getTargetDirectory(fileName),
         token: process.env.BLOB_READ_WRITE_TOKEN
@@ -223,12 +253,23 @@ export async function POST(request: NextRequest) {
         return existingFileName.includes(`${fileType}_${year}`);
       });
 
-      // Wenn eine Datei existiert, lösche sie
+      // Wenn eine Datei existiert, explizit löschen
       if (existingFile) {
-        console.log(`Replacing existing file: ${existingFile.pathname}`);
-        // Die neue Datei wird automatisch die alte ersetzen, da sie den gleichen Pfad hat
+        console.log(`Deleting existing file: ${existingFile.pathname}`);
+        try {
+          await del(existingFile.url, {
+            token: process.env.BLOB_READ_WRITE_TOKEN
+          });
+          console.log(`Successfully deleted file: ${existingFile.pathname}`);
+        } catch (deleteError) {
+          console.error(`Error deleting file ${existingFile.pathname}:`, deleteError);
+          // Continue with upload even if deletion fails
+        }
       }
     }
+
+    // Jetzt erst die Upload-Meldung ausgeben, nachdem alte Dateien gelöscht wurden
+    console.log('Uploading converted file to Blob storage:', targetPath);
 
     // Upload to Vercel Blob storage in the correct directory
     const blob = await put(targetPath, Buffer.from(convertedFileBuffer), {
@@ -240,13 +281,17 @@ export async function POST(request: NextRequest) {
 
     console.log('File uploaded to Blob storage:', blob.url);
 
+    // Add cache-busting query parameter to URL
+    const cacheBustUrl = `${blob.url}?v=${Date.now()}`;
+    console.log('Cache-busted URL:', cacheBustUrl);
+
     // Let the upload route handle custom-dates.json updates
 
-    // Return success response
+    // Return success response with cache-busting URL
     return NextResponse.json({
       success: true,
       fileName,
-      url: blob.url
+      url: cacheBustUrl
     });
 
   } catch (error) {

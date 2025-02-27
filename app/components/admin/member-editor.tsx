@@ -17,7 +17,7 @@ const uploadMemberImage = async (file: File, memberId: string): Promise<string |
     // Generiere einen eindeutigen Dateinamen mit Timestamp und zufälliger ID
     const fileExt = file.name.split('.').pop();
     const fileName = `${memberId}_${Date.now()}_${Math.random().toString(36).substring(2, 15)}.${fileExt}`;
-    const filePath = `members/${fileName}`;
+    const filePath = `${fileName}`; // Direkt im Root-Verzeichnis speichern, ohne 'members/' Präfix
     
     // Datei in ArrayBuffer umwandeln
     const arrayBuffer = await file.arrayBuffer();

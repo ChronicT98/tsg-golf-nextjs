@@ -1,6 +1,5 @@
 import { NextResponse } from 'next/server';
 import { put } from '@vercel/blob';
-import { getFileNumberFor2024Date } from '@/app/utils/dateMapping';
 
 // Helper function to determine target directory - aligned with migration paths
 function getTargetDirectory(filename: string): string {
@@ -83,17 +82,8 @@ export async function POST(request: Request) {
           const prefix = baseFilename.includes('geld') ? 'geld' : 'spiel';
           const dateStr = formatDateForFilename(date || '');
           
-          if (year === '2024') {
-            // For 2024, use file numbers
-            const fileNumber = getFileNumberFor2024Date(dateStr);
-            if (!fileNumber) {
-              throw new Error(`Invalid date for 2024: ${dateStr}`);
-            }
-            fileName = `${prefix}_${fileNumber}.jpg`;
-          } else {
-            // For other years, use the full date
-            fileName = `${prefix}_${dateStr}.jpg`;
-          }
+          // Use the full date for all years
+          fileName = `${prefix}_${dateStr}.jpg`;
         } else {
           console.warn('Unrecognized file type:', file.name);
           continue;
@@ -137,6 +127,8 @@ export async function POST(request: Request) {
             fileName: data.fileName,
             path: data.url
           });
+          
+          // Skip further processing for this file - PDF already converted and uploaded
           continue;
         }
 
@@ -148,10 +140,12 @@ export async function POST(request: Request) {
           token: process.env.BLOB_READ_WRITE_TOKEN
         });
 
-        const blobUrl = blob.url;
+        // Add cache-busting query parameter to URL
+        const cacheBustUrl = `${blob.url}?v=${Date.now()}`;
+        console.log('Cache-busted URL:', cacheBustUrl);
 
         // Verify upload
-        const verifyResponse = await fetch(blobUrl);
+        const verifyResponse = await fetch(blob.url);
         if (!verifyResponse.ok) {
           throw new Error(`Failed to verify upload: ${verifyResponse.status}`);
         }
@@ -159,7 +153,7 @@ export async function POST(request: Request) {
         results.push({
           success: true,
           fileName: fileName,
-          path: blobUrl
+          path: cacheBustUrl
         });
 
       } catch (error) {
