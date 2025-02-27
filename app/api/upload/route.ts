@@ -124,11 +124,11 @@ export async function POST(request: Request) {
             
             try {
               // Try to parse the error response as JSON
-              const errorData = await response.clone().json();
-              errorMessage = errorData.error || errorData.details || errorMessage;
-              console.error('PDF conversion error (JSON):', errorData);
-            } catch (_) {
-              // If JSON parsing fails, try to get the response as text
+            const errorData = await response.clone().json();
+            errorMessage = errorData.error || errorData.details || errorMessage;
+            console.error('PDF conversion error (JSON):', errorData);
+          } catch (_error) {
+            // If JSON parsing fails, try to get the response as text
               try {
                 const errorText = await response.text();
                 if (errorText && errorText.length < 500) { // Only use text if it's reasonably short
@@ -147,7 +147,7 @@ export async function POST(request: Request) {
           let data;
           try {
             data = await response.json();
-          } catch (_) {
+          } catch (_error) {
             console.error('Error parsing convert-pdf response');
             throw new Error('Die Serverantwort konnte nicht verarbeitet werden');
           }
