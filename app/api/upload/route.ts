@@ -102,32 +102,44 @@ export async function POST(request: Request) {
           // Handle PDF conversion
           const pdfFormData = new FormData();
           pdfFormData.append('file', file);
-          pdfFormData.append('date', date || '');
-          pdfFormData.append('year', year);
+          if (date) pdfFormData.append('date', date);
+          if (year) pdfFormData.append('year', year);
 
           const protocol = process.env.NODE_ENV === 'development' ? 'http' : 'https';
           const host = request.headers.get('host') || 'localhost:3000';
-          const response = await fetch(`${protocol}://${host}/api/convert-pdf`, {
-            method: 'POST',
-            body: pdfFormData,
-          });
+          
+          let response;
+          try {
+            response = await fetch(`${protocol}://${host}/api/convert-pdf`, {
+              method: 'POST',
+              body: pdfFormData,
+            });
+          } catch (fetchError) {
+            console.error('Network error during PDF conversion:', fetchError);
+            throw new Error('Netzwerkfehler bei der PDF-Konvertierung');
+          }
 
           if (!response.ok) {
-            let errorMessage = 'Failed to convert PDF file';
+            let errorMessage = 'Fehler bei der PDF-Konvertierung';
+            
             try {
               // Try to parse the error response as JSON
               const errorData = await response.clone().json();
               errorMessage = errorData.error || errorData.details || errorMessage;
+              console.error('PDF conversion error (JSON):', errorData);
             } catch (jsonError) {
               // If JSON parsing fails, try to get the response as text
               try {
                 const errorText = await response.text();
-                errorMessage = errorText || errorMessage;
-                console.error('PDF conversion error (text):', errorText);
+                if (errorText && errorText.length < 500) { // Only use text if it's reasonably short
+                  errorMessage = errorText;
+                }
+                console.error('PDF conversion error (text):', errorText.substring(0, 1000));
               } catch (textError) {
                 console.error('Error reading error response:', textError);
               }
             }
+            
             throw new Error(errorMessage);
           }
 
@@ -139,8 +151,9 @@ export async function POST(request: Request) {
             console.error('Error parsing convert-pdf response:', jsonError);
             throw new Error('Die Serverantwort konnte nicht verarbeitet werden');
           }
+          
           if (!data.success) {
-            throw new Error(data.error || 'PDF conversion failed');
+            throw new Error(data.error || 'PDF-Konvertierung fehlgeschlagen');
           }
 
           results.push({
@@ -154,35 +167,44 @@ export async function POST(request: Request) {
         }
 
         // Upload the file to blob storage
-        const blob = await put(targetPath, buffer, {
-          access: 'public',
-          addRandomSuffix: false,
-          contentType: 'image/jpeg',
-          token: process.env.BLOB_READ_WRITE_TOKEN
-        });
+        try {
+          const blob = await put(targetPath, buffer, {
+            access: 'public',
+            addRandomSuffix: false,
+            contentType: 'image/jpeg',
+            token: process.env.BLOB_READ_WRITE_TOKEN
+          });
 
-        // Add cache-busting query parameter to URL
-        const cacheBustUrl = `${blob.url}?v=${Date.now()}`;
-        console.log('Cache-busted URL:', cacheBustUrl);
+          // Add cache-busting query parameter to URL
+          const cacheBustUrl = `${blob.url}?v=${Date.now()}`;
+          console.log('Cache-busted URL:', cacheBustUrl);
 
-        // Verify upload
-        const verifyResponse = await fetch(blob.url);
-        if (!verifyResponse.ok) {
-          throw new Error(`Failed to verify upload: ${verifyResponse.status}`);
+          // Verify upload - but don't fail if verification doesn't work
+          try {
+            const verifyResponse = await fetch(blob.url);
+            if (!verifyResponse.ok) {
+              console.warn(`Warning: Failed to verify upload: ${verifyResponse.status}`);
+            }
+          } catch (verifyError) {
+            console.warn('Warning: Error verifying uploaded file:', verifyError);
+          }
+
+          results.push({
+            success: true,
+            fileName: fileName,
+            path: cacheBustUrl
+          });
+        } catch (uploadError) {
+          console.error('Error uploading to blob storage:', uploadError);
+          throw new Error('Fehler beim Hochladen in den Blob-Speicher');
         }
-
-        results.push({
-          success: true,
-          fileName: fileName,
-          path: cacheBustUrl
-        });
 
       } catch (error) {
         console.error('Error processing file:', file.name, error);
         results.push({
           success: false,
           fileName: file.name,
-          error: 'Fehler bei der Verarbeitung der Datei'
+          error: error instanceof Error ? error.message : 'Fehler bei der Verarbeitung der Datei'
         });
       }
     }
@@ -191,8 +213,17 @@ export async function POST(request: Request) {
 
   } catch (error) {
     console.error('Error handling file upload:', error);
+    
+    // Create a safe error message that won't cause JSON parsing issues
+    const errorMessage = error instanceof Error ? 
+      error.message.replace(/[\"\'\\\n\r\t]/g, '') : 
+      'Unbekannter Fehler beim Hochladen';
+    
     return NextResponse.json(
-      { error: 'Fehler beim Speichern der Datei' },
+      { 
+        error: 'Fehler beim Speichern der Datei',
+        details: errorMessage
+      },
       { status: 500 }
     );
   }

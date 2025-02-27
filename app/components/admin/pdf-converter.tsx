@@ -13,54 +13,87 @@ export default function PdfConverter({ onConversionComplete }: PdfConverterProps
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-    const convertPdfToJpeg = async (pdfFile: File, date?: string, year?: string): Promise<File> => {
-      try {
-        const formData = new FormData();
-        formData.append('file', pdfFile);
-        if (date) formData.append('date', date);
-        if (year) formData.append('year', year);
+  const convertPdfToJpeg = async (pdfFile: File, date?: string, year?: string): Promise<File> => {
+    try {
+      const formData = new FormData();
+      formData.append('file', pdfFile);
+      if (date) formData.append('date', date);
+      if (year) formData.append('year', year);
 
-        const response = await fetch('/api/convert-pdf', {
+      console.log(`Converting PDF file: ${pdfFile.name}, date: ${date}, year: ${year}`);
+
+      // First make the request to convert
+      let response;
+      try {
+        response = await fetch('/api/convert-pdf', {
           method: 'POST',
           body: formData,
         });
-
-        // First check if the response is OK
-        if (!response.ok) {
-          // Try to parse as JSON first
-          let errorMessage = 'Konvertierung fehlgeschlagen';
-          try {
-            const errorData = await response.clone().json();
-            errorMessage = errorData.details || errorData.error || errorMessage;
-            console.error('Konvertierungsfehler:', errorData);
-          } catch (jsonError) {
-            // If JSON parsing fails, try to get the response as text
-            try {
-              const errorText = await response.text();
-              errorMessage = errorText || errorMessage;
-              console.error('Konvertierungsfehler (Text):', errorText);
-            } catch (textError) {
-              console.error('Fehler beim Lesen der Fehlermeldung:', textError);
-            }
-          }
-          throw new Error(errorMessage);
-        }
-
-        // If response is OK, then try to parse JSON
-        let data;
-        try {
-          data = await response.json();
-        } catch (jsonError) {
-          console.error('Fehler beim Parsen der JSON-Antwort:', jsonError);
-          throw new Error('Die Serverantwort konnte nicht verarbeitet werden.');
-        }
-      
-      // Download the converted file from CloudConvert
-      const imageResponse = await fetch(data.url);
-      if (!imageResponse.ok) {
-        throw new Error('Fehler beim Herunterladen der konvertierten Datei');
+      } catch (fetchError) {
+        console.error('Network error during fetch:', fetchError);
+        throw new Error('Netzwerkfehler: Bitte überprüfen Sie Ihre Internetverbindung und versuchen Sie es erneut.');
       }
 
+      // Handle non-200 responses
+      if (!response.ok) {
+        let errorMessage = 'Konvertierung fehlgeschlagen';
+        
+        try {
+          // Try to parse as JSON first
+          const errorData = await response.clone().json();
+          errorMessage = errorData.details || errorData.error || errorMessage;
+          console.error('Server error (JSON):', errorData);
+        } catch (jsonError) {
+          // If JSON parsing fails, try to get text
+          try {
+            const errorText = await response.text();
+            // Only use the text if it's reasonably short
+            if (errorText && errorText.length < 500) {
+              errorMessage = errorText;
+            }
+            console.error('Server error (text):', errorText.substring(0, 1000)); // Log only first 1000 chars
+          } catch (textError) {
+            console.error('Error reading response body:', textError);
+          }
+        }
+        
+        throw new Error(`Fehler bei der Konvertierung: ${errorMessage}`);
+      }
+
+      // Parse successful response
+      let data;
+      try {
+        data = await response.json();
+      } catch (jsonError) {
+        console.error('Error parsing server response:', jsonError);
+        throw new Error('Die Serverantwort konnte nicht verarbeitet werden. Bitte versuchen Sie es später erneut.');
+      }
+
+      // Validate response data
+      if (!data.success) {
+        throw new Error(data.error || 'Unbekannter Fehler bei der Konvertierung');
+      }
+      
+      if (!data.url) {
+        throw new Error('Die Konvertierung war erfolgreich, aber keine Bild-URL wurde zurückgegeben');
+      }
+
+      console.log('Conversion successful, downloading converted file from:', data.url);
+      
+      // Download the converted file
+      let imageResponse;
+      try {
+        imageResponse = await fetch(data.url);
+      } catch (fetchError) {
+        console.error('Error downloading converted image:', fetchError);
+        throw new Error('Fehler beim Herunterladen der konvertierten Datei');
+      }
+      
+      if (!imageResponse.ok) {
+        throw new Error(`Fehler beim Herunterladen der konvertierten Datei: ${imageResponse.status}`);
+      }
+
+      // Process the image
       const imageBlob = await imageResponse.blob();
       
       // Create preview URL with cache-busting parameter
@@ -69,7 +102,7 @@ export default function PdfConverter({ onConversionComplete }: PdfConverterProps
       setPreviewUrl(cacheUrl);
 
       // Return as File object
-      return new File([imageBlob], data.filename || pdfFile.name.replace('.pdf', '.jpg'), {
+      return new File([imageBlob], data.fileName || pdfFile.name.replace('.pdf', '.jpg'), {
         type: 'image/jpeg'
       });
 
@@ -78,11 +111,13 @@ export default function PdfConverter({ onConversionComplete }: PdfConverterProps
       let errorMessage = 'PDF konnte nicht konvertiert werden';
       
       if (error instanceof Error) {
-        // Versuche, spezifische Fehlermeldungen zu extrahieren
+        // Extract specific error messages
         if (error.message.includes('502')) {
           errorMessage = 'Der Konvertierungsservice ist momentan nicht erreichbar. Bitte versuchen Sie es in einigen Minuten erneut.';
         } else if (error.message.includes('timeout')) {
           errorMessage = 'Die Konvertierung hat zu lange gedauert. Bitte versuchen Sie es mit einer kleineren Datei.';
+        } else if (error.message.includes('Network Error')) {
+          errorMessage = 'Netzwerkfehler: Bitte überprüfen Sie Ihre Internetverbindung und versuchen Sie es erneut.';
         } else {
           errorMessage = error.message;
         }
@@ -95,18 +130,27 @@ export default function PdfConverter({ onConversionComplete }: PdfConverterProps
   const handlePdfSelect = async (files: File[], date?: string, year?: string) => {
     setIsConverting(true);
     setError(null);
+    setPreviewUrl(null);
     
     try {
+      // Filter PDF files
+      const pdfFiles = files.filter(file => file.type === 'application/pdf');
+      
+      if (pdfFiles.length === 0) {
+        setError('Keine PDF-Dateien ausgewählt');
+        setIsConverting(false);
+        return;
+      }
+      
+      // Convert each PDF file
       const convertedFiles = await Promise.all(
-        files
-          .filter(file => file.type === 'application/pdf')
-          .map(file => convertPdfToJpeg(file, date, year))
+        pdfFiles.map(file => convertPdfToJpeg(file, date, year))
       );
       
       if (convertedFiles.length > 0) {
-        onConversionComplete(convertedFiles);
+        onConversionComplete(convertedFiles, date, year);
       } else {
-        setError('Keine PDF-Dateien gefunden');
+        setError('Keine Dateien konnten konvertiert werden');
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Fehler bei der Konvertierung');

@@ -1,3 +1,4 @@
+// app/api/convert-pdf/route.ts
 import { NextRequest, NextResponse } from 'next/server';
 import CloudConvert from 'cloudconvert';
 import { Readable } from 'stream';
@@ -285,8 +286,6 @@ export async function POST(request: NextRequest) {
     const cacheBustUrl = `${blob.url}?v=${Date.now()}`;
     console.log('Cache-busted URL:', cacheBustUrl);
 
-    // Let the upload route handle custom-dates.json updates
-
     // Return success response with cache-busting URL
     return NextResponse.json({
       success: true,
@@ -311,28 +310,15 @@ export async function POST(request: NextRequest) {
     // Ensure we return a properly formatted JSON response with appropriate headers
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
     
-    // Create a sanitized error message that's guaranteed to be safe for JSON
-    let sanitizedError = errorMessage;
-    try {
-      // Test if we can serialize and parse the error message
-      JSON.parse(JSON.stringify({ message: errorMessage }));
-    } catch (jsonError) {
-      // If serialization fails, use a generic message
-      console.error('Error message contains invalid JSON characters:', errorMessage);
-      sanitizedError = 'Fehler bei der Konvertierung (Details nicht verfügbar)';
-    }
+    // Create a generic error message that won't cause JSON parsing issues
+    const safeErrorMessage = 'Fehler bei der Konvertierung: ' + 
+      (error instanceof Error ? error.message.replace(/["\\]/g, '') : 'Unbekannter Fehler');
     
-    return new NextResponse(
-      JSON.stringify({ 
-        error: 'Fehler bei der Konvertierung',
-        details: sanitizedError
-      }),
-      { 
-        status: 500,
-        headers: {
-          'Content-Type': 'application/json',
-        }
-      }
-    );
+    return NextResponse.json({ 
+      error: 'Fehler bei der Konvertierung',
+      details: safeErrorMessage
+    }, { 
+      status: 500
+    });
   }
 }
