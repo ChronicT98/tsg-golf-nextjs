@@ -246,14 +246,14 @@
         height: 40px;
         border: none;
         background: var(--primary-gradient);
-        opacity: 0.1;
+        opacity: 1;
         border-radius: 50%;
         cursor: pointer;
         display: none;
         align-items: center;
         justify-content: center;
         transition: var(--transition);
-        z-index: 1001;
+        z-index: 1050;
     }
 
     .nav-menu.active + .mobile-menu-close {
@@ -266,7 +266,7 @@
         position: absolute;
         width: 20px;
         height: 2px;
-        background: var(--text-color);
+        background: #fff;
         border-radius: 2px;
         transition: var(--transition);
     }
@@ -280,7 +280,7 @@
     }
 
     .mobile-menu-close:hover {
-        opacity: 0.2;
+        opacity: 1;
         transform: rotate(180deg);
     }
 
@@ -389,14 +389,14 @@
         height: 44px;
         border: none;
         background: var(--primary-gradient);
-        opacity: 0.1;
+        opacity: 1;
         border-radius: 50%;
         cursor: pointer;
         display: none;
         align-items: center;
         justify-content: center;
         transition: var(--transition);
-        z-index: 1001;
+        z-index: 1050;
     }
 
     .nav-menu.active + .mobile-menu-close {
@@ -409,7 +409,7 @@
         position: absolute;
         width: 22px;
         height: 2px;
-        background: var(--text-color);
+        background: #fff;
         border-radius: 2px;
         transition: var(--transition);
     }
@@ -423,7 +423,7 @@
     }
 
     .mobile-menu-close:hover {
-        opacity: 0.2;
+        opacity: 1;
         transform: rotate(180deg);
     }
 
@@ -562,16 +562,16 @@
 
         .mobile-menu-close {
             background: var(--primary-gradient);
-            opacity: 0.3;
+            opacity: 1;
         }
 
         .mobile-menu-close::before,
         .mobile-menu-close::after {
-            background: rgba(255, 255, 255, 0.9);
+            background: #fff;
         }
 
         .mobile-menu-close:hover {
-            opacity: 0.4;
+            opacity: 1;
         }
     }
 }
