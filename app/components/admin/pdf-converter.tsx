@@ -43,7 +43,7 @@ export default function PdfConverter({ onConversionComplete }: PdfConverterProps
           const errorData = await response.clone().json();
           errorMessage = errorData.details || errorData.error || errorMessage;
           console.error('Server error (JSON):', errorData);
-        } catch (jsonError) {
+        } catch (parseError) {
           // If JSON parsing fails, try to get text
           try {
             const errorText = await response.text();
@@ -64,8 +64,8 @@ export default function PdfConverter({ onConversionComplete }: PdfConverterProps
       let data;
       try {
         data = await response.json();
-      } catch (jsonError) {
-        console.error('Error parsing server response:', jsonError);
+      } catch (parseError) {
+        console.error('Error parsing server response:', parseError);
         throw new Error('Die Serverantwort konnte nicht verarbeitet werden. Bitte versuchen Sie es später erneut.');
       }
 

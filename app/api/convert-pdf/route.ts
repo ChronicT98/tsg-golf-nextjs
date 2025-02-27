@@ -1,4 +1,3 @@
-// app/api/convert-pdf/route.ts
 import { NextRequest, NextResponse } from 'next/server';
 import CloudConvert from 'cloudconvert';
 import { Readable } from 'stream';
@@ -307,9 +306,6 @@ export async function POST(request: NextRequest) {
       console.error('API Error Response:', axiosError.response.data);
     }
 
-    // Ensure we return a properly formatted JSON response with appropriate headers
-    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-    
     // Create a generic error message that won't cause JSON parsing issues
     const safeErrorMessage = 'Fehler bei der Konvertierung: ' + 
       (error instanceof Error ? error.message.replace(/["\\]/g, '') : 'Unbekannter Fehler');

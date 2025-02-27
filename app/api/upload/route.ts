@@ -127,7 +127,7 @@ export async function POST(request: Request) {
               const errorData = await response.clone().json();
               errorMessage = errorData.error || errorData.details || errorMessage;
               console.error('PDF conversion error (JSON):', errorData);
-            } catch (jsonError) {
+            } catch (parseError) {
               // If JSON parsing fails, try to get the response as text
               try {
                 const errorText = await response.text();
@@ -147,8 +147,8 @@ export async function POST(request: Request) {
           let data;
           try {
             data = await response.json();
-          } catch (jsonError) {
-            console.error('Error parsing convert-pdf response:', jsonError);
+          } catch (parseError) {
+            console.error('Error parsing convert-pdf response:', parseError);
             throw new Error('Die Serverantwort konnte nicht verarbeitet werden');
           }
           
