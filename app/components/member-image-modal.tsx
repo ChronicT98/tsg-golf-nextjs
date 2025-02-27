@@ -47,14 +47,7 @@ const MemberImageModal: React.FC<MemberImageModalProps> = ({ imageUrl, alt, onCl
         zIndex: 1000,
       }}
     >
-      <div
-        style={{
-          position: 'relative',
-          maxWidth: '98vw',
-          maxHeight: '98vh',
-          overflow: 'hidden',
-        }}
-      >
+      
         {imageUrl && (
           <Image
             src={imageUrl}
@@ -62,17 +55,16 @@ const MemberImageModal: React.FC<MemberImageModalProps> = ({ imageUrl, alt, onCl
             width={2000}
             height={2000}
             style={{
-              width: 'auto',
+              width: '25vw',  // 70% der Bildschirmbreite
               height: 'auto',
-              maxWidth: '100%',
-              maxHeight: '98vh',
+              maxWidth: '90vw',
+              maxHeight: '90vh',
               objectFit: 'contain',
             }}
             priority
           />
         )}
       </div>
-    </div>
   );
 };
 
