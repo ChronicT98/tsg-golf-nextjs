@@ -6,7 +6,7 @@ import Image from 'next/image';
 import MemberImageModal from '@/app/components/member-image-modal';
 
 export default function MitgliederPage() {
-  const [activeCategory, setActiveCategory] = useState<string>('all');
+  const [activeCategory, setActiveCategory] = useState<string>('gruendung');
   const [gruendungsmitglieder, setGruendungsmitglieder] = useState<MemberDetails[]>([]);
   const [ordentlicheMitglieder, setOrdentlicheMitglieder] = useState<MemberDetails[]>([]);
   const [inMemoriam, setInMemoriam] = useState<MemberDetails[]>([]);
