@@ -92,7 +92,7 @@
 }
 
 .mitglieder__category-title {
-    font-size: 2.5rem;
+    font-size: 2.1rem;
     font-weight: 600;
     margin: 3rem 0 2rem;
     text-align: center;
@@ -352,6 +352,10 @@
     .mitglieder h1 {
         font-size: clamp(1.5rem, 3vw, 2rem);
         margin-bottom: 2rem;
+    }
+
+    .mitglieder__category-title {
+        font-size: 1.8rem;
     }
 
     .mitglieder__grid {

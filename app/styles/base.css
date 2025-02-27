@@ -182,7 +182,7 @@
 .modern-design .container {
     max-width: var(--max-width);
     margin: 0 auto;
-    padding: 0 1.5rem;
+    padding: 0 0.5rem;
 }
 
 /* Animations */
@@ -239,9 +239,6 @@
         padding: 8px;
     }
 
-    .modern-design .container {
-        padding: 0 1rem;
-    }
 
     .modern-design .features__card {
         margin: 1rem;
