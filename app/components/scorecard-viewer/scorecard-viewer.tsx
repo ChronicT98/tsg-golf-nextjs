@@ -31,14 +31,6 @@ interface ScorecardData {
   [year: string]: YearData;
 }
 
-// Hardcodierte Daten für 2024
-const dates2024 = [
-  '19.03.2024', '26.03.2024', '02.04.2024', '09.04.2024', '16.04.2024',
-  '30.04.2024', '07.05.2024', '14.05.2024', '21.05.2024', '28.05.2024',
-  '04.06.2024', '18.06.2024', '25.06.2024', '02.07.2024', '09.07.2024',
-  '16.07.2024', '23.07.2024', '30.07.2024', '13.08.2024', '20.08.2024',
-  '27.08.2024', '03.09.2024', '10.09.2024', '24.09.2024', '01.10.2024'
-];
 
 const ScorecardViewer: React.FC = () => {
   const [data, setData] = useState<ScorecardData | null>(null);
@@ -46,7 +38,7 @@ const ScorecardViewer: React.FC = () => {
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const years = ['2025', '2024', '2023', '2022'];
+  const years = ['2025', '2024', '2023', '2022', '2021'];
   const [modalState, setModalState] = useState<ModalState>({
     isOpen: false,
     imageUrl: '',
@@ -104,24 +96,7 @@ const ScorecardViewer: React.FC = () => {
 
   // Funktion zum Rendern der Datumsbuttons
   const renderDateButtons = () => {
-    if (selectedYear === '2024') {
-      // Hardcodierte Buttons für 2024
-      return dates2024.map((date) => (
-        <button
-          key={date}
-          onClick={() => setSelectedDate(date)}
-          className={`date-button ${
-            selectedDate === date 
-              ? 'date-button-active' 
-              : 'date-button-inactive'
-          }`}
-        >
-          {date}
-        </button>
-      ));
-    }
-
-    // Dynamische Buttons für andere Jahre
+    // Dynamische Buttons für alle Jahre
     return currentYearData.spielCards.map((card) => (
       <button
         key={card.date}

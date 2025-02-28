@@ -6,7 +6,7 @@ import Image from 'next/image';
 
 export default function Blechstatistik() {
   const [selectedYear, setSelectedYear] = useState('2024');
-  const years = ['2025', '2024', '2023', '2022'];
+  const years = ['2025', '2024', '2023', '2022', '2021'];
   const [latestFiles, setLatestFiles] = useState<Record<string, string>>({});
   const [modalState, setModalState] = useState({
     isOpen: false,

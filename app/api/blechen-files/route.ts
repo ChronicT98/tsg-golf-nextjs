@@ -14,7 +14,8 @@ export async function GET() {
       '2025': '',
       '2024': '',
       '2023': '',
-      '2022': ''
+      '2022': '',
+      '2021': ''
     };
 
     const timestamp = Date.now(); // HINZUGEFÜGT: Timestamp für Cache-Busting

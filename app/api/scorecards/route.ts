@@ -1,6 +1,5 @@
 import { NextResponse } from 'next/server';
 import { list, del } from '@vercel/blob';
-import { dateMapping2024 } from '@/app/utils/dateMapping';
 
 interface SpielScorecard {
   id: string;
@@ -57,28 +56,7 @@ export async function GET() {
     // Add timestamp for cache busting
     const timestamp = Date.now();
 
-    // Initialize 2024 with empty structure
-    yearData['2024'] = {
-      static: {},
-      spielCards: []
-    };
-
-    // Add fixed 2024 data with cache busting
-    Object.entries(dateMapping2024).forEach(([fileNumber, date]) => {
-      const spielCard: SpielScorecard = {
-        id: `spiel_${fileNumber}`,
-        date: date,
-        fileName: `/scorecards/spiel_${fileNumber}.jpg?v=${timestamp}`,
-        geldFileName: `/scorecard-geld/geld_${fileNumber}.jpg?v=${timestamp}`
-      };
-      yearData['2024'].spielCards.push(spielCard);
-    });
-
-    // Add 2024 static files with cache busting
-    yearData['2024'].static.statistik = `/scorecard-statistik/statistik_2024.jpg?v=${timestamp}`;
-    yearData['2024'].static.blechen = `/blechen/blechen_2024.jpg?v=${timestamp}`;
-
-    // Get data from blob storage for other years
+    // Get data from blob storage for all years
     const [scorecardBlobs, geldBlobs, statistikBlobs, blechenBlobs] = await Promise.all([
       list({ prefix: 'scorecards/', token: process.env.BLOB_READ_WRITE_TOKEN }),
       list({ prefix: 'scorecard-geld/', token: process.env.BLOB_READ_WRITE_TOKEN }),
@@ -86,14 +64,14 @@ export async function GET() {
       list({ prefix: 'blechen/', token: process.env.BLOB_READ_WRITE_TOKEN })
     ]);
 
-    // Create a map of geld files by date for dynamic years (with cache busting)
+    // Create a map of geld files by date for all years (with cache busting)
     const geldFilesByDate = new Map<string, string>();
     geldBlobs.blobs
       .filter(blob => blob.pathname.endsWith('.jpg'))
       .forEach(blob => {
         const filename = blob.pathname.split('/').pop() || '';
         const dateInfo = parseDynamicDate(filename);
-        if (dateInfo && dateInfo.year !== '2024') {
+        if (dateInfo) {
           geldFilesByDate.set(dateInfo.date, `${blob.url}?v=${timestamp}`);
         }
       });
@@ -142,7 +120,7 @@ export async function GET() {
         const filename = blob.pathname.split('/').pop() || '';
         const dateInfo = parseDynamicDate(filename);
         
-        if (dateInfo && dateInfo.year !== '2024') {
+        if (dateInfo) {
           // Initialize year data if it doesn't exist
           if (!yearData[dateInfo.year]) {
             yearData[dateInfo.year] = {
@@ -196,12 +174,7 @@ export async function DELETE(request: Request) {
       );
     }
 
-    // For 2024, we don't delete from blob storage as these are static files
-    if (year === '2024') {
-      return NextResponse.json({ success: true });
-    }
-
-    // For other years, delete from blob storage
+    // For all years, delete from blob storage
     const [scorecardBlobs, geldBlobs] = await Promise.all([
       list({ prefix: 'scorecards/', token: process.env.BLOB_READ_WRITE_TOKEN }),
       list({ prefix: 'scorecard-geld/', token: process.env.BLOB_READ_WRITE_TOKEN })
