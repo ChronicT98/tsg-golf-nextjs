@@ -3,6 +3,7 @@ import '@/app/styles/GolfScorecard.css';
 import '@/app/styles/spielergebnisse.css';
 import ImageModal from './image-modal';
 import Image from 'next/image';
+import { useCallback } from 'react';
 
 interface SpielScorecard {
   id: string;
@@ -44,6 +45,85 @@ const ScorecardViewer: React.FC = () => {
     imageUrl: '',
     alt: ''
   });
+  // State to track preloaded images
+  const [preloadedImages, setPreloadedImages] = useState<Set<string>>(new Set());
+
+  // Function to preload an image
+  const preloadImage = useCallback((url: string | undefined) => {
+    if (!url || preloadedImages.has(url)) return; // Skip if URL is undefined or already preloaded
+    
+    const imgElement = document.createElement('img');
+    imgElement.src = url;
+    imgElement.onload = () => {
+      setPreloadedImages(prev => {
+        const newSet = new Set(prev);
+        newSet.add(url);
+        return newSet;
+      });
+    };
+  }, [preloadedImages]);
+
+  // Function to preload neighboring years' images
+  const preloadNeighboringYears = useCallback((currentYear: string) => {
+    if (!data) return;
+
+    // Get the index of the current year in the years array
+    const currentIndex = years.indexOf(currentYear);
+    
+    // Preload the previous year (if exists)
+    if (currentIndex > 0) {
+      const prevYear = years[currentIndex - 1];
+      if (data[prevYear]?.static?.statistik) {
+        preloadImage(data[prevYear].static.statistik);
+      }
+    }
+    
+    // Preload the next year (if exists)
+    if (currentIndex < years.length - 1) {
+      const nextYear = years[currentIndex + 1];
+      if (data[nextYear]?.static?.statistik) {
+        preloadImage(data[nextYear].static.statistik);
+      }
+    }
+  }, [data, preloadImage, years]);
+
+  // Function to preload neighboring dates' scorecards
+  const preloadNeighboringDates = useCallback((currentDate: string) => {
+    if (!data || !selectedYear || !currentDate) return;
+    
+    const yearData = data[selectedYear];
+    if (!yearData || !yearData.spielCards.length) return;
+    
+    // Find the index of the current date in the spielCards array
+    const sortedCards = [...yearData.spielCards].sort((a, b) => {
+      const parseDate = (dateStr: string) => {
+        const [day, month, year] = dateStr.split('.');
+        return new Date(`${year}-${month}-${day}`);
+      };
+      return parseDate(a.date).getTime() - parseDate(b.date).getTime();
+    });
+    
+    const currentIndex = sortedCards.findIndex(card => card.date === currentDate);
+    if (currentIndex === -1) return;
+    
+    // Preload the previous date's scorecards (if exists)
+    if (currentIndex > 0) {
+      const prevCard = sortedCards[currentIndex - 1];
+      preloadImage(prevCard.fileName);
+      if (prevCard.geldFileName) {
+        preloadImage(prevCard.geldFileName);
+      }
+    }
+    
+    // Preload the next date's scorecards (if exists)
+    if (currentIndex < sortedCards.length - 1) {
+      const nextCard = sortedCards[currentIndex + 1];
+      preloadImage(nextCard.fileName);
+      if (nextCard.geldFileName) {
+        preloadImage(nextCard.geldFileName);
+      }
+    }
+  }, [data, selectedYear, preloadImage]);
 
   const openModal = (imageUrl: string, alt: string) => {
     setModalState({
@@ -60,6 +140,40 @@ const ScorecardViewer: React.FC = () => {
       alt: ''
     });
   };
+
+  // Preload images when data is loaded or selected year changes
+  useEffect(() => {
+    if (data && selectedYear) {
+      // Preload statistics image for current year
+      if (data[selectedYear]?.static?.statistik) {
+        preloadImage(data[selectedYear].static.statistik);
+      }
+      
+      // Preload neighboring years
+      preloadNeighboringYears(selectedYear);
+    }
+  }, [data, selectedYear, preloadImage, preloadNeighboringYears]);
+
+  // Preload images when selected date changes
+  useEffect(() => {
+    if (data && selectedYear && selectedDate) {
+      // Find the current card
+      const currentCard = data[selectedYear].spielCards.find(card => card.date === selectedDate);
+      
+      if (currentCard) {
+        // Ensure current card images are loaded with high priority
+        // (They should already be loaded by the time this effect runs,
+        // but this ensures they're prioritized)
+        preloadImage(currentCard.fileName);
+        if (currentCard.geldFileName) {
+          preloadImage(currentCard.geldFileName);
+        }
+        
+        // Preload neighboring dates
+        preloadNeighboringDates(selectedDate);
+      }
+    }
+  }, [data, selectedYear, selectedDate, preloadImage, preloadNeighboringDates]);
 
   useEffect(() => {
     const fetchScorecards = async () => {
@@ -134,6 +248,15 @@ const ScorecardViewer: React.FC = () => {
           {/* Datumsbuttons */}
           <div className="button-grid">
             {renderDateButtons()}
+            {/* Invisible preload div for date buttons */}
+            <div style={{ display: 'none' }}>
+              {currentYearData.spielCards.map((card) => (
+                <div key={`preload-${card.id}`}>
+                  <img src={card.fileName} alt="" />
+                  {card.geldFileName && <img src={card.geldFileName} alt="" />}
+                </div>
+              ))}
+            </div>
           </div>
 
           {/* Bildanzeige */}
@@ -171,6 +294,7 @@ const ScorecardViewer: React.FC = () => {
                               height={1200}
                               className="scorecard-image-geld clickable-image"
                               onClick={() => openModal(card.geldFileName!, "Geldübersicht")}
+                              priority={selectedDate === card.date}
                               role="button"
                               tabIndex={0}
                               onError={(e) => {
@@ -183,7 +307,6 @@ const ScorecardViewer: React.FC = () => {
                                   openModal(card.geldFileName!, "Geldübersicht");
                                 }
                               }}
-                              loading="lazy"
                             />
                           )}
                         </div>
@@ -196,6 +319,7 @@ const ScorecardViewer: React.FC = () => {
                           height={1200}
                           className="scorecard-image clickable-image"
                           onClick={() => openModal(card.fileName, `Spielergebnis vom ${card.date}`)}
+                          priority={selectedDate === card.date}
                           role="button"
                           tabIndex={0}
                           onError={(e) => {
@@ -208,7 +332,6 @@ const ScorecardViewer: React.FC = () => {
                               openModal(card.fileName, `Spielergebnis vom ${card.date}`);
                             }
                           }}
-                          loading="lazy"
                         />
                       </div>
                     </div>
@@ -223,6 +346,7 @@ const ScorecardViewer: React.FC = () => {
                   height={1200}
                   className="scorecard-image-stat clickable-image"
                   onClick={() => openModal(currentYearData.static.statistik!, "Statistik")}
+                  priority={true}
                   role="button"
                   tabIndex={0}
                   onKeyDown={(e) => {
