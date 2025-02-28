@@ -1,5 +1,6 @@
 'use client';
 import '@/app/styles/blechstatistik.css';
+import '@/app/styles/GolfScorecard.css';
 import { useState, useEffect, useCallback } from 'react';
 import ImageModal from '@/app/components/scorecard-viewer/image-modal';
 import Image from 'next/image';

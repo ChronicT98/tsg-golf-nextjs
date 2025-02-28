@@ -17,50 +17,27 @@
   animation: fadeIn 0.8s ease-out, gradientShift 8s ease infinite;
 }
 
-.year-selector {
-  display: flex;
-  justify-content: center;
-  gap: 1.5rem;
-  margin-bottom: 3rem;
-}
-
-.year-button {
-  padding: 8px 16px;
-  border-radius: 12px;
-  cursor: pointer;
-  transition: all 0.3s ease-in-out;
-  background: var(--card-background);
-  color: var(--text-color);
-  border: 1px solid rgba(79, 70, 229, 0.2);
-  font-weight: 500;
-}
-
-.year-button:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(79, 70, 229, 0.15);
-  border-color: var(--primary-color);
-}
-
-.year-button.active {
-  background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
-  color: white;
-  border: none;
-}
-.year-button.active:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(79, 70, 229, 0.2);
-}
 
 .blech-content {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 1rem;
 }
 
 .blech-image-container {
   width: 100%;
   display: flex;
   justify-content: center;
+}
+
+.blech-image-container .scorecard-image-stat {
+  width: 100%; 
+  height: auto;
+  margin: 0 auto;
+  display: block;
+  max-width: 1000px;
+  border-radius: 8px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+  padding: 10px;
 }
 
 .clickable-image {
@@ -206,20 +183,6 @@
     margin-bottom: 2rem;
   }
 
-  .year-selector {
-    flex-direction: column;
-    align-items: center;
-    gap: 0.75rem;
-    margin-bottom: 2rem;
-  }
-
-  .year-button {
-    width: 100%;
-    max-width: 280px;
-    padding: 0.625rem 1rem;
-    font-size: 0.9375rem;
-    min-width: unset;
-  }
 
   .blech-content {
     padding: 0.5rem;
@@ -278,17 +241,6 @@
     margin-bottom: 1.75rem;
   }
 
-  .year-selector {
-    flex-direction: column;
-    align-items: center;
-    gap: 1rem;
-    margin-bottom: 2.5rem;
-  }
-
-  .year-button {
-    width: 100%;
-    max-width: 300px;
-  }
 
   .blech-content {
     padding: 0.75rem;
