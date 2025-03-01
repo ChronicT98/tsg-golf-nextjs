@@ -17,12 +17,29 @@ export const metadata: Metadata = {
   description: "Tuesday Selection Golf - since April 2007",
   icons: {
     icon: [
-      { url: '/tsg-logo-browser.gif', type: 'image/gif' }
+      { url: '/images/tsg-logo.gif', type: 'image/gif' }
     ],
     shortcut: [
-      { url: '/tsg-logo-browser.gif', type: 'image/gif' }
+      { url: '/images/tsg-logo.gif', type: 'image/gif' }
     ],
+    apple: [
+      { url: '/images/tsg-logo.gif', type: 'image/gif' }
+    ],
+    other: [
+      {
+        rel: 'icon',
+        url: '/images/tsg-logo.gif',
+        type: 'image/gif',
+        sizes: 'any'
+      }
+    ]
   },
+  // Force browsers to refresh favicon on each page load
+  other: {
+    'cache-control': 'no-cache, no-store, must-revalidate',
+    'pragma': 'no-cache',
+    'expires': '0'
+  }
 };
 
 export default function RootLayout({
