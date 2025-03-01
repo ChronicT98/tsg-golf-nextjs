@@ -132,7 +132,7 @@ export default function RegelwerkPage() {
                 </p>
               </article>
   
-              <article className="regelwerk__rule">
+              <article className="regelwerk__rule full-width-rule">
                 <h3>§14. Geldwertung</h3>
                 <p>
                   Folgende Vereinbarungen werden getroffen und sind vom jeweiligen
