@@ -63,28 +63,16 @@ const ScorecardViewer: React.FC = () => {
     };
   }, [preloadedImages]);
 
-  // Function to preload neighboring years' images
-  const preloadNeighboringYears = useCallback((currentYear: string) => {
+  // Function to preload all years' images
+  const preloadAllYears = useCallback(() => {
     if (!data) return;
 
-    // Get the index of the current year in the years array
-    const currentIndex = years.indexOf(currentYear);
-    
-    // Preload the previous year (if exists)
-    if (currentIndex > 0) {
-      const prevYear = years[currentIndex - 1];
-      if (data[prevYear]?.static?.statistik) {
-        preloadImage(data[prevYear].static.statistik);
+    // Preload all years' statistics images
+    years.forEach(year => {
+      if (data[year]?.static?.statistik) {
+        preloadImage(data[year].static.statistik);
       }
-    }
-    
-    // Preload the next year (if exists)
-    if (currentIndex < years.length - 1) {
-      const nextYear = years[currentIndex + 1];
-      if (data[nextYear]?.static?.statistik) {
-        preloadImage(data[nextYear].static.statistik);
-      }
-    }
+    });
   }, [data, preloadImage, years]);
 
   // Function to preload neighboring dates' scorecards
@@ -141,18 +129,13 @@ const ScorecardViewer: React.FC = () => {
     });
   };
 
-  // Preload images when data is loaded or selected year changes
+  // Preload images when data is loaded
   useEffect(() => {
-    if (data && selectedYear) {
-      // Preload statistics image for current year
-      if (data[selectedYear]?.static?.statistik) {
-        preloadImage(data[selectedYear].static.statistik);
-      }
-      
-      // Preload neighboring years
-      preloadNeighboringYears(selectedYear);
+    if (data) {
+      // Preload all years' statistics images
+      preloadAllYears();
     }
-  }, [data, selectedYear, preloadImage, preloadNeighboringYears]);
+  }, [data, preloadAllYears]);
 
   // Preload images when selected date changes
   useEffect(() => {
