@@ -17,18 +17,18 @@ export const metadata: Metadata = {
   description: "Tuesday Selection Golf - since April 2007",
   icons: {
     icon: [
-      { url: '/images/tsg-logo.gif', type: 'image/gif' }
+      { url: '/tsg-logo-browser.gif', type: 'image/gif' }
     ],
     shortcut: [
-      { url: '/images/tsg-logo.gif', type: 'image/gif' }
+      { url: '/tsg-logo-browser.gif', type: 'image/gif' }
     ],
     apple: [
-      { url: '/images/tsg-logo.gif', type: 'image/gif' }
+      { url: '/tsg-logo-browser.gif', type: 'image/gif' }
     ],
     other: [
       {
         rel: 'icon',
-        url: '/images/tsg-logo.gif',
+        url: '/tsg-logo-browser.gif',
         type: 'image/gif',
         sizes: 'any'
       }
