@@ -15,6 +15,14 @@ import "./styles/blechstatistik.css";
 export const metadata: Metadata = {
   title: "Tuesday Selection Golf",
   description: "Tuesday Selection Golf - since April 2007",
+  icons: {
+    icon: [
+      { url: '/tsg-logo-browser.gif', type: 'image/gif' }
+    ],
+    shortcut: [
+      { url: '/tsg-logo-browser.gif', type: 'image/gif' }
+    ],
+  },
 };
 
 export default function RootLayout({
@@ -36,6 +44,7 @@ export default function RootLayout({
                 width={100}
                 height={100}
                 priority
+                style={{ objectFit: 'contain' }}
               />
             </Link>
             <div className="logo-text">Tuesday Selection Golf - since April 2007</div>
