@@ -2,8 +2,14 @@
 
 import React, { useState, useRef, DragEvent } from 'react';
 
+interface UploadResult {
+  success: boolean;
+  fileName: string;
+  error?: string;
+}
+
 interface GalleryUploadProps {
-  onUploadComplete?: (results: any) => void;
+  onUploadComplete?: (results: UploadResult[]) => void;
 }
 
 export default function GalleryUpload({ onUploadComplete }: GalleryUploadProps) {
@@ -15,7 +21,7 @@ export default function GalleryUpload({ onUploadComplete }: GalleryUploadProps) 
   const [uploadResult, setUploadResult] = useState<{
     success: boolean;
     message: string;
-    results?: any[];
+    results?: UploadResult[];
   } | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -117,7 +123,7 @@ export default function GalleryUpload({ onUploadComplete }: GalleryUploadProps) 
       const data = await response.json();
       
       if (data.results) {
-        const successCount = data.results.filter((r: any) => r.success).length;
+        const successCount = data.results.filter((r: UploadResult) => r.success).length;
         const totalCount = data.results.length;
         
         setUploadResult({
@@ -278,8 +284,8 @@ export default function GalleryUpload({ onUploadComplete }: GalleryUploadProps) 
           {uploadResult.results && !uploadResult.success && (
             <ul className="error-list">
               {uploadResult.results
-                .filter((r: any) => !r.success)
-                .map((r: any, i: number) => (
+                .filter((r: UploadResult) => !r.success)
+                .map((r: UploadResult, i: number) => (
                   <li key={i}>
                     {r.fileName}: {r.error}
                   </li>

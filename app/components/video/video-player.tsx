@@ -31,7 +31,7 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ videos, category }) => {
   const modalVideoRef = useRef<HTMLVideoElement>(null);
 
   // Video playback functions
-  const togglePlay = () => {
+  const togglePlay = useCallback(() => {
     const videoElement = modalState.isOpen ? modalVideoRef.current : videoRef.current;
     
     if (!videoElement) return;
@@ -43,19 +43,9 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ videos, category }) => {
     } else {
       videoElement.pause();
     }
-  };
+  }, [modalState.isOpen]);
 
-  const pauseCurrentVideo = () => {
-    if (videoRef.current && !videoRef.current.paused) {
-      videoRef.current.pause();
-    }
-    
-    if (modalVideoRef.current && !modalVideoRef.current.paused) {
-      modalVideoRef.current.pause();
-    }
-  };
-
-  const closeModal = () => {
+  const closeModal = useCallback(() => {
     if (modalVideoRef.current && !modalVideoRef.current.paused) {
       modalVideoRef.current.pause();
     }
@@ -64,7 +54,7 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ videos, category }) => {
       isOpen: false,
       videoIndex: 0
     });
-  };
+  }, []);
 
   // Function to handle keyboard navigation
   const handleKeyDown = useCallback((e: KeyboardEvent) => {

@@ -26,15 +26,15 @@ const GalleryGrid: React.FC<GalleryGridProps> = ({ images, category }) => {
     imageIndex: 0
   });
 
-  // Modal functions
-  const closeModal = () => {
+  // Modal functions - wrapped in useCallback to avoid recreation on each render
+  const closeModal = useCallback(() => {
     setModalState({
       isOpen: false,
       imageIndex: 0
     });
-  };
+  }, []);
 
-  const navigateModal = (direction: 'prev' | 'next') => {
+  const navigateModal = useCallback((direction: 'prev' | 'next') => {
     setModalState((prev) => {
       const newIndex = direction === 'prev'
         ? (prev.imageIndex === 0 ? images.length - 1 : prev.imageIndex - 1)
@@ -45,7 +45,7 @@ const GalleryGrid: React.FC<GalleryGridProps> = ({ images, category }) => {
         imageIndex: newIndex
       };
     });
-  };
+  }, [images.length]);
 
   // Function to handle keyboard navigation for modal
   const handleKeyDown = useCallback((e: KeyboardEvent) => {
