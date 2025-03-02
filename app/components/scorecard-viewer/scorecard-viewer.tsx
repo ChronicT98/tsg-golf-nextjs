@@ -76,6 +76,19 @@ const ScorecardViewer: React.FC = () => {
     });
   }, [data, preloadImage, years]);
 
+  // Function to preload all dates for the selected year
+  const preloadAllDatesForYear = useCallback((year: string) => {
+    if (!data || !data[year] || !data[year].spielCards) return;
+    
+    // Preload all date images for the selected year
+    data[year].spielCards.forEach(card => {
+      preloadImage(card.fileName);
+      if (card.geldFileName) {
+        preloadImage(card.geldFileName);
+      }
+    });
+  }, [data, preloadImage]);
+
   // Function to preload neighboring dates' scorecards
   const preloadNeighboringDates = useCallback((currentDate: string) => {
     if (!data || !selectedYear || !currentDate) return;
@@ -130,13 +143,18 @@ const ScorecardViewer: React.FC = () => {
     });
   };
 
-  // Preload images when data is loaded
+  // Preload images when data is loaded or year changes
   useEffect(() => {
     if (data) {
       // Preload all years' statistics images
       preloadAllYears();
+      
+      // If a year is selected, preload all dates for that year
+      if (selectedYear) {
+        preloadAllDatesForYear(selectedYear);
+      }
     }
-  }, [data, preloadAllYears]);
+  }, [data, selectedYear, preloadAllYears, preloadAllDatesForYear]);
 
   // Preload images when selected date changes
   useEffect(() => {
@@ -220,6 +238,10 @@ const ScorecardViewer: React.FC = () => {
             onClick={() => {
               setSelectedYear(year);
               setSelectedDate(null);
+              // Ensure all dates for this year are preloaded
+              if (data && data[year]) {
+                preloadAllDatesForYear(year);
+              }
             }}
             className={`year-button ${selectedYear === year ? 'active' : ''}`}
           >
