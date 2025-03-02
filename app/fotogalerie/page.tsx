@@ -88,11 +88,6 @@ export default function FotogaleriePage() {
         newCategories.sort((a, b) => a.name.localeCompare(b.name));
         
         setCategories(newCategories);
-        
-        // Select the first category if none is selected and categories exist
-        if ((!selectedCategory || !newCategories.find(c => c.id === selectedCategory)) && newCategories.length > 0) {
-          setSelectedCategory(newCategories[0].id);
-        }
       } catch (err) {
         console.error('Error fetching gallery images:', err);
         setError(err instanceof Error ? err.message : 'Fehler beim Laden der Bilder');
@@ -103,6 +98,14 @@ export default function FotogaleriePage() {
 
     fetchGalleryImages();
   }, []);
+
+  // Set default category when categories change or selectedCategory is invalid
+  useEffect(() => {
+    // Select the first category if none is selected and categories exist
+    if ((!selectedCategory || !categories.find(c => c.id === selectedCategory)) && categories.length > 0) {
+      setSelectedCategory(categories[0].id);
+    }
+  }, [categories, selectedCategory]);
 
   // Find the current category data
   const currentCategory = categories.find(

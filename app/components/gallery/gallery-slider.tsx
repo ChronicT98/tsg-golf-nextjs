@@ -128,20 +128,21 @@ const GallerySlider: React.FC<GallerySliderProps> = ({ images, category }) => {
         >
           {images.map((image, index) => (
             <div key={`slide-${index}`} className="gallery-slide">
-              {/* Standard HTML img statt Next.js Image für Supabase-Bilder */}
-              <img
-                src={image.src}
-                alt={image.alt}
-                style={{ 
-                  width: '100%', 
-                  height: 'auto', 
-                  maxHeight: '600px',
-                  cursor: 'pointer',
-                  objectFit: 'cover'
-                }}
-                onClick={() => openModal(index)}
-                onError={() => console.error(`Fehler beim Laden des Bildes: ${image.src}`)}
-              />
+              {/* Next.js Image für optimierte Bildanzeige */}
+              <div className="gallery-image-container" style={{ position: 'relative', width: '100%', height: '600px' }}>
+                <Image
+                  src={image.src}
+                  alt={image.alt}
+                  fill={true}
+                  sizes="(max-width: 768px) 100vw, (max-width: 1200px) 80vw, 70vw"
+                  style={{ 
+                    objectFit: 'cover',
+                    cursor: 'pointer'
+                  }}
+                  onClick={() => openModal(index)}
+                  onError={() => console.error(`Fehler beim Laden des Bildes: ${image.src}`)}
+                />
+              </div>
             </div>
           ))}
         </div>
@@ -198,18 +199,21 @@ const GallerySlider: React.FC<GallerySliderProps> = ({ images, category }) => {
           onClick={handleBackdropClick}
         >
           <div className="gallery-modal-content">
-            {/* Auch im Modal natives img-Tag verwenden */}
-            <img
-              src={images[modalState.imageIndex].src}
-              alt={images[modalState.imageIndex].alt}
-              className="gallery-modal-image"
-              style={{ 
-                maxWidth: '100%', 
-                maxHeight: '90vh',
-                objectFit: 'contain'
-              }}
-              onError={() => console.error(`Fehler beim Laden des Modal-Bildes: ${images[modalState.imageIndex].src}`)}
-            />
+            {/* Next.js Image auch im Modal verwenden */}
+            <div className="gallery-modal-image-container" style={{ position: 'relative', width: '100%', height: '90vh' }}>
+              <Image
+                src={images[modalState.imageIndex].src}
+                alt={images[modalState.imageIndex].alt}
+                fill={true}
+                sizes="100vw"
+                className="gallery-modal-image"
+                style={{ 
+                  objectFit: 'contain'
+                }}
+                priority={true}
+                onError={() => console.error(`Fehler beim Laden des Modal-Bildes: ${images[modalState.imageIndex].src}`)}
+              />
+            </div>
             <button 
               className="gallery-modal-close"
               onClick={closeModal}

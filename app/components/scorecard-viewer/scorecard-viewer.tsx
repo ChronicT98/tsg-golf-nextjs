@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import '@/app/styles/GolfScorecard.css';
 import '@/app/styles/spielergebnisse.css';
 import ImageModal from './image-modal';
@@ -39,7 +39,8 @@ const ScorecardViewer: React.FC = () => {
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const years = ['2025', '2024', '2023', '2022', '2021'];
+  // Wrap years array in useMemo to prevent dependency changes
+  const years = useMemo(() => ['2025', '2024', '2023', '2022', '2021'], []);
   const [modalState, setModalState] = useState<ModalState>({
     isOpen: false,
     imageUrl: '',
@@ -235,8 +236,8 @@ const ScorecardViewer: React.FC = () => {
             <div style={{ display: 'none' }}>
               {currentYearData.spielCards.map((card) => (
                 <div key={`preload-${card.id}`}>
-                  <img src={card.fileName} alt="" />
-                  {card.geldFileName && <img src={card.geldFileName} alt="" />}
+                  <Image src={card.fileName} alt="" width={1} height={1} />
+                  {card.geldFileName && <Image src={card.geldFileName} alt="" width={1} height={1} />}
                 </div>
               ))}
             </div>

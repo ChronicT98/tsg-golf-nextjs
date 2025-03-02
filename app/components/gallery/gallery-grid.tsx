@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useCallback, useEffect } from 'react';
+import Image from 'next/image';
 
 interface GalleryImage {
   src: string;
@@ -114,10 +115,20 @@ const GalleryGrid: React.FC<GalleryGridProps> = ({ images, category }) => {
     <div className="gallery-grid-container">
       {/* Featured image */}
       <div className="gallery-featured">
-        <img
+        <Image
           src={images[featuredImageIndex].src}
           alt={images[featuredImageIndex].alt}
+          width={600}
+          height={400}
           className="featured-image"
+          style={{ 
+            maxWidth: '100%',
+            maxHeight: '70vh',
+            width: 'auto',
+            height: 'auto',
+            objectFit: 'contain',
+            cursor: 'pointer'
+          }}
           onClick={() => openModal(featuredImageIndex)}
           onError={() => console.error(`Fehler beim Laden des Bildes: ${images[featuredImageIndex].src}`)}
         />
@@ -138,11 +149,16 @@ const GalleryGrid: React.FC<GalleryGridProps> = ({ images, category }) => {
             className={`gallery-thumbnail ${featuredImageIndex === index ? 'active' : ''}`}
             onClick={() => setAsFeatured(index)}
           >
-            <img
-              src={image.src}
-              alt={image.alt}
-              onError={() => console.error(`Fehler beim Laden des Thumbnails: ${image.src}`)}
-            />
+            <div style={{ position: 'relative', width: '100%', height: '100%' }}>
+              <Image
+                src={image.src}
+                alt={image.alt}
+                fill={true}
+                sizes="128px"
+                style={{ objectFit: 'cover' }}
+                onError={() => console.error(`Fehler beim Laden des Thumbnails: ${image.src}`)}
+              />
+            </div>
           </div>
         ))}
       </div>
@@ -154,17 +170,18 @@ const GalleryGrid: React.FC<GalleryGridProps> = ({ images, category }) => {
           onClick={handleBackdropClick}
         >
           <div className="gallery-modal-content">
-            <img
-              src={images[modalState.imageIndex].src}
-              alt={images[modalState.imageIndex].alt}
-              className="gallery-modal-image"
-              style={{ 
-                maxWidth: '100%', 
-                maxHeight: '90vh',
-                objectFit: 'contain'
-              }}
-              onError={() => console.error(`Fehler beim Laden des Modal-Bildes: ${images[modalState.imageIndex].src}`)}
-            />
+            <div className="gallery-modal-image-container" style={{ position: 'relative', width: '100%', height: '90vh' }}>
+              <Image
+                src={images[modalState.imageIndex].src}
+                alt={images[modalState.imageIndex].alt}
+                fill={true}
+                sizes="100vw"
+                className="gallery-modal-image"
+                style={{ objectFit: 'contain' }}
+                priority={true}
+                onError={() => console.error(`Fehler beim Laden des Modal-Bildes: ${images[modalState.imageIndex].src}`)}
+              />
+            </div>
             <button 
               className="gallery-modal-close"
               onClick={closeModal}

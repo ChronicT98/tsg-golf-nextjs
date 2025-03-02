@@ -31,40 +31,6 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ videos, category }) => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const modalVideoRef = useRef<HTMLVideoElement>(null);
 
-  // Function to handle keyboard navigation
-  const handleKeyDown = useCallback((e: KeyboardEvent) => {
-    if (modalState.isOpen) {
-      if (e.key === 'Escape') {
-        closeModal();
-      } else if (e.key === ' ') {
-        // Space key toggles play/pause
-        togglePlay();
-      }
-    }
-  }, [modalState.isOpen]);
-
-  // Add event listener for keyboard navigation
-  useEffect(() => {
-    document.addEventListener('keydown', handleKeyDown);
-    
-    return () => {
-      document.removeEventListener('keydown', handleKeyDown);
-    };
-  }, [handleKeyDown]);
-
-  // Function to prevent body scrolling when modal is open
-  useEffect(() => {
-    if (modalState.isOpen) {
-      document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = 'unset';
-    }
-
-    return () => {
-      document.body.style.overflow = 'unset';
-    };
-  }, [modalState.isOpen]);
-
   // Video playback functions
   const togglePlay = () => {
     const videoElement = modalState.isOpen ? modalVideoRef.current : videoRef.current;
@@ -95,8 +61,8 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ videos, category }) => {
     }
   };
 
-  // Modal functions
-  const openModal = () => {
+  // Modal function - kept for the modal that's shown by other parts of the app
+  const openFullscreenModal = () => {
     pauseCurrentVideo();
     setModalState({
       isOpen: true,
@@ -115,6 +81,41 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ videos, category }) => {
       videoIndex: 0
     });
   };
+
+  // Function to handle keyboard navigation
+  const handleKeyDown = useCallback((e: KeyboardEvent) => {
+    if (modalState.isOpen) {
+      if (e.key === 'Escape') {
+        closeModal();
+      } else if (e.key === ' ') {
+        // Space key toggles play/pause
+        togglePlay();
+      }
+    }
+  }, [modalState.isOpen, togglePlay, closeModal]);
+
+  // Add event listener for keyboard navigation
+  useEffect(() => {
+    document.addEventListener('keydown', handleKeyDown);
+    
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [handleKeyDown]);
+
+  // Function to prevent body scrolling when modal is open
+  useEffect(() => {
+    if (modalState.isOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'unset';
+    }
+
+    return () => {
+      document.body.style.overflow = 'unset';
+    };
+  }, [modalState.isOpen]);
+
 
   // Handle backdrop click to close modal
   const handleBackdropClick = (e: React.MouseEvent) => {
@@ -184,8 +185,6 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ videos, category }) => {
                   title={videos[0].alt}
                   className="video-modal-player"
                   autoplay={true}
-                  onPlay={() => setIsPlaying(true)}
-                  onPause={() => setIsPlaying(false)}
                 />
               </div>
             ) : (
@@ -196,8 +195,6 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ videos, category }) => {
                 className="video-modal-player"
                 controls
                 poster={videos[0].thumbnailSrc}
-                onPlay={() => setIsPlaying(true)}
-                onPause={() => setIsPlaying(false)}
                 onError={() => console.error(`Fehler beim Laden des Modal-Videos: ${videos[0].src}`)}
               >
                 Ihr Browser unterstützt das Video-Element nicht.

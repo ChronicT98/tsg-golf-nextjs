@@ -1,14 +1,12 @@
 'use client';
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 
 interface YouTubeEmbedProps {
   videoId: string;
   title?: string;
   autoplay?: boolean;
   className?: string;
-  onPlay?: () => void;
-  onPause?: () => void;
 }
 
 /**
@@ -21,9 +19,7 @@ const YouTubeEmbed: React.FC<YouTubeEmbedProps> = ({
   videoId,
   title = 'YouTube Video',
   autoplay = false,
-  className = '',
-  onPlay,
-  onPause
+  className = ''
 }) => {
   const [isLoaded, setIsLoaded] = useState(false);
   const [error, setError] = useState<string | null>(null);
