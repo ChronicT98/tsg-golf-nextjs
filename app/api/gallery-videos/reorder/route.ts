@@ -7,6 +7,57 @@ interface OrderUpdate {
 }
 
 /**
+ * DELETE endpoint to remove a video from the database
+ * Uses URL parameter ?videoId=... to identify the video to delete
+ */
+export async function DELETE(request: Request) {
+  try {
+    // Extrahiere Video-ID aus der URL
+    const { searchParams } = new URL(request.url);
+    const videoId = searchParams.get('videoId');
+    
+    if (!videoId) {
+      return NextResponse.json(
+        { error: 'Video-ID ist erforderlich' },
+        { status: 400 }
+      );
+    }
+    
+    console.log(`Lösche Video: ${videoId}`);
+    
+    // Video aus der Datenbank löschen
+    const { error } = await supabaseAdmin
+      .from('youtube_videos')
+      .delete()
+      .eq('id', videoId);
+      
+    if (error) {
+      throw error;
+    }
+    
+    console.log(`Video ${videoId} erfolgreich gelöscht`);
+    
+    return NextResponse.json({
+      success: true,
+      message: `Video ${videoId} erfolgreich gelöscht`
+    });
+  } catch (error) {
+    console.error('Error deleting video:', error);
+    
+    const errorMessage = error instanceof Error ? 
+      error.message : 'Unbekannter Fehler beim Löschen des Videos';
+    
+    return NextResponse.json(
+      { 
+        error: 'Fehler beim Löschen des Videos',
+        details: errorMessage
+      },
+      { status: 500 }
+    );
+  }
+}
+
+/**
  * PUT endpoint to update the order_index of videos
  */
 export async function PUT(request: Request) {

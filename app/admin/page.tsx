@@ -11,6 +11,7 @@ import GalleryUpload from '@/app/components/admin/gallery-upload';
 import GalleryCategoryReorderManager from '@/app/components/admin/gallery-category-reorder-manager';
 import YouTubeVideoManager from '@/app/components/admin/youtube-video-manager';
 import VideoReorderManager from '@/app/components/admin/video-reorder-manager';
+import RuleManager from '@/app/components/admin/rule-manager';
 import type { MemberDetails } from '@/app/types/members';
 
 interface UploadResult {
@@ -25,7 +26,7 @@ interface SelectedMember {
   category: 'gruendungsmitglieder' | 'ordentlicheMitglieder' | 'inMemoriam';
 }
 
-type AdminSection = 'scorecards' | 'members' | 'gallery' | 'videos';
+type AdminSection = 'scorecards' | 'members' | 'gallery' | 'videos' | 'rules';
 
 export default function AdminPage() {
   const { status } = useSession();
@@ -247,6 +248,12 @@ export default function AdminPage() {
           >
             Video Verwaltung
           </button>
+          <button
+            className={`toggle-button ${activeSection === 'rules' ? 'active' : ''}`}
+            onClick={() => setActiveSection('rules')}
+          >
+            Regelwerk Verwaltung
+          </button>
         </div>
 
         {activeSection === 'members' && (
@@ -280,7 +287,7 @@ export default function AdminPage() {
                                 onClick={() => setSelectedMember({ member, category: 'gruendungsmitglieder' })}
                                 className="edit-button"
                               >
-                                Bearbeiten
+                                ✏️
                               </button>
                             </div>
                           )}
@@ -324,7 +331,7 @@ export default function AdminPage() {
                                 onClick={() => setSelectedMember({ member, category: 'ordentlicheMitglieder' })}
                                 className="edit-button"
                               >
-                                Bearbeiten
+                                ✏️
                               </button>
                             </div>
                           )}
@@ -368,7 +375,7 @@ export default function AdminPage() {
                                 onClick={() => setSelectedMember({ member, category: 'inMemoriam' })}
                                 className="edit-button"
                               >
-                                Bearbeiten
+                                ✏️
                               </button>
                             </div>
                           )}
@@ -537,6 +544,12 @@ export default function AdminPage() {
               <VideoReorderManager />
             </div>
             
+          </div>
+        )}
+
+        {activeSection === 'rules' && (
+          <div className="rules-manager-container">
+            <RuleManager />
           </div>
         )}
       </div>

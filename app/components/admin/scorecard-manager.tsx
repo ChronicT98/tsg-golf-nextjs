@@ -30,6 +30,9 @@ export default function ScorecardManager() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedYear, setSelectedYear] = useState<string>('');
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [cardToDelete, setCardToDelete] = useState<{id: string, date: string, year: string} | null>(null);
+  const [deleteLoading, setDeleteLoading] = useState(false);
 
   useEffect(() => {
     fetchScorecards();
@@ -51,11 +54,21 @@ export default function ScorecardManager() {
     }
   };
 
-  const handleDelete = async (year: string, cardId: string) => {
-    if (!confirm('Möchten Sie diese Scorecard wirklich löschen?')) return;
+  const handleDeleteClick = (year: string, card: SpielScorecard) => {
+    setCardToDelete({
+      id: card.id,
+      date: card.date,
+      year
+    });
+    setShowDeleteConfirm(true);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!cardToDelete) return;
+    setDeleteLoading(true);
 
     try {
-      const response = await fetch(`/api/scorecards?year=${year}&id=${cardId}`, {
+      const response = await fetch(`/api/scorecards?year=${cardToDelete.year}&id=${cardToDelete.id}`, {
         method: 'DELETE',
       });
 
@@ -64,14 +77,20 @@ export default function ScorecardManager() {
       // Update local state
       setScorecards(prev => {
         const updated = { ...prev };
-        updated[year].spielCards = updated[year].spielCards.filter(
-          card => card.id !== cardId
+        updated[cardToDelete.year].spielCards = updated[cardToDelete.year].spielCards.filter(
+          card => card.id !== cardToDelete.id
         );
         return updated;
       });
+
+      // Close modal
+      setShowDeleteConfirm(false);
+      setCardToDelete(null);
     } catch (err) {
       alert('Fehler beim Löschen der Scorecard');
       console.error(err);
+    } finally {
+      setDeleteLoading(false);
     }
   };
 
@@ -138,10 +157,10 @@ export default function ScorecardManager() {
                   <span className="card-date">{card.date}</span>
                   <div className="card-actions">
                     <button
-                      onClick={() => handleDelete(selectedYear, card.id)}
-                      className="btn btn-danger btn-sm"
+                      onClick={() => handleDeleteClick(selectedYear, card)}
+                      className="btn btn-danger btn-sm delete-button"
                     >
-                      Löschen
+                      🗑️
                     </button>
                   </div>
                 </div>
@@ -171,6 +190,45 @@ export default function ScorecardManager() {
                 </div>
               </div>
             ))}
+          </div>
+        </div>
+      )}
+
+      {/* Bestätigungs-Dialog für das Löschen */}
+      {showDeleteConfirm && cardToDelete && (
+        <div className="modal-overlay">
+          <div className="modal-content">
+            <h2>Scorecard löschen</h2>
+            
+            <div className="warning-message">
+              <p>
+                Soll die Scorecard vom <strong>{cardToDelete.date}</strong> wirklich gelöscht werden?
+              </p>
+              <p>
+                <strong>Dies wird die Scorecard unwiderruflich löschen!</strong>
+              </p>
+            </div>
+            
+            <div className="button-group">
+              <button 
+                className="cancel-button" 
+                onClick={() => {
+                  setShowDeleteConfirm(false);
+                  setCardToDelete(null);
+                }}
+                disabled={deleteLoading}
+              >
+                Abbrechen
+              </button>
+              
+              <button 
+                className="delete-button" 
+                onClick={handleDeleteConfirm}
+                disabled={deleteLoading}
+              >
+                {deleteLoading ? 'Wird gelöscht...' : 'Löschen'}
+              </button>
+            </div>
           </div>
         </div>
       )}

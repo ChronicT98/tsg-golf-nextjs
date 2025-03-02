@@ -405,7 +405,7 @@ export default function MemberEditor({ member, category, onSave, onCancel }: Mem
                 }}
                 className="delete-button"
               >
-                Löschen
+                🗑️
               </button>
             )}
           </div>

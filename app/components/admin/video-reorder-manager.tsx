@@ -33,6 +33,66 @@ export default function VideoReorderManager() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [videoToDelete, setVideoToDelete] = useState<Video | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  // Funktion zum Vorbereiten des Löschvorgangs (zeigt Bestätigungsdialog)
+  const handleDeleteClick = (video: Video) => {
+    setVideoToDelete(video);
+    setShowDeleteConfirm(true);
+  };
+
+  // Funktion zum tatsächlichen Löschen nach Bestätigung
+  const handleDeleteConfirm = async () => {
+    if (!videoToDelete) return;
+    
+    try {
+      setIsDeleting(true);
+      setMessage(null);
+      
+      // API-Aufruf zum Löschen des Videos
+      const response = await fetch(`/api/gallery-videos/reorder?videoId=${videoToDelete.id}`, {
+        method: 'DELETE',
+      });
+      
+      if (!response.ok) {
+        throw new Error('Fehler beim Löschen des Videos');
+      }
+      
+      const result = await response.json();
+      
+      if (result.success) {
+        // Aktualisiere die Video-Liste nach erfolgreicher Löschung
+        setVideos(prevVideos => 
+          prevVideos.filter(video => video.id !== videoToDelete.id)
+        );
+        
+        setMessage({
+          type: 'success',
+          text: `Video "${videoToDelete.title || videoToDelete.alt}" erfolgreich gelöscht`
+        });
+      } else {
+        throw new Error(result.error || 'Fehler beim Löschen des Videos');
+      }
+    } catch (err) {
+      console.error('Error deleting video:', err);
+      setMessage({
+        type: 'error',
+        text: err instanceof Error ? err.message : 'Fehler beim Löschen des Videos'
+      });
+    } finally {
+      setIsDeleting(false);
+      setShowDeleteConfirm(false);
+      setVideoToDelete(null);
+    }
+  };
+
+  // Abbrechen des Löschvorgangs
+  const handleDeleteCancel = () => {
+    setShowDeleteConfirm(false);
+    setVideoToDelete(null);
+  };
 
   useEffect(() => {
     const fetchVideos = async () => {
@@ -143,6 +203,7 @@ export default function VideoReorderManager() {
       <p className="help-text">
         Ziehen Sie die Videos, um ihre Reihenfolge auf der Video-Seite zu ändern.
         Die Änderungen werden automatisch gespeichert.
+        Zum Löschen eines Videos auf den Papierkorb klicken.
       </p>
       
       {message && (
@@ -181,6 +242,17 @@ export default function VideoReorderManager() {
                         <div className="video-title">{video.alt}</div>
                         <div className="video-order">Reihenfolge: {video.order}</div>
                       </div>
+                      <button
+                        type="button"
+                        className="delete-button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleDeleteClick(video);
+                        }}
+                        title="Video löschen"
+                      >
+                        🗑️
+                      </button>
                       {video.youtubeId && (
                         <div className="video-preview">
                           <YouTubeEmbed 
@@ -199,6 +271,40 @@ export default function VideoReorderManager() {
           )}
         </Droppable>
       </DragDropContext>
+      
+      {/* Löschbestätigungsdialog */}
+      {showDeleteConfirm && videoToDelete && (
+        <div className="modal-overlay">
+          <div className="modal-content">
+            <div className="admin-editor">
+              <h2>Video löschen</h2>
+              
+              <div className="warning-message">
+                <p>Soll das Video <strong>{videoToDelete.title || videoToDelete.alt}</strong> wirklich gelöscht werden?</p>
+                <p>Diese Aktion kann nicht rückgängig gemacht werden!</p>
+              </div>
+              
+              <div className="button-group">
+                <button 
+                  className="cancel-button" 
+                  onClick={handleDeleteCancel}
+                  disabled={isDeleting}
+                >
+                  Abbrechen
+                </button>
+                
+                <button 
+                  className="delete-button" 
+                  onClick={handleDeleteConfirm}
+                  disabled={isDeleting}
+                >
+                  {isDeleting ? 'Wird gelöscht...' : 'Löschen'}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

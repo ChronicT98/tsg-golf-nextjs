@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useRef, DragEvent } from 'react';
+import React, { useState, useRef, useEffect, DragEvent } from 'react';
 
 interface UploadResult {
   success: boolean;
@@ -16,6 +16,7 @@ export default function GalleryUpload({ onUploadComplete }: GalleryUploadProps) 
   const [isDragging, setIsDragging] = useState(false);
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [customCategory, setCustomCategory] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState('');
   const [categoryError, setCategoryError] = useState('');
   const [isUploading, setIsUploading] = useState(false);
   const [uploadResult, setUploadResult] = useState<{
@@ -23,7 +24,42 @@ export default function GalleryUpload({ onUploadComplete }: GalleryUploadProps) 
     message: string;
     results?: UploadResult[];
   } | null>(null);
+  const [existingCategories, setExistingCategories] = useState<{id: string, name: string}[]>([]);
+  const [isLoadingCategories, setIsLoadingCategories] = useState(true);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Laden der vorhandenen Kategorien beim Initialisieren der Komponente
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        setIsLoadingCategories(true);
+        const response = await fetch('/api/gallery-images');
+        
+        if (!response.ok) {
+          throw new Error('Fehler beim Laden der Kategorien');
+        }
+        
+        const data = await response.json();
+        
+        // Kategorie-IDs und Namen extrahieren
+        const categories = Object.keys(data.categories).map(categoryId => ({
+          id: categoryId,
+          name: data.metadata[categoryId]?.originalName || categoryId.replace(/-/g, ' ')
+        }));
+        
+        // Alphabetisch sortieren
+        categories.sort((a, b) => a.name.localeCompare(b.name));
+        
+        setExistingCategories(categories);
+      } catch (error) {
+        console.error('Error fetching categories:', error);
+      } finally {
+        setIsLoadingCategories(false);
+      }
+    };
+
+    fetchCategories();
+  }, []);
 
   const handleDragOver = (e: DragEvent<HTMLDivElement>) => {
     e.preventDefault();
@@ -81,9 +117,9 @@ export default function GalleryUpload({ onUploadComplete }: GalleryUploadProps) 
   const handleUpload = async () => {
     if (selectedFiles.length === 0) return;
     
-    // Validate category
-    if (!customCategory.trim()) {
-      setCategoryError('Bitte geben Sie eine Kategorie ein');
+    // Validate category - entweder eine bestehende Kategorie oder eine neue
+    if (!selectedCategory && !customCategory.trim()) {
+      setCategoryError('Bitte wählen Sie eine Kategorie aus oder geben Sie eine neue ein');
       return;
     }
     
@@ -97,14 +133,22 @@ export default function GalleryUpload({ onUploadComplete }: GalleryUploadProps) 
         formData.append('file', file);
       });
       
-      // Speichere den originalen Kategorienamen für die Anzeige
-      const originalCategoryName = customCategory.trim();
+      let safeCategory;
+      let originalCategoryName;
       
-      // Create a URL-friendly version of the category using the same standardized format as the API
-      // This ensures consistent category naming between upload and display
-      const safeCategory = originalCategoryName.toLowerCase().replace(/[^a-z0-9äöüß]/g, '-');
+      // Verwende entweder die ausgewählte bestehende Kategorie oder erstelle eine neue
+      if (selectedCategory) {
+        // Bestehende Kategorie verwenden
+        safeCategory = selectedCategory;
+        // Namen aus den existierenden Kategorien finden
+        originalCategoryName = existingCategories.find(cat => cat.id === selectedCategory)?.name || selectedCategory;
+      } else {
+        // Neue Kategorie erstellen
+        originalCategoryName = customCategory.trim();
+        safeCategory = originalCategoryName.toLowerCase().replace(/[^a-z0-9äöüß]/g, '-');
+      }
       
-      // Show the user what category name will be used
+      // Debug-Info: Kategorie, die verwendet wird
       console.log(`Using category name: ${safeCategory} (Original: "${originalCategoryName}")`);
       
       formData.append('category', safeCategory);
@@ -160,15 +204,43 @@ export default function GalleryUpload({ onUploadComplete }: GalleryUploadProps) 
 
   return (
     <div className="gallery-upload-container">
-      
       <div className="form-group">
-        <label htmlFor="category">Kategorie:</label>
+        <label htmlFor="categorySelect">In bestehende Kategorie hochladen:</label>
+        <select
+          id="categorySelect"
+          value={selectedCategory}
+          onChange={(e) => {
+            setSelectedCategory(e.target.value);
+            if (e.target.value) {
+              setCustomCategory(''); // Leere das Textfeld für neue Kategorien
+            }
+            setCategoryError('');
+          }}
+          className="category-select"
+          disabled={isLoadingCategories}
+        >
+          <option value="">-- Bestehende Kategorie auswählen --</option>
+          {existingCategories.map(category => (
+            <option key={category.id} value={category.id}>
+              {category.name}
+            </option>
+          ))}
+        </select>
+        
+        <div className="category-divider">
+          <span>ODER</span>
+        </div>
+        
+        <label htmlFor="category">Neue Kategorie erstellen:</label>
         <input
           type="text"
           id="category"
           value={customCategory}
           onChange={(e) => {
             setCustomCategory(e.target.value);
+            if (e.target.value) {
+              setSelectedCategory(''); // Leere die Auswahl bestehender Kategorien
+            }
             setCategoryError('');
           }}
           placeholder="Neue Kategorie eingeben (z.B. Turniere 2024)"

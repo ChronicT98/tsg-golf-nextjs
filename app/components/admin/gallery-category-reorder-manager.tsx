@@ -267,7 +267,7 @@ export default function GalleryCategoryReorderManager() {
               <h2>Kategorie löschen</h2>
               
               <div className="warning-message">
-                <p>Möchten Sie die Kategorie <strong>{categoryToDelete.originalName}</strong> wirklich löschen?</p>
+                <p>Soll die Kategorie <strong>{categoryToDelete.originalName}</strong> wirklich gelöscht werden?</p>
                 <p>Dies wird <strong>alle Bilder</strong> in dieser Kategorie <strong>unwiderruflich löschen</strong>!</p>
               </div>
               
