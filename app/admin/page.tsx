@@ -9,6 +9,7 @@ import ScorecardManager from '@/app/components/admin/scorecard-manager';
 import MemberEditor from '@/app/components/admin/member-editor';
 import GalleryUpload from '@/app/components/admin/gallery-upload';
 import YouTubeVideoManager from '@/app/components/admin/youtube-video-manager';
+import VideoReorderManager from '@/app/components/admin/video-reorder-manager';
 import type { MemberDetails } from '@/app/types/members';
 
 interface UploadResult {
@@ -529,17 +530,11 @@ export default function AdminPage() {
               </div>
             </div>
             
-            <div className="gallery-note">
-              <h3>Hinweis</h3>
-              <p>
-                Die Videos werden direkt von YouTube eingebettet und müssen daher nicht hochgeladen werden.
-                Sie benötigen lediglich die YouTube-Video-URL oder Video-ID.
-              </p>
-              <p>
-                YouTube-Video-URLs haben folgendes Format: <code>https://www.youtube.com/watch?v=XXXXXXXXXXX</code>, 
-                wobei &quot;XXXXXXXXXXX&quot; die Video-ID ist.
-              </p>
+            <div className="video-reorder-section">
+              <div className="divider" style={{ margin: '30px 0', borderTop: '1px solid #ddd' }}></div>
+              <VideoReorderManager />
             </div>
+            
           </div>
         )}
       </div>

@@ -162,10 +162,15 @@ export async function GET() {
       alt: video.alt
     })));
     
-    // Sort all videos by creation date (newest first)
-    videos.sort((a, b) => 
-      new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-    );
+    // Sort all videos by order_index (or fallback to creation date if order is same)
+    videos.sort((a, b) => {
+      // First sort by order value (lower order comes first)
+      if ((a.order || 0) !== (b.order || 0)) {
+        return (a.order || 0) - (b.order || 0);
+      }
+      // If order is the same, fallback to creation date (newest first)
+      return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+    });
 
     return NextResponse.json({ videos });
   } catch (error) {
