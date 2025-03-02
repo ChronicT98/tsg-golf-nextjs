@@ -4,6 +4,21 @@ import React, { useState, useEffect } from 'react';
 import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea/dnd';
 import YouTubeEmbed from '@/app/components/video/youtube-embed';
 
+// Interface for raw video data from API
+interface ApiVideoData {
+  id: string;
+  src: string;
+  alt?: string;
+  title?: string;
+  caption?: string;
+  category?: string;
+  order?: number;
+  createdAt: string;
+  thumbnailSrc?: string;
+  type?: 'video' | 'youtube';
+  youtubeId?: string;
+}
+
 interface Video {
   id: string;
   youtubeId?: string;
@@ -31,7 +46,7 @@ export default function VideoReorderManager() {
         }
         
         const data = await response.json();
-        const videosWithOrder = data.videos.map((video: any, index: number) => ({
+        const videosWithOrder = data.videos.map((video: ApiVideoData, index: number) => ({
           id: video.id,
           youtubeId: video.youtubeId,
           alt: video.alt || video.title || 'Unbenanntes Video',
