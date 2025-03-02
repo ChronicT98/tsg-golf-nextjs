@@ -172,7 +172,8 @@ const GalleryGrid: React.FC<GalleryGridProps> = ({ images, category }) => {
         >
           <div className="gallery-modal-content">
             <div className="gallery-modal-image-container">
-              {/* Using standard img tag instead of Next.js Image for better compatibility */}
+              {/* Using standard img tag instead of Next.js Image for better compatibility with lightbox modals */}
+              {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={images[modalState.imageIndex].src}
                 alt={images[modalState.imageIndex].alt}

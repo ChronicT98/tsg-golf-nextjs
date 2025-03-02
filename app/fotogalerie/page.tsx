@@ -1,7 +1,6 @@
 'use client';
 
 import React, { useState, useEffect, useCallback } from 'react';
-import Image from 'next/image';
 import '@/app/styles/fotogalerie.css';
 import GalleryGrid from '@/app/components/gallery/gallery-grid';
 
