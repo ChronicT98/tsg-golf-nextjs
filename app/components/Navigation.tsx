@@ -47,7 +47,7 @@ export default function Navigation() {
     <>
       <div className="nav-sticky-wrapper">
         <div className="sidebar-navigation">
-          <div style={{ display: 'flex', alignItems: 'center', padding: '0.75rem 0' }}>
+          <div style={{ display: 'flex', alignItems: 'center', padding: '0' }}>
             <button 
               id="sidebar-toggle"
               className={`sidebar-toggle-button ${isSidebarOpen ? 'active' : ''}`}

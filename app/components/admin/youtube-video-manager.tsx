@@ -208,7 +208,7 @@ export default function YouTubeVideoManager({ onAddComplete }: YouTubeVideoManag
         {videoPreview && (
           <div className="video-preview">
             <h4>Vorschau:</h4>
-            <div className="preview-container">
+            <div className="preview-container-youtube">
               <iframe
                 src={`https://www.youtube.com/embed/${videoPreview}`}
                 title="YouTube Video Preview"
