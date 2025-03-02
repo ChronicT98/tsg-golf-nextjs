@@ -26,6 +26,27 @@ const GalleryGrid: React.FC<GalleryGridProps> = ({ images, category }) => {
     imageIndex: 0
   });
 
+  // Modal functions
+  const closeModal = () => {
+    setModalState({
+      isOpen: false,
+      imageIndex: 0
+    });
+  };
+
+  const navigateModal = (direction: 'prev' | 'next') => {
+    setModalState((prev) => {
+      const newIndex = direction === 'prev'
+        ? (prev.imageIndex === 0 ? images.length - 1 : prev.imageIndex - 1)
+        : (prev.imageIndex === images.length - 1 ? 0 : prev.imageIndex + 1);
+      
+      return {
+        ...prev,
+        imageIndex: newIndex
+      };
+    });
+  };
+
   // Function to handle keyboard navigation for modal
   const handleKeyDown = useCallback((e: KeyboardEvent) => {
     if (modalState.isOpen) {
@@ -37,7 +58,7 @@ const GalleryGrid: React.FC<GalleryGridProps> = ({ images, category }) => {
         navigateModal('next');
       }
     }
-  }, [modalState.isOpen]);
+  }, [modalState.isOpen, closeModal, navigateModal]);
 
   // Add event listener for keyboard navigation
   useEffect(() => {
@@ -71,26 +92,6 @@ const GalleryGrid: React.FC<GalleryGridProps> = ({ images, category }) => {
     setModalState({
       isOpen: true,
       imageIndex: index
-    });
-  };
-
-  const closeModal = () => {
-    setModalState({
-      isOpen: false,
-      imageIndex: 0
-    });
-  };
-
-  const navigateModal = (direction: 'prev' | 'next') => {
-    setModalState((prev) => {
-      const newIndex = direction === 'prev'
-        ? (prev.imageIndex === 0 ? images.length - 1 : prev.imageIndex - 1)
-        : (prev.imageIndex === images.length - 1 ? 0 : prev.imageIndex + 1);
-      
-      return {
-        ...prev,
-        imageIndex: newIndex
-      };
     });
   };
 

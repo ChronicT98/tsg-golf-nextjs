@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useCallback, useEffect, useRef } from 'react';
+import React, { useCallback, useEffect, useRef } from 'react';
 import YouTubeEmbed from './youtube-embed';
 
 interface GalleryVideo {
@@ -23,11 +23,10 @@ interface ModalState {
 }
 
 const VideoPlayer: React.FC<VideoPlayerProps> = ({ videos, category }) => {
-  const [modalState, setModalState] = useState<ModalState>({
+  const [modalState, setModalState] = React.useState<ModalState>({
     isOpen: false,
     videoIndex: 0
   });
-  const [isPlaying, setIsPlaying] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
   const modalVideoRef = useRef<HTMLVideoElement>(null);
 
@@ -38,42 +37,27 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ videos, category }) => {
     if (!videoElement) return;
     
     if (videoElement.paused) {
-      videoElement.play().then(() => {
-        setIsPlaying(true);
-      }).catch(err => {
+      videoElement.play().catch(err => {
         console.error('Error playing video:', err);
       });
     } else {
       videoElement.pause();
-      setIsPlaying(false);
     }
   };
 
   const pauseCurrentVideo = () => {
     if (videoRef.current && !videoRef.current.paused) {
       videoRef.current.pause();
-      setIsPlaying(false);
     }
     
     if (modalVideoRef.current && !modalVideoRef.current.paused) {
       modalVideoRef.current.pause();
-      setIsPlaying(false);
     }
-  };
-
-  // Modal function - kept for the modal that's shown by other parts of the app
-  const openFullscreenModal = () => {
-    pauseCurrentVideo();
-    setModalState({
-      isOpen: true,
-      videoIndex: 0
-    });
   };
 
   const closeModal = () => {
     if (modalVideoRef.current && !modalVideoRef.current.paused) {
       modalVideoRef.current.pause();
-      setIsPlaying(false);
     }
     
     setModalState({
@@ -92,7 +76,7 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ videos, category }) => {
         togglePlay();
       }
     }
-  }, [modalState.isOpen, togglePlay, closeModal]);
+  }, [modalState.isOpen, closeModal, togglePlay]);
 
   // Add event listener for keyboard navigation
   useEffect(() => {

@@ -47,8 +47,18 @@ export async function GET() {
     console.log(`Found ${youtubeVideos?.length || 0} YouTube videos in database`);
     
     // 2. Get all regular videos from storage (as in the original implementation)
+    // Define proper type for Supabase storage file objects
+    interface StorageFile {
+      id: string;
+      name: string;
+      created_at?: string;
+      last_modified?: string;
+      size?: number; // Make size optional to match Supabase's FileObject type
+      metadata?: Record<string, string>;
+    }
+    
     // Array for all found videos
-    const allFiles: Array<{file: any, category: string}> = [];
+    const allFiles: Array<{file: StorageFile, category: string}> = [];
     
     // Fetch files for each known category
     for (const category of categories) {
@@ -84,7 +94,7 @@ export async function GET() {
       // Add files to total list with category info
       videoFiles?.forEach(file => {
         allFiles.push({
-          file,
+          file: file as StorageFile,
           category
         });
       });
@@ -194,7 +204,15 @@ export async function POST(request: Request) {
         );
       }
 
-      const results: Array<{ success: boolean; fileName: string; path?: string; error?: string }> = [];
+      // Define proper type for upload results
+      interface UploadResult {
+        success: boolean;
+        fileName: string;
+        path?: string;
+        error?: string;
+      }
+
+      const results: Array<UploadResult> = [];
 
       for (const file of files) {
         try {

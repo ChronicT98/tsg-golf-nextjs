@@ -10,8 +10,21 @@ interface YouTubeVideo {
   createdAt?: string;
 }
 
+// Define proper API response type
+interface YouTubeVideoResponse {
+  success: boolean;
+  video: {
+    id: string;
+    youtube_id: string;
+    title: string;
+    caption?: string | null;
+    order_index?: number;
+    created_at: string;
+  };
+}
+
 interface YouTubeVideoManagerProps {
-  onAddComplete?: (results: any) => void;
+  onAddComplete?: (results: YouTubeVideoResponse) => void;
 }
 
 export default function YouTubeVideoManager({ onAddComplete }: YouTubeVideoManagerProps) {
@@ -26,7 +39,6 @@ export default function YouTubeVideoManager({ onAddComplete }: YouTubeVideoManag
     text: string;
   } | null>(null);
   const [videoPreview, setVideoPreview] = useState<string | null>(null);
-
 
   // Function to extract YouTube video ID from URL
   const extractYouTubeId = (url: string): string | null => {
