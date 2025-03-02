@@ -76,10 +76,6 @@ export default function VideosPage() {
               Willkommen in der TSG Video-Galerie. Hier finden Sie YouTube-Videos 
               aus der Geschichte unserer Golfgemeinschaft.
             </p>
-            <p>
-              Die Videos können direkt über unsere Plattform angesehen werden.
-              Die Administratoren können YouTube-Videos über das Admin-Dashboard hinzufügen.
-            </p>
           </div>
 
           {/* Video title buttons */}
