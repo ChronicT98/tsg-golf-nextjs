@@ -15,10 +15,7 @@ export interface GalleryVideo {
   youtubeId?: string; // YouTube video ID for YouTube videos
 }
 
-// Interface for our response format
-interface GalleryResponse {
-  [category: string]: GalleryVideo[];
-}
+// This interface was unused and has been removed
 
 /**
  * GET endpoint to fetch all gallery videos as a flat list
@@ -118,8 +115,7 @@ export async function GET() {
       console.log(`Generated video URL: ${correctUrl}`);
       
       // Thumbnail URL (if available)
-      const baseName = filename.substring(0, filename.lastIndexOf('.'));
-      let thumbnailSrc = undefined;
+      const thumbnailSrc = undefined;
       
       // Create gallery video object
       return {
@@ -222,7 +218,6 @@ export async function POST(request: Request) {
           }
           
           // Generate file path in the format category/filename.ext
-          const fileExt = file.name.split('.').pop()?.toLowerCase() || 'mp4';
           const timestamp = Date.now();
           const uniqueFileName = `${timestamp}-${file.name.replace(/\s+/g, '-')}`;
           const filePath = `${safeCategory}/${uniqueFileName}`;

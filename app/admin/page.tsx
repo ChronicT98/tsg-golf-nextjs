@@ -465,7 +465,7 @@ export default function AdminPage() {
                   onUploadComplete={(results) => {
                     // Show feedback to user
                     if (results && results.length > 0) {
-                      const successCount = results.filter((r: any) => r.success).length;
+                      const successCount = results.filter((r: UploadResult) => r.success).length;
                       const totalCount = results.length;
                       
                       setUploadStatus({
@@ -473,7 +473,7 @@ export default function AdminPage() {
                         type: successCount === totalCount ? 'success' : 'error'
                       });
                     }
-                  }} 
+                  }}
                 />
                 {uploadStatus.type !== 'none' && (
                   <div className={`upload-status ${uploadStatus.type}`}>
@@ -537,7 +537,7 @@ export default function AdminPage() {
               </p>
               <p>
                 YouTube-Video-URLs haben folgendes Format: <code>https://www.youtube.com/watch?v=XXXXXXXXXXX</code>, 
-                wobei "XXXXXXXXXXX" die Video-ID ist.
+                wobei &quot;XXXXXXXXXXX&quot; die Video-ID ist.
               </p>
             </div>
           </div>

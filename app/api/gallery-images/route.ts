@@ -1,6 +1,14 @@
 import { NextResponse } from 'next/server';
 import { supabase } from '@/app/utils/supabase';
 
+// Interface for Supabase Storage File object
+interface SupabaseStorageFile {
+  id?: string;
+  name: string;
+  created_at?: string;
+  metadata?: Record<string, unknown>;
+}
+
 // Types for gallery images
 export interface GalleryImage {
   id: string;
@@ -215,7 +223,7 @@ export async function GET() {
     }
     
     // Array für alle gefundenen Bilder
-    const allFiles: Array<{file: any, category: string}> = [];
+    const allFiles: Array<{file: SupabaseStorageFile, category: string}> = [];
     
     // Für jede bekannte Kategorie die Dateien abrufen
     for (const category of categories) {
@@ -392,7 +400,6 @@ export async function POST(request: Request) {
     for (const file of files) {
       try {
         // Generate file path in the format category/filename.ext
-        const fileExt = file.name.split('.').pop()?.toLowerCase() || 'jpg';
         const timestamp = Date.now();
         const uniqueFileName = `${timestamp}-${file.name.replace(/\s+/g, '-')}`;
         const filePath = `${safeCategory}/${uniqueFileName}`;
@@ -418,8 +425,8 @@ export async function POST(request: Request) {
           throw new Error(uploadError.message);
         }
 
-        // Get the public URL with correct format
-        const { data: publicUrlData } = supabase
+        // Get the public URL
+        supabase
           .storage
           .from('gallery')
           .getPublicUrl(filePath);
