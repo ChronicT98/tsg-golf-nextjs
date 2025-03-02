@@ -112,6 +112,74 @@ async function saveCategoryMetadata(category: string, metadata: CategoryMetadata
   }
 }
 
+// Schnittstelle für die Kategorie-Reihenfolgedaten
+interface CategoriesOrderData {
+  order: Record<string, number>; // Map von Kategorie-ID zu Reihenfolgen-Index
+  lastUpdated: string;
+}
+
+/**
+ * Lädt die Reihenfolge-Daten für die Kategorien
+ */
+async function getCategoriesOrder(): Promise<CategoriesOrderData | null> {
+  try {
+    // Versuche, die categories-order.json-Datei zu lesen
+    const { data: orderFile, error } = await supabase
+      .storage
+      .from('gallery')
+      .download('categories-order.json');
+      
+    if (error || !orderFile) {
+      console.log('No categories order file found');
+      return null;
+    }
+    
+    // Datei in Text umwandeln und parsen
+    const orderText = await orderFile.text();
+    const orderData = JSON.parse(orderText) as CategoriesOrderData;
+    
+    return orderData;
+  } catch (error) {
+    console.error('Error reading categories order:', error);
+    return null;
+  }
+}
+
+// Type für die Kategorie-Daten aus der Datenbank
+interface CategoryOrderData {
+  id: number;
+  category_id: string;
+  original_name: string | null;
+  order_index: number;
+}
+
+/**
+ * Lädt die Kategorie-Daten aus der Datenbank
+ */
+async function loadCategoryOrderFromDB(): Promise<Record<string, number>> {
+  try {
+    const { data, error } = await supabase
+      .from('gallery_categories')
+      .select('category_id, order_index')
+      .order('order_index');
+      
+    if (error) {
+      console.error('Error loading category order from DB:', error);
+      return {};
+    }
+    
+    const orderMap: Record<string, number> = {};
+    (data as CategoryOrderData[]).forEach(category => {
+      orderMap[category.category_id] = category.order_index;
+    });
+    
+    return orderMap;
+  } catch (error) {
+    console.error('Error in loadCategoryOrderFromDB:', error);
+    return {};
+  }
+}
+
 /**
  * GET endpoint to fetch gallery images grouped by category
  */
@@ -124,6 +192,9 @@ export async function GET() {
       categories: {},
       metadata: {}
     };
+    
+    // Lade die Kategorie-Reihenfolge-Daten aus der Datenbank
+    const categoriesOrder = await loadCategoryOrderFromDB();
     
     // Approach 1: Get all folders directly
     let categories: string[] = [];
@@ -341,8 +412,49 @@ export async function GET() {
         new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
       );
     }
+    
+    // Vorbereiten einer sortierten Kategorien-Map, um die Kategorien in der richtigen Reihenfolge zurückzugeben
+    const orderedResponse: GalleryResponse = {
+      categories: {},
+      metadata: galleryByCategory.metadata
+    };
+    
+    // Sortiere die Kategorien nach der benutzerdefinierten Reihenfolge, falls vorhanden
+    const categoryKeys = Object.keys(galleryByCategory.categories);
+    let sortedCategoryKeys: string[];
+    
+    if (Object.keys(categoriesOrder).length > 0) {
+      // Kategorien mit definierter Reihenfolge gruppieren
+      const keysWithOrder = categoryKeys.filter(key => 
+        categoriesOrder[key] !== undefined
+      );
+      
+      // Kategorien ohne definierte Reihenfolge (werden am Ende angefügt)
+      const keysWithoutOrder = categoryKeys.filter(key => 
+        categoriesOrder[key] === undefined
+      );
+      
+      // Sortiere die Kategorien mit definierter Reihenfolge
+      keysWithOrder.sort((a, b) => 
+        (categoriesOrder[a] || 0) - (categoriesOrder[b] || 0)
+      );
+      
+      // Verbinde die sortierten Kategorien mit denen ohne Reihenfolge
+      sortedCategoryKeys = [...keysWithOrder, ...keysWithoutOrder];
+      
+      console.log('Kategorien in benutzerdefinierter Reihenfolge:', sortedCategoryKeys);
+    } else {
+      // Keine Reihenfolge definiert, verwende alphabetische Sortierung
+      sortedCategoryKeys = categoryKeys.sort();
+      console.log('Kategorien in alphabetischer Reihenfolge:', sortedCategoryKeys);
+    }
+    
+    // Übertrage die Kategorien in der richtigen Reihenfolge
+    sortedCategoryKeys.forEach(category => {
+      orderedResponse.categories[category] = galleryByCategory.categories[category];
+    });
 
-    return NextResponse.json(galleryByCategory);
+    return NextResponse.json(orderedResponse);
   } catch (error) {
     console.error('Error in gallery API:', error);
     return NextResponse.json(

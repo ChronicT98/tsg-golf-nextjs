@@ -141,8 +141,8 @@ export default function FotogaleriePage() {
           });
         }
         
-        // Sort categories alphabetically by display name
-        newCategories.sort((a, b) => a.name.localeCompare(b.name));
+        // Die Kategorien werden bereits in der API in der richtigen Reihenfolge zurückgegeben,
+        // daher keine zusätzliche Sortierung nötig, um die benutzerdefinierte Reihenfolge zu erhalten
         
         setCategories(newCategories);
       } catch (err) {

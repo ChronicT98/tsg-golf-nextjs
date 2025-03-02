@@ -8,6 +8,7 @@ import PdfConverter from '@/app/components/admin/pdf-converter';
 import ScorecardManager from '@/app/components/admin/scorecard-manager';
 import MemberEditor from '@/app/components/admin/member-editor';
 import GalleryUpload from '@/app/components/admin/gallery-upload';
+import GalleryCategoryReorderManager from '@/app/components/admin/gallery-category-reorder-manager';
 import YouTubeVideoManager from '@/app/components/admin/youtube-video-manager';
 import VideoReorderManager from '@/app/components/admin/video-reorder-manager';
 import type { MemberDetails } from '@/app/types/members';
@@ -484,6 +485,11 @@ export default function AdminPage() {
                   </div>
                 )}
               </div>
+            </div>
+            
+            <div className="gallery-category-reorder-section">
+              <div className="divider" style={{ margin: '30px 0', borderTop: '1px solid #ddd' }}></div>
+              <GalleryCategoryReorderManager />
             </div>
             
             <div className="gallery-note">
