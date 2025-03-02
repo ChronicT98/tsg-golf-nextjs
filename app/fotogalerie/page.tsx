@@ -218,22 +218,7 @@ export default function FotogaleriePage() {
             </div>
           )}
 
-          {/* Hidden preload div for category images */}
-          <div style={{ display: 'none' }}>
-            {categories.map((category) => (
-              <div key={`preload-${category.id}`}>
-                {category.images.slice(0, 1).map((image) => (
-                  <Image 
-                    key={`preload-img-${image.id}`}
-                    src={image.src} 
-                    alt="" 
-                    width={1} 
-                    height={1} 
-                  />
-                ))}
-              </div>
-            ))}
-          </div>
+          {/* Removed preloading div */}
 
           {/* Loading state */}
           {isLoading && (

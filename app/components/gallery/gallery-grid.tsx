@@ -171,15 +171,17 @@ const GalleryGrid: React.FC<GalleryGridProps> = ({ images, category }) => {
           onClick={handleBackdropClick}
         >
           <div className="gallery-modal-content">
-            <div className="gallery-modal-image-container" style={{ position: 'relative', width: '100%', height: '90vh' }}>
-              <Image
+            <div className="gallery-modal-image-container">
+              {/* Using standard img tag instead of Next.js Image for better compatibility */}
+              <img
                 src={images[modalState.imageIndex].src}
                 alt={images[modalState.imageIndex].alt}
-                fill={true}
-                sizes="100vw"
                 className="gallery-modal-image"
-                style={{ objectFit: 'contain' }}
-                priority={true}
+                style={{ 
+                  maxWidth: '100%',
+                  maxHeight: '90vh',
+                  objectFit: 'contain'
+                }}
                 onError={() => console.error(`Fehler beim Laden des Modal-Bildes: ${images[modalState.imageIndex].src}`)}
               />
             </div>
