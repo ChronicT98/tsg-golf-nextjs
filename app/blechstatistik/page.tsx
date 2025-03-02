@@ -1,19 +1,48 @@
 'use client';
 import '@/app/styles/blechstatistik.css';
 import '@/app/styles/GolfScorecard.css';
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import ImageModal from '@/app/components/scorecard-viewer/image-modal';
 import Image from 'next/image';
 
 export default function Blechstatistik() {
   const [selectedYear, setSelectedYear] = useState('2024');
-  const years = ['2025', '2024', '2023', '2022', '2021'];
+  const years = useMemo(() => ['2025', '2024', '2023', '2022', '2021'], []);
   const [latestFiles, setLatestFiles] = useState<Record<string, string>>({});
   const [modalState, setModalState] = useState({
     isOpen: false,
     imageUrl: '',
     alt: ''
   });
+  // State to track preloaded images
+  const [preloadedImages, setPreloadedImages] = useState<Set<string>>(new Set());
+  
+  // Function to preload an image
+  const preloadImage = useCallback((url: string | undefined) => {
+    if (!url || preloadedImages.has(url)) return; // Skip if URL is undefined or already preloaded
+    
+    const imgElement = document.createElement('img');
+    imgElement.src = url;
+    imgElement.onload = () => {
+      setPreloadedImages(prev => {
+        const newSet = new Set(prev);
+        newSet.add(url);
+        return newSet;
+      });
+    };
+  }, [preloadedImages]);
+  
+  // Function to preload all year images
+  const preloadAllYearImages = useCallback(() => {
+    if (!latestFiles || Object.keys(latestFiles).length === 0) return;
+    
+    // Preload all year images
+    years.forEach(year => {
+      if (latestFiles[year]) {
+        preloadImage(latestFiles[year]);
+      }
+    });
+  }, [latestFiles, preloadImage, years]);
 
   useEffect(() => {
     const fetchLatestFiles = async () => {
@@ -28,6 +57,13 @@ export default function Blechstatistik() {
 
     fetchLatestFiles();
   }, []);
+  
+  // Preload all year images when latestFiles data is loaded
+  useEffect(() => {
+    if (Object.keys(latestFiles).length > 0) {
+      preloadAllYearImages();
+    }
+  }, [latestFiles, preloadAllYearImages]);
 
   const openModal = useCallback((imageUrl: string, alt: string) => {
     setModalState({
@@ -55,7 +91,13 @@ export default function Blechstatistik() {
             <button
               key={year}
               className={`year-button ${selectedYear === year ? 'active' : ''}`}
-              onClick={() => setSelectedYear(year)}
+              onClick={() => {
+                setSelectedYear(year);
+                // Ensure this year's image is preloaded
+                if (latestFiles[year]) {
+                  preloadImage(latestFiles[year]);
+                }
+              }}
             >
               Blechstatistik {year}
             </button>
@@ -87,6 +129,21 @@ export default function Blechstatistik() {
                 <p>Noch keine Statistik verfügbar.</p>
               </div>
             )}
+          </div>
+          
+          {/* Hidden div for preloading images */}
+          <div style={{ display: 'none' }}>
+            {Object.entries(latestFiles)
+              .filter(([_, url]) => url && url.trim() !== '') // Filter out empty or undefined URLs
+              .map(([year, url]) => (
+                <Image 
+                  key={`preload-${year}`}
+                  src={url}
+                  alt={`Preload ${year}`}
+                  width={1}
+                  height={1}
+                />
+              ))}
           </div>
         </div>
       </div>
