@@ -1,6 +1,10 @@
+'use client';
+import { useState } from 'react';
+import ImageModal from '@/app/components/scorecard-viewer/image-modal';
 import Image from 'next/image';
 
 export default function Home() {
+  const [isModalOpen, setIsModalOpen] = useState(false);
   return (
     <main>
       <section className="hero">
@@ -20,6 +24,8 @@ export default function Home() {
                 height={600}
                 className="hero__image"
                 priority
+                onClick={() => setIsModalOpen(true)}
+                style={{ cursor: 'pointer' }}
               />
             </div>
           </div>
@@ -108,6 +114,14 @@ export default function Home() {
           </div>
         </div>
       </section>
+
+      {isModalOpen && (
+  <ImageModal
+    imageUrl="/images/TSG-Members.jpg"
+    alt="Tuesday Selection Golf Members"
+    onClose={() => setIsModalOpen(false)}
+  />
+)}
     </main>
   );
 }

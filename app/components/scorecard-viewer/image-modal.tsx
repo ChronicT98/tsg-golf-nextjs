@@ -1,3 +1,5 @@
+'use client';
+
 import React, { useEffect, useState } from 'react';
 import '@/app/styles/image-modal.css';
 import Image from 'next/image';

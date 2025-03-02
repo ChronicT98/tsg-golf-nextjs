@@ -7,6 +7,8 @@ import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea
 import PdfConverter from '@/app/components/admin/pdf-converter';
 import ScorecardManager from '@/app/components/admin/scorecard-manager';
 import MemberEditor from '@/app/components/admin/member-editor';
+import GalleryUpload from '@/app/components/admin/gallery-upload';
+import YouTubeVideoManager from '@/app/components/admin/youtube-video-manager';
 import type { MemberDetails } from '@/app/types/members';
 
 interface UploadResult {
@@ -21,7 +23,7 @@ interface SelectedMember {
   category: 'gruendungsmitglieder' | 'ordentlicheMitglieder' | 'inMemoriam';
 }
 
-type AdminSection = 'scorecards' | 'members';
+type AdminSection = 'scorecards' | 'members' | 'gallery' | 'videos';
 
 export default function AdminPage() {
   const { status } = useSession();
@@ -231,6 +233,18 @@ export default function AdminPage() {
           >
             Mitglieder Verwaltung
           </button>
+          <button
+            className={`toggle-button ${activeSection === 'gallery' ? 'active' : ''}`}
+            onClick={() => setActiveSection('gallery')}
+          >
+            Fotogalerie Verwaltung
+          </button>
+          <button
+            className={`toggle-button ${activeSection === 'videos' ? 'active' : ''}`}
+            onClick={() => setActiveSection('videos')}
+          >
+            Video Verwaltung
+          </button>
         </div>
 
         {activeSection === 'members' && (
@@ -418,7 +432,7 @@ export default function AdminPage() {
             <div className="upload-tools">
               <div className="converter-section">
                 <h3>PDF Hochladen und Konvertieren</h3>
-                <p>Lade PDF-Dateien hoch. Diese werden automatisch in JPEG konvertiert und in den entsprechenden Ordner gespeichert.</p>
+                <p>PDF-Dateien hochladen. Diese werden automatisch in JPEG konvertiert und in den entsprechenden Ordner gespeichert.</p>
                 <PdfConverter onConversionComplete={handleFileUpload} />
                 {uploadStatus.type !== 'none' && (
                   <div className={`upload-status ${uploadStatus.type}`}>
@@ -433,6 +447,98 @@ export default function AdminPage() {
             <div className="existing-cards">
               <h3>Vorhandene Scorecards</h3>
               <ScorecardManager />
+            </div>
+          </div>
+        )}
+
+        {activeSection === 'gallery' && (
+          <div className="gallery-manager">
+            <h2>Medien Verwaltung</h2>
+            
+            <div className="upload-tools">
+              <div className="gallery-section">
+                <h3>Bilder zur Fotogalerie hinzufügen</h3>
+                <p>
+                  Hier können Bilder für verschiedene Kategorien der Fotogalerie hochgeladen werden.
+                </p>
+                <GalleryUpload 
+                  onUploadComplete={(results) => {
+                    // Show feedback to user
+                    if (results && results.length > 0) {
+                      const successCount = results.filter((r: any) => r.success).length;
+                      const totalCount = results.length;
+                      
+                      setUploadStatus({
+                        message: `${successCount} von ${totalCount} Bilder erfolgreich hochgeladen.`,
+                        type: successCount === totalCount ? 'success' : 'error'
+                      });
+                    }
+                  }} 
+                />
+                {uploadStatus.type !== 'none' && (
+                  <div className={`upload-status ${uploadStatus.type}`}>
+                    {uploadStatus.message.split('\n').map((line, i) => (
+                      <p key={i}>{line}</p>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+            
+            <div className="gallery-note">
+              <h3>Hinweis</h3>
+              <p>
+                Die hochgeladenen Bilder werden automatisch in der Fotogalerie angezeigt und nach Kategorien sortiert.
+                Um die Galerie anzusehen, besuchen Sie die <a href="/fotogalerie" target="_blank" rel="noopener noreferrer">Fotogalerie-Seite</a>.
+              </p>
+            </div>
+          </div>
+        )}
+
+        {activeSection === 'videos' && (
+          <div className="videos-manager">
+            <h2>YouTube Video Verwaltung</h2>
+            
+            <div className="upload-tools">
+              <div className="video-section">
+                <h3>YouTube Videos hinzufügen</h3>
+                <p>
+                  Hier können YouTube-Videos für die Video-Galerie hinzugefügt werden.
+                  YouTube-URL oder Video-ID und Titel eingeben, optional eine Beschreibung hinzufügen.
+                </p>
+                <p>
+                  Die Videos werden auf der <a href="/videos" className="text-gradient" rel="noopener noreferrer">Video-Seite</a> angezeigt.
+                </p>
+                <YouTubeVideoManager 
+                  onAddComplete={(result) => {
+                    if (result && result.success) {
+                      setUploadStatus({
+                        message: `YouTube-Video wurde erfolgreich hinzugefügt.`,
+                        type: 'success'
+                      });
+                    }
+                  }} 
+                />
+                {uploadStatus.type !== 'none' && (
+                  <div className={`upload-status ${uploadStatus.type}`}>
+                    {uploadStatus.message.split('\n').map((line, i) => (
+                      <p key={i}>{line}</p>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+            
+            <div className="gallery-note">
+              <h3>Hinweis</h3>
+              <p>
+                Die Videos werden direkt von YouTube eingebettet und müssen daher nicht hochgeladen werden.
+                Sie benötigen lediglich die YouTube-Video-URL oder Video-ID.
+              </p>
+              <p>
+                YouTube-Video-URLs haben folgendes Format: <code>https://www.youtube.com/watch?v=XXXXXXXXXXX</code>, 
+                wobei "XXXXXXXXXXX" die Video-ID ist.
+              </p>
             </div>
           </div>
         )}

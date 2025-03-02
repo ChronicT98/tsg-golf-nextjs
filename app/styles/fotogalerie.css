@@ -1,0 +1,615 @@
+/* fotogalerie.css */
+/* Page-specific container */
+.fotogalerie {
+    padding: 4rem 0;
+    background: linear-gradient(to bottom, var(--background-color), rgba(79, 70, 229, 0.05));
+}
+
+/* Common heading style */
+.fotogalerie h1 {
+    text-align: center;
+    margin-bottom: 3rem;
+    font-size: clamp(2rem, 4vw, 3rem);
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    background-size: 200% 200%;
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: fadeIn 0.8s ease-out, gradientShift 8s ease infinite;
+}
+
+.fotogalerie__section {
+    margin-bottom: 4rem;
+    animation: fadeIn 0.8s ease-out;
+}
+
+.fotogalerie__intro {
+    max-width: 800px;
+    margin: 0 auto 2.5rem;
+    text-align: center;
+    color: var(--text-color);
+    font-size: 1.1rem;
+    line-height: 1.6;
+    animation: fadeIn 0.8s ease-out 0.2s backwards;
+}
+
+.category-selector {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 1rem;
+    margin-bottom: 3rem;
+    animation: fadeIn 0.8s ease-out 0.4s backwards;
+}
+
+.category-button {
+    background: var(--card-background);
+    color: var(--text-color);
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: var(--transition);
+    box-shadow: var(--shadow);
+    position: relative;
+    border: 0.5px solid transparent; /* Konsistenter Rahmen im Normalzustand */
+}
+
+
+.category-button:hover {
+    transform: translateY(-3px);
+    border-color: var(--primary-color); /* Nur die Farbe des Rahmens ändern */
+}
+
+.category-button:hover::before {
+    opacity: 1;
+}
+
+.category-button.active {
+    background: var(--primary-gradient);
+    color: white;
+    transform: translateY(-3px);
+    border: 0.5px solid transparent; /* Konsistenter Rahmen beibehalten */
+}
+
+.category-button.active:hover {
+    border-color: transparent; /* Rahmen beibehalten, aber transparent */
+}
+
+/* Content container - common structure */
+.content-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    animation: fadeIn 0.8s ease-out 0.6s backwards;
+}
+
+/* Gallery specific containers */
+.gallery-container, .gallery-grid-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    animation: fadeIn 0.8s ease-out 0.6s backwards;
+}
+
+/* Slider common styles */
+.content-slider {
+    position: relative;
+    margin: 0 auto;
+    overflow: hidden;
+    border-radius: 16px;
+    box-shadow: var(--shadow-lg);
+    background: var(--card-background);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Gallery slider styles - keeping for backward compatibility */
+.gallery-slider {
+    position: relative;
+    margin: 0 auto;
+    overflow: hidden;
+    border-radius: 16px;
+    box-shadow: var(--shadow-lg);
+    background: var(--card-background);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.content-slides {
+    display: flex;
+    transition: transform 0.5s ease-in-out;
+}
+
+.gallery-slides {
+    display: flex;
+    transition: transform 0.5s ease-in-out;
+}
+
+.gallery-slide {
+    min-width: 100%;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+}
+
+.gallery-slide img {
+    max-width: 100%;
+    max-height: 70vh;
+    object-fit: contain;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: transform 0.3s ease;
+}
+
+.gallery-slide img:hover {
+    transform: scale(1.02);
+}
+
+/* Gallery grid styles - new layout */
+.gallery-grid-container {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+}
+
+.gallery-featured {
+    background: var(--card-background);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 16px;
+    box-shadow: var(--shadow-lg);
+    max-width: 600px;
+    padding: 0.5rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 0 auto;
+
+}
+
+.featured-image {
+    max-width: 100%;
+    max-height: 70vh;
+    object-fit: contain;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: transform 0.3s ease;
+}
+
+.featured-image:hover {
+    transform: scale(1.02);
+}
+
+.gallery-thumbnails {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+.gallery-thumbnail {
+    position: relative;
+    aspect-ratio: 1;
+    border-radius: 8px;
+    overflow: hidden;
+    cursor: pointer;
+    box-shadow: var(--shadow);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    border: 2px solid transparent;
+}
+
+.gallery-thumbnail.active {
+    border-color: var(--primary-color);
+    transform: scale(1.05);
+    box-shadow: var(--shadow-lg);
+}
+
+.gallery-thumbnail:hover {
+    transform: scale(1.05);
+    box-shadow: var(--shadow-lg);
+}
+
+.gallery-thumbnail img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* Navigation controls - common styles */
+.slider-controls {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    margin-top: 1.5rem;
+}
+
+.slider-arrow {
+    background: var(--card-background);
+    color: var(--text-color);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: var(--transition);
+    box-shadow: var(--shadow);
+}
+
+.slider-arrow:hover {
+    transform: scale(1.1);
+    box-shadow: var(--shadow-lg);
+    background: linear-gradient(
+        to bottom right,
+        var(--primary-color),
+        var(--secondary-color)
+    );
+    color: white;
+}
+
+.slider-dots {
+    display: flex;
+    justify-content: center;
+    gap: 0.5rem;
+    margin-top: 1rem;
+}
+
+.slider-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.3);
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.slider-dot.active {
+    background: var(--primary-color);
+    transform: scale(1.2);
+}
+
+.coming-soon {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 300px;
+    text-align: center;
+    color: var(--text-light);
+    background: var(--card-background);
+    border-radius: 16px;
+    padding: 3rem;
+    box-shadow: var(--shadow);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    animation: fadeIn 0.8s ease-out 0.6s backwards;
+}
+
+.coming-soon h2 {
+    font-size: 1.5rem;
+    margin-bottom: 1rem;
+    color: var(--text-color);
+}
+
+.coming-soon p {
+    font-size: 1.1rem;
+    max-width: 600px;
+}
+
+.placeholder-image {
+    width: 100%;
+    height: 100%;
+    min-height: 400px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(
+        45deg,
+        rgba(79, 70, 229, 0.1),
+        rgba(79, 70, 229, 0.05)
+    );
+    border-radius: 8px;
+    color: var(--text-light);
+    font-size: 1.1rem;
+}
+
+/* Modal common styles */
+.content-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.9);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+
+.content-modal-content {
+    position: relative;
+    max-width: 90vw;
+    max-height: 90vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.content-modal-close {
+    position: absolute;
+    top: -40px;
+    right: 0;
+    background: none;
+    border: none;
+    color: white;
+    font-size: 1.5rem;
+    cursor: pointer;
+    padding: 8px;
+}
+
+.content-modal-nav {
+    position: absolute;
+    top: 50%;
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    transform: translateY(-50%);
+}
+
+.content-modal-prev,
+.content-modal-next {
+    background: rgba(0, 0, 0, 0.5);
+    color: white;
+    border: none;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.content-modal-prev:hover,
+.content-modal-next:hover {
+    background: rgba(79, 70, 229, 0.8);
+}
+
+.content-modal-caption {
+    color: white;
+    text-align: center;
+    margin-top: 1rem;
+    font-size: 1rem;
+}
+
+/* Gallery modal specific styles - keeping for backward compatibility */
+.gallery-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.9);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+
+.gallery-modal-content {
+    position: relative;
+    max-width: 90vw;
+    max-height: 90vh;
+}
+
+.gallery-modal-image {
+    max-width: 100%;
+    max-height: 90vh;
+    object-fit: contain;
+}
+
+.gallery-modal-close {
+    position: absolute;
+    top: -40px;
+    right: 0;
+    background: none;
+    border: none;
+    color: white;
+    font-size: 1.5rem;
+    cursor: pointer;
+    padding: 8px;
+}
+
+.gallery-modal-nav {
+    position: absolute;
+    top: 50%;
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    transform: translateY(-50%);
+}
+
+.gallery-modal-prev,
+.gallery-modal-next {
+    background: rgba(0, 0, 0, 0.5);
+    color: white;
+    border: none;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.gallery-modal-prev:hover,
+.gallery-modal-next:hover {
+    background: rgba(79, 70, 229, 0.8);
+}
+
+/* Content caption - common style */
+.content-caption {
+    text-align: center;
+    padding: 1rem;
+    color: var(--text-light);
+    font-size: 0.9rem;
+    max-width: 900px;
+    margin: 0 auto;
+}
+
+.gallery-caption {
+    text-align: center;
+    padding: 1rem;
+    color: var(--text-light);
+    font-size: 0.9rem;
+}
+
+/* Responsive styles */
+@media (max-width: 768px) {
+    .fotogalerie {
+        padding: 2rem 0;
+    }
+
+    .fotogalerie h1 {
+        margin-bottom: 2rem;
+    }
+
+    .fotogalerie__intro {
+        margin-bottom: 2rem;
+        font-size: 1rem;
+        padding: 0 1rem;
+    }
+
+    .category-selector {
+        margin-bottom: 2rem;
+        padding: 0 1rem;
+    }
+
+    .category-button {
+        padding: 0.6rem 1.25rem;
+        font-size: 0.9rem;
+    }
+
+    /* Common content styles for smaller screens */
+    .content-container,
+    .gallery-container,
+    .gallery-grid-container {
+        padding: 0 1rem;
+    }
+
+    .content-slider,
+    .gallery-slider {
+        border-radius: 12px;
+    }
+
+    .content-slides .content-slide,
+    .gallery-slide {
+        padding: 1rem;
+    }
+
+    .gallery-featured {
+        padding: 1rem;
+    }
+
+    .featured-image {
+        max-height: 60vh;
+    }
+
+    .gallery-thumbnails {
+        grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+    }
+
+    .slider-arrow {
+        width: 40px;
+        height: 40px;
+    }
+
+    .content-modal-prev,
+    .content-modal-next,
+    .gallery-modal-prev,
+    .gallery-modal-next {
+        width: 36px;
+        height: 36px;
+    }
+
+    .coming-soon {
+        padding: 2rem 1rem;
+        min-height: 200px;
+    }
+
+    .placeholder-image {
+        min-height: 250px;
+    }
+}
+
+@media (max-width: 480px) {
+    .fotogalerie {
+        padding: 1.5rem 0;
+    }
+
+    .category-selector {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .category-button {
+        width: 80%;
+        text-align: center;
+    }
+
+    .gallery-slide img {
+        max-height: 50vh;
+    }
+
+    .featured-image {
+        max-height: 50vh;
+    }
+
+    .gallery-thumbnails {
+        grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+    }
+
+    .slider-controls {
+        margin-top: 1rem;
+    }
+
+    .slider-arrow {
+        width: 36px;
+        height: 36px;
+    }
+}
+
+/* Support for reduced motion */
+@media (prefers-reduced-motion: reduce) {
+    .fotogalerie h1,
+    .fotogalerie__section,
+    .fotogalerie__intro,
+    .category-selector,
+    .content-container,
+    .gallery-container,
+    .coming-soon {
+        animation: none;
+    }
+
+    .category-button:hover,
+    .slider-arrow:hover,
+    .gallery-slide img:hover,
+    .content-modal-prev:hover,
+    .content-modal-next:hover {
+        transform: none;
+    }
+
+    .gallery-slides,
+    .content-slides {
+        transition: none;
+    }
+
+    .gallery-thumbnail:hover,
+    .featured-image:hover {
+        transform: none;
+    }
+}
