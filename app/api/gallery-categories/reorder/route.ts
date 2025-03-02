@@ -141,3 +141,98 @@ export async function PUT(request: Request) {
     );
   }
 }
+
+/**
+ * DELETE endpoint to remove a gallery category and all its contents
+ * Uses URL parameter ?categoryId=... to identify the category to delete
+ */
+export async function DELETE(request: Request) {
+  try {
+    // Kategorie-ID aus der URL extrahieren
+    const { searchParams } = new URL(request.url);
+    const categoryId = searchParams.get('categoryId');
+    
+    if (!categoryId) {
+      return NextResponse.json(
+        { error: 'Kategorie-ID ist erforderlich' },
+        { status: 400 }
+      );
+    }
+    
+    console.log(`Lösche Kategorie: ${categoryId}`);
+    
+    // 1. Prüfen, ob die Kategorie in der Datenbank existiert
+    const { data: categoryData, error: categoryError } = await supabase
+      .from('gallery_categories')
+      .select('*')
+      .eq('category_id', categoryId)
+      .single();
+      
+    if (categoryError && categoryError.code !== 'PGRST116') { // PGRST116 = Not found
+      throw categoryError;
+    }
+    
+    // 2. Auflisten aller Dateien im Kategorie-Ordner
+    const { data: folderFiles, error: listError } = await supabase
+      .storage
+      .from('gallery')
+      .list(categoryId);
+      
+    if (listError) {
+      throw listError;
+    }
+    
+    // 3. Alle Dateien im Ordner löschen
+    if (folderFiles && folderFiles.length > 0) {
+      console.log(`${folderFiles.length} Dateien in Kategorie ${categoryId} zum Löschen gefunden`);
+      
+      const filePaths = folderFiles.map(file => `${categoryId}/${file.name}`);
+      
+      const { error: deleteFilesError } = await supabaseAdmin
+        .storage
+        .from('gallery')
+        .remove(filePaths);
+        
+      if (deleteFilesError) {
+        throw deleteFilesError;
+      }
+      
+      console.log(`${filePaths.length} Dateien erfolgreich gelöscht`);
+    }
+    
+    // 4. Kategorie-Ordner löschen (wird automatisch entfernt, wenn er leer ist)
+    
+    // 5. Kategorie aus der Datenbank löschen
+    if (categoryData) {
+      const { error: deleteDbError } = await supabaseAdmin
+        .from('gallery_categories')
+        .delete()
+        .eq('category_id', categoryId);
+        
+      if (deleteDbError) {
+        throw deleteDbError;
+      }
+      
+      console.log(`Kategorie ${categoryId} erfolgreich aus der Datenbank gelöscht`);
+    }
+    
+    return NextResponse.json({
+      success: true,
+      message: `Kategorie ${categoryId} erfolgreich gelöscht`
+    });
+  } catch (error) {
+    console.error('Error deleting category:', error);
+    
+    const errorMessage = error instanceof Error ? 
+      error.message.replace(/[\"\'\\\n\r\t]/g, '') : 
+      'Unbekannter Fehler beim Löschen der Kategorie';
+    
+    return NextResponse.json(
+      { 
+        error: 'Fehler beim Löschen der Kategorie',
+        details: errorMessage
+      },
+      { status: 500 }
+    );
+  }
+}

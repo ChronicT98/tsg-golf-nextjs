@@ -14,6 +14,66 @@ export default function GalleryCategoryReorderManager() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [categoryToDelete, setCategoryToDelete] = useState<CategoryData | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  // Funktion zum Vorbereiten des Löschvorgangs (zeigt Bestätigungsdialog)
+  const handleDeleteClick = (category: CategoryData) => {
+    setCategoryToDelete(category);
+    setShowDeleteConfirm(true);
+  };
+
+  // Funktion zum tatsächlichen Löschen nach Bestätigung
+  const handleDeleteConfirm = async () => {
+    if (!categoryToDelete) return;
+    
+    try {
+      setIsDeleting(true);
+      setMessage(null);
+      
+      // API-Aufruf zum Löschen der Kategorie
+      const response = await fetch(`/api/gallery-categories/reorder?categoryId=${categoryToDelete.id}`, {
+        method: 'DELETE',
+      });
+      
+      if (!response.ok) {
+        throw new Error('Fehler beim Löschen der Kategorie');
+      }
+      
+      const result = await response.json();
+      
+      if (result.success) {
+        // Aktualisiere die Kategorieliste nach erfolgreicher Löschung
+        setCategories(prevCategories => 
+          prevCategories.filter(cat => cat.id !== categoryToDelete.id)
+        );
+        
+        setMessage({
+          type: 'success',
+          text: `Kategorie "${categoryToDelete.originalName}" erfolgreich gelöscht`
+        });
+      } else {
+        throw new Error(result.error || 'Fehler beim Löschen der Kategorie');
+      }
+    } catch (err) {
+      console.error('Error deleting category:', err);
+      setMessage({
+        type: 'error',
+        text: err instanceof Error ? err.message : 'Fehler beim Löschen der Kategorie'
+      });
+    } finally {
+      setIsDeleting(false);
+      setShowDeleteConfirm(false);
+      setCategoryToDelete(null);
+    }
+  };
+
+  // Abbrechen des Löschvorgangs
+  const handleDeleteCancel = () => {
+    setShowDeleteConfirm(false);
+    setCategoryToDelete(null);
+  };
 
   useEffect(() => {
     const fetchCategories = async () => {
@@ -178,6 +238,17 @@ export default function GalleryCategoryReorderManager() {
                         <div className="category-name">{category.originalName}</div>
                         <div className="category-id">(ID: {category.id})</div>
                       </div>
+                      <button
+                        type="button"
+                        className="delete-button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleDeleteClick(category);
+                        }}
+                        title="Kategorie löschen"
+                      >
+                        🗑️
+                      </button>
                     </div>
                   )}
                 </Draggable>
@@ -187,6 +258,40 @@ export default function GalleryCategoryReorderManager() {
           )}
         </Droppable>
       </DragDropContext>
+      
+      {/* Löschbestätigungsdialog */}
+      {showDeleteConfirm && categoryToDelete && (
+        <div className="modal-overlay">
+          <div className="modal-content">
+            <div className="admin-editor">
+              <h2>Kategorie löschen</h2>
+              
+              <div className="warning-message">
+                <p>Möchten Sie die Kategorie <strong>{categoryToDelete.originalName}</strong> wirklich löschen?</p>
+                <p>Dies wird <strong>alle Bilder</strong> in dieser Kategorie <strong>unwiderruflich löschen</strong>!</p>
+              </div>
+              
+              <div className="button-group">
+                <button 
+                  className="cancel-button" 
+                  onClick={handleDeleteCancel}
+                  disabled={isDeleting}
+                >
+                  Abbrechen
+                </button>
+                
+                <button 
+                  className="delete-button" 
+                  onClick={handleDeleteConfirm}
+                  disabled={isDeleting}
+                >
+                  {isDeleting ? 'Wird gelöscht...' : 'Löschen'}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

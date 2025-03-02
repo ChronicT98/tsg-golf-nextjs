@@ -463,6 +463,9 @@ export default function AdminPage() {
                 <p>
                   Hier können Bilder für verschiedene Kategorien der Fotogalerie hochgeladen werden.
                 </p>
+                <p>
+                Die Fotos werden auf der <a href="/fotogalerie" className="text-gradient" rel="noopener noreferrer">Fotogalerie-Seite</a> angezeigt.
+                </p>
                 <GalleryUpload 
                   onUploadComplete={(results) => {
                     // Show feedback to user
@@ -492,13 +495,6 @@ export default function AdminPage() {
               <GalleryCategoryReorderManager />
             </div>
             
-            <div className="gallery-note">
-              <h3>Hinweis</h3>
-              <p>
-                Die hochgeladenen Bilder werden automatisch in der Fotogalerie angezeigt und nach Kategorien sortiert.
-                Um die Galerie anzusehen, besuchen Sie die <a href="/fotogalerie" target="_blank" rel="noopener noreferrer">Fotogalerie-Seite</a>.
-              </p>
-            </div>
           </div>
         )}
 
