@@ -55,7 +55,7 @@ const MemberImageModal: React.FC<MemberImageModalProps> = ({ imageUrl, alt, onCl
             width={2000}
             height={2000}
             style={{
-              width:'min(70vw, 300px)',
+              width: '533px',
               height: 'auto',
               maxWidth: '90vw',
               maxHeight: '90vh',
