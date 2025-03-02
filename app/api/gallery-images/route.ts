@@ -112,39 +112,6 @@ async function saveCategoryMetadata(category: string, metadata: CategoryMetadata
   }
 }
 
-// Schnittstelle für die Kategorie-Reihenfolgedaten
-interface CategoriesOrderData {
-  order: Record<string, number>; // Map von Kategorie-ID zu Reihenfolgen-Index
-  lastUpdated: string;
-}
-
-/**
- * Lädt die Reihenfolge-Daten für die Kategorien
- */
-async function getCategoriesOrder(): Promise<CategoriesOrderData | null> {
-  try {
-    // Versuche, die categories-order.json-Datei zu lesen
-    const { data: orderFile, error } = await supabase
-      .storage
-      .from('gallery')
-      .download('categories-order.json');
-      
-    if (error || !orderFile) {
-      console.log('No categories order file found');
-      return null;
-    }
-    
-    // Datei in Text umwandeln und parsen
-    const orderText = await orderFile.text();
-    const orderData = JSON.parse(orderText) as CategoriesOrderData;
-    
-    return orderData;
-  } catch (error) {
-    console.error('Error reading categories order:', error);
-    return null;
-  }
-}
-
 // Type für die Kategorie-Daten aus der Datenbank
 interface CategoryOrderData {
   id: number;
