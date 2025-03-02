@@ -134,7 +134,7 @@ export default function Blechstatistik() {
           {/* Hidden div for preloading images */}
           <div style={{ display: 'none' }}>
             {Object.entries(latestFiles)
-              .filter(([_, url]) => url && url.trim() !== '') // Filter out empty or undefined URLs
+              .filter(([, url]) => url && url.trim() !== '') // Filter out empty or undefined URLs
               .map(([year, url]) => (
                 <Image 
                   key={`preload-${year}`}
