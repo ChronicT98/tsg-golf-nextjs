@@ -179,7 +179,7 @@ export default function RuleManager() {
         throw new Error(errorData.error || 'Error saving rule');
       }
 
-      const result = await response.json();
+      await response.json();
 
       setMessage({
         type: 'success',
@@ -480,11 +480,11 @@ export default function RuleManager() {
                     </li>
                     <li>
                       <strong>Tabellen erstellen (wie bei §14 Geldwertung)</strong>:<br></br> 
-                      Jede Zeile im Format "Ereignis : Betrag" eingeben. Der Header ist immer die erste Zeile.
+                      Jede Zeile im Format &quot;Ereignis : Betrag&quot; eingeben. Der Header ist immer die erste Zeile.
                     </li>
                     <li>
                       <strong>Unterregeln erstellen (wie bei §16)</strong>:<br></br> 
-                      Jede Unterregel auf einer neuen Zeile mit Format "§16.1 ..." usw. eingeben
+                      Jede Unterregel auf einer neuen Zeile mit Format &quot;§16.1 ...&quot; usw. eingeben
                     </li>
                   </ul>
                 </div>
