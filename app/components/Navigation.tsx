@@ -85,12 +85,12 @@ export default function Navigation() {
         <ul className="sidebar-menu-items">
           <li><Link href="/" onClick={toggleSidebar}>Home</Link></li>
           <li><Link href="/regelwerk" onClick={toggleSidebar}>Regelwerk</Link></li>
-          <li><Link href="/blechstatistik" onClick={toggleSidebar}>Blechstatistik</Link></li>
           <li><Link href="/mitglieder" onClick={toggleSidebar}>Mitglieder</Link></li>
+          <li><Link href="/spielergebnisse" onClick={toggleSidebar}>Spielergebnisse</Link></li>
+          <li><Link href="/blechstatistik" onClick={toggleSidebar}>Blechstatistik</Link></li>
+          <li><Link href="/turnierplan" onClick={toggleSidebar}>Turnierplan</Link></li>
           <li><Link href="/fotogalerie" onClick={toggleSidebar}>Fotogalerie</Link></li>
           <li><Link href="/videos" onClick={toggleSidebar}>Videos</Link></li>
-          <li><Link href="/turnierplan" onClick={toggleSidebar}>Turnierplan</Link></li>
-          <li><Link href="/spielergebnisse" onClick={toggleSidebar}>Spielergebnisse</Link></li>
           <li><Link href="/kontakt" onClick={toggleSidebar}>Kontakt</Link></li>
         </ul>
       </nav>
