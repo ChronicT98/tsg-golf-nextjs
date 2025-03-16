@@ -10,7 +10,6 @@ export default function OfficialManager() {
   const [officials, setOfficials] = useState<OfficialDetails[]>([]);
   const [selectedOfficial, setSelectedOfficial] = useState<OfficialDetails | null>(null);
   const [isEditing, setIsEditing] = useState(false);
-  const [isDragging, setIsDragging] = useState(false);
 
   // Load officials from API
   const loadOfficials = async () => {
