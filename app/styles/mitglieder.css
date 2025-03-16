@@ -307,27 +307,21 @@
     animation: gradientShift 6s ease infinite;
 }
 
+
+/* Neuer Separator als eigenständiges Element */
+.mitglieder__role-separator {
+    display: inline-block;
+    width: 2px;
+    height: calc(100% - 20px);
+    background-color: var(--secondary-color);
+    margin: 10px;
+
+}
+
 .mitglieder__card--funktionaer .mitglieder__badge:hover {
     pointer-events: none;
 }
 
-#seperator {
-    position: relative;
-    border-right: none;
-    padding-right: 8px;
-    height: 100%;
-}
-
-#seperator::after {
-    content: "";
-    position: absolute;
-    right: 0;
-    top: 10px;
-    height: calc(100% - 20px);
-    width: 2px;
-    background-color: var(--secondary-color);
-    transform: translateX(50%);
-}
 
 .mitglieder__badge:hover {
     transform: translateY(-2px);

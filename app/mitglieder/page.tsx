@@ -10,16 +10,18 @@ export default function MitgliederPage() {
   const [gruendungsmitglieder, setGruendungsmitglieder] = useState<MemberDetails[]>([]);
   const [ordentlicheMitglieder, setOrdentlicheMitglieder] = useState<MemberDetails[]>([]);
   const [inMemoriam, setInMemoriam] = useState<MemberDetails[]>([]);
+  const [officials, setOfficials] = useState<{name: string; role1: string; role2?: string}[]>([]);
 
   useEffect(() => {
     async function loadMembers() {
       try {
-        const response = await fetch('/api/members');
-        if (!response.ok) {
+        // Lade Mitglieder
+        const membersResponse = await fetch('/api/members');
+        if (!membersResponse.ok) {
           throw new Error('Failed to fetch members');
         }
         
-        const members = await response.json();
+        const members = await membersResponse.json();
         console.log('Received members:', members);
         
         // Sortiere die Mitglieder in ihre Kategorien
@@ -32,8 +34,16 @@ export default function MitgliederPage() {
         setInMemoriam(
           members.filter((m: MemberDetails) => m.category === 'inMemoriam')
         );
+        
+        // Lade Funktionäre
+        const officialsResponse = await fetch('/api/officials');
+        if (officialsResponse.ok) {
+          const officialsData = await officialsResponse.json();
+          console.log('Received officials:', officialsData);
+          setOfficials(officialsData);
+        }
       } catch (err) {
-        console.error('Error loading members:', err);
+        console.error('Error loading data:', err);
       }
     }
 
@@ -276,43 +286,24 @@ export default function MitgliederPage() {
           <section className="mitglieder__section">
             <h3 className="mitglieder__category-title">Funktionäre</h3>
             <div className="mitglieder__grid">
-              <div className="mitglieder__card mitglieder__card--funktionaer">
-                <h3 className="mitglieder__name">Christian Kafka</h3>
-                <div className="mitglieder__badges">
-                  <span className="mitglieder__badge" id="seperator">Präsident</span>
-                  <span className="mitglieder__badge">Auswertung</span>
+              {officials.map((official, index) => (
+                <div key={index} className="mitglieder__card mitglieder__card--funktionaer">
+                  <h3 className="mitglieder__name">{official.name}</h3>
+                  <div className="mitglieder__badges">
+                      <span className="mitglieder__badge">
+                        {official.role1}
+                      </span>
+                      {official.role2 && (
+                        <>
+                          <span className="mitglieder__role-separator"></span>
+                          <span className="mitglieder__badge">
+                            {official.role2}
+                          </span>
+                        </>
+                      )}
+                  </div>
                 </div>
-              </div>
-
-              <div className="mitglieder__card mitglieder__card--funktionaer">
-                <h3 className="mitglieder__name">Ernst Aigner</h3>
-                <div className="mitglieder__badges">
-                  <span className="mitglieder__badge">Kassier</span>
-                </div>
-              </div>
-
-              <div className="mitglieder__card mitglieder__card--funktionaer">
-                <h3 className="mitglieder__name">Peter Konrad</h3>
-                <div className="mitglieder__badges">
-                  <span className="mitglieder__badge" id="seperator">Kassaprüfer</span>
-                  <span className="mitglieder__badge">Turnierkarten</span>
-                </div>
-              </div>
-
-              <div className="mitglieder__card mitglieder__card--funktionaer">
-                <h3 className="mitglieder__name">Tobias Kafka</h3>
-                <div className="mitglieder__badges">
-                  <span className="mitglieder__badge">Homepage</span>
-                </div>
-              </div>
-
-              <div className="mitglieder__card mitglieder__card--funktionaer">
-                <h3 className="mitglieder__name">Bernhard Anderle</h3>
-                <div className="mitglieder__badges">
-                  <span className="mitglieder__badge" id="seperator">Medien</span>
-                  <span className="mitglieder__badge">Marketing</span>
-                </div>
-              </div>
+              ))}
             </div>
           </section>
         )}

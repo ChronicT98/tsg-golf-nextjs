@@ -7,6 +7,7 @@ import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea
 import PdfConverter from '@/app/components/admin/pdf-converter';
 import ScorecardManager from '@/app/components/admin/scorecard-manager';
 import MemberEditor from '@/app/components/admin/member-editor';
+import OfficialManager from '@/app/components/admin/official-manager';
 import GalleryUpload from '@/app/components/admin/gallery-upload';
 import GalleryCategoryReorderManager from '@/app/components/admin/gallery-category-reorder-manager';
 import YouTubeVideoManager from '@/app/components/admin/youtube-video-manager';
@@ -259,6 +260,45 @@ export default function AdminPage() {
         {activeSection === 'members' && (
           <div className="members-manager">
           <h2>Mitglieder Verwaltung</h2>
+          
+          <div className="member-sections">
+            <button 
+              className="section-toggle active" 
+              onClick={(e) => {
+                // Toggle between members and officials sections
+                const buttons = e.currentTarget.parentElement?.querySelectorAll('.section-toggle');
+                buttons?.forEach(btn => btn.classList.remove('active'));
+                e.currentTarget.classList.add('active');
+                
+                // Show members section, hide officials section
+                const membersSection = document.querySelector('.members-section');
+                const officialsSection = document.querySelector('.officials-section');
+                if (membersSection) membersSection.classList.remove('hidden');
+                if (officialsSection) officialsSection.classList.add('hidden');
+              }}
+            >
+              Mitglieder
+            </button>
+            <button 
+              className="section-toggle" 
+              onClick={(e) => {
+                // Toggle between members and officials sections
+                const buttons = e.currentTarget.parentElement?.querySelectorAll('.section-toggle');
+                buttons?.forEach(btn => btn.classList.remove('active'));
+                e.currentTarget.classList.add('active');
+                
+                // Show officials section, hide members section
+                const membersSection = document.querySelector('.members-section');
+                const officialsSection = document.querySelector('.officials-section');
+                if (membersSection) membersSection.classList.add('hidden');
+                if (officialsSection) officialsSection.classList.remove('hidden');
+              }}
+            >
+              Funktionäre
+            </button>
+          </div>
+          
+          <div className="members-section">
           <DragDropContext onDragEnd={handleDragEnd}>
             <div className="member-categories">
               <div className="member-category">
@@ -394,6 +434,12 @@ export default function AdminPage() {
             </div>
           </div>
           </DragDropContext>
+          
+          </div>
+          
+          <div className="officials-section hidden">
+            <OfficialManager />
+          </div>
 
           {selectedMember && (
             <div className="modal-overlay">
@@ -433,6 +479,35 @@ export default function AdminPage() {
         </div>
 
         )}
+
+        <style jsx>{`
+          .member-sections {
+            display: flex;
+            margin-bottom: 20px;
+            border-bottom: 1px solid #e0e0e0;
+          }
+          
+          .section-toggle {
+            padding: 8px 16px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 1rem;
+            margin-right: 10px;
+            opacity: 0.7;
+            transition: all 0.2s ease;
+          }
+          
+          .section-toggle.active {
+            opacity: 1;
+            font-weight: bold;
+            border-bottom: 2px solid #1a73e8;
+          }
+          
+          .hidden {
+            display: none;
+          }
+        `}</style>
 
         {activeSection === 'scorecards' && (
           <div className="scorecards-manager">
