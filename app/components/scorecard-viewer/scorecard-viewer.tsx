@@ -35,7 +35,7 @@ interface ScorecardData {
 
 const ScorecardViewer: React.FC = () => {
   const [data, setData] = useState<ScorecardData | null>(null);
-  const [selectedYear, setSelectedYear] = useState('2024');
+  const [selectedYear, setSelectedYear] = useState('2025');
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);

@@ -6,7 +6,7 @@ import ImageModal from '@/app/components/scorecard-viewer/image-modal';
 import Image from 'next/image';
 
 export default function Blechstatistik() {
-  const [selectedYear, setSelectedYear] = useState('2024');
+  const [selectedYear, setSelectedYear] = useState('2025');
   const years = useMemo(() => ['2025', '2024', '2023', '2022', '2021'], []);
   const [latestFiles, setLatestFiles] = useState<Record<string, string>>({});
   const [modalState, setModalState] = useState({
