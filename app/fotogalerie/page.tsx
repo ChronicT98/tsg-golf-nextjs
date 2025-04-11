@@ -18,170 +18,138 @@ interface GalleryImage {
 interface GalleryCategory {
   id: string;
   name: string;
-  images: GalleryImage[];
 }
 
-// Aktualisiertes Interface für die neue API-Antwortstruktur
-interface ApiResponse {
-  categories: {
-    [category: string]: GalleryImage[];
+interface CategoryImagesResponse {
+  images: GalleryImage[];
+  metadata?: {
+    originalName: string;
   };
-  metadata: {
-    [categoryId: string]: {
-      originalName: string;
-    };
-  };
+}
+
+interface CategoriesResponse {
+  categories: GalleryCategory[];
 }
 
 export default function FotogaleriePage() {
   const [categories, setCategories] = useState<GalleryCategory[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<string>('');
-  const [isLoading, setIsLoading] = useState(true);
+  const [categoryImages, setCategoryImages] = useState<Record<string, GalleryImage[]>>({});
+  const [isLoadingCategories, setIsLoadingCategories] = useState(true);
+  const [isLoadingImages, setIsLoadingImages] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // State to track preloaded images
-  const [preloadedImages, setPreloadedImages] = useState<Set<string>>(new Set());
-
-  // Function to preload an image
-  const preloadImage = useCallback((url: string | undefined) => {
-    if (!url || preloadedImages.has(url)) return; // Skip if URL is undefined or already preloaded
-    
-    const imgElement = document.createElement('img');
-    imgElement.src = url;
-    imgElement.onload = () => {
-      setPreloadedImages(prev => {
-        const newSet = new Set(prev);
-        newSet.add(url);
-        return newSet;
-      });
-    };
-  }, [preloadedImages]);
-
-  // Function to preload all categories' images
-  const preloadAllCategories = useCallback(() => {
-    if (!categories.length) return;
-
-    // Preload first image from each category
-    categories.forEach(category => {
-      if (category.images && category.images.length > 0) {
-        // Preload first image from each category (you could preload more if needed)
-        const firstImage = category.images[0];
-        if (firstImage && firstImage.src) {
-          preloadImage(firstImage.src);
+  // Lade nur Kategorien beim ersten Laden
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        setIsLoadingCategories(true);
+        setError(null);
+        
+        const response = await fetch('/api/gallery-categories');
+        if (!response.ok) {
+          throw new Error('Fehler beim Laden der Galerie-Kategorien');
         }
+        
+        const data: CategoriesResponse = await response.json();
+        setCategories(data.categories);
+        
+        // Wähle die erste Kategorie als Standard, wenn vorhanden
+        if (data.categories.length > 0) {
+          setSelectedCategory(data.categories[0].id);
+        }
+      } catch (err) {
+        console.error('Error fetching gallery categories:', err);
+        setError(err instanceof Error ? err.message : 'Fehler beim Laden der Kategorien');
+      } finally {
+        setIsLoadingCategories(false);
       }
-    });
-  }, [categories, preloadImage]);
+    };
 
-  // Function to preload neighboring categories
-  const preloadNeighboringCategories = useCallback((currentCategoryId: string) => {
-    if (!categories.length) return;
+    fetchCategories();
+  }, []);
+
+  // Lade Bilder nur für die ausgewählte Kategorie
+  useEffect(() => {
+    if (!selectedCategory) return;
     
-    // Find the index of the current category
-    const currentIndex = categories.findIndex(c => c.id === currentCategoryId);
+    // Wenn wir die Bilder für diese Kategorie bereits geladen haben, nicht erneut laden
+    if (categoryImages[selectedCategory]) return;
+    
+    const fetchCategoryImages = async () => {
+      try {
+        setIsLoadingImages(true);
+        
+        const response = await fetch(`/api/gallery-images/${selectedCategory}`);
+        if (!response.ok) {
+          throw new Error(`Fehler beim Laden der Bilder für ${selectedCategory}`);
+        }
+        
+        const data: CategoryImagesResponse = await response.json();
+        
+        setCategoryImages(prevImages => ({
+          ...prevImages,
+          [selectedCategory]: data.images
+        }));
+      } catch (err) {
+        console.error(`Error fetching images for category ${selectedCategory}:`, err);
+        setError(err instanceof Error ? err.message : 'Fehler beim Laden der Bilder');
+      } finally {
+        setIsLoadingImages(false);
+      }
+    };
+    
+    fetchCategoryImages();
+  }, [selectedCategory, categoryImages]);
+
+  // Preload benachbarte Kategorien für schnellere Navigation
+  const preloadNeighboringCategories = useCallback(() => {
+    if (!selectedCategory || categories.length === 0) return;
+    
+    // Finde den Index der aktuellen Kategorie
+    const currentIndex = categories.findIndex(c => c.id === selectedCategory);
     if (currentIndex === -1) return;
     
-    // Get previous and next categories
+    // Bestimme vorherige und nächste Kategorie
     const prevCategory = currentIndex > 0 ? categories[currentIndex - 1] : null;
     const nextCategory = currentIndex < categories.length - 1 ? categories[currentIndex + 1] : null;
     
-    // Preload images from previous category
-    if (prevCategory && prevCategory.images.length > 0) {
-      preloadImage(prevCategory.images[0].src);
-    }
-    
-    // Preload images from next category
-    if (nextCategory && nextCategory.images.length > 0) {
-      preloadImage(nextCategory.images[0].src);
-    }
-  }, [categories, preloadImage]);
-
-  // Fetch images when the component mounts
-  useEffect(() => {
-    const fetchGalleryImages = async () => {
+    // Preload in niedriger Priorität
+    const preloadCategory = async (categoryId: string) => {
+      // Überprüfe, ob wir diese Kategorie bereits geladen haben
+      if (categoryImages[categoryId]) return;
+      
       try {
-        setIsLoading(true);
-        setError(null);
+        const response = await fetch(`/api/gallery-images/${categoryId}`);
+        if (!response.ok) return;
         
-        const response = await fetch('/api/gallery-images');
-        if (!response.ok) {
-          throw new Error('Fehler beim Laden der Galerie-Bilder');
-        }
+        const data: CategoryImagesResponse = await response.json();
         
-        const data: ApiResponse = await response.json();
-        
-        // Update categories with fetched images
-        // Transform API data into our GalleryCategory format
-        const newCategories: GalleryCategory[] = [];
-        
-        // Verarbeite die neue API-Struktur mit categories und metadata
-        for (const [categoryId, images] of Object.entries(data.categories || {})) {
-          // Verwende den originalen Namen aus den Metadaten, falls vorhanden
-          const originalName = data.metadata?.[categoryId]?.originalName;
-          
-          // Verwende entweder den originalen Namen oder erzeuge einen aus der ID
-          const displayName = originalName || categoryId
-            // Replace hyphens with spaces
-            .replace(/-/g, ' ')
-            // Split into words
-            .split(' ')
-            // Capitalize each word and handle special German terms
-            .map(word => {
-              // Special case for common German terms and abbreviations
-              if (word.toLowerCase() === 'tsg') return 'TSG';
-              // Standard capitalization for other words
-              return word.charAt(0).toUpperCase() + word.slice(1);
-            })
-            .join(' ');
-            
-          newCategories.push({
-            id: categoryId,
-            name: displayName,
-            images: images
-          });
-        }
-        
-        // Die Kategorien werden bereits in der API in der richtigen Reihenfolge zurückgegeben,
-        // daher keine zusätzliche Sortierung nötig, um die benutzerdefinierte Reihenfolge zu erhalten
-        
-        setCategories(newCategories);
-      } catch (err) {
-        console.error('Error fetching gallery images:', err);
-        setError(err instanceof Error ? err.message : 'Fehler beim Laden der Bilder');
-      } finally {
-        setIsLoading(false);
+        setCategoryImages(prevImages => ({
+          ...prevImages,
+          [categoryId]: data.images
+        }));
+      } catch (error) {
+        console.error(`Error preloading category ${categoryId}:`, error);
       }
     };
+    
+    // Verzögertes Preloading, damit es nicht die Hauptkategorie beeinträchtigt
+    setTimeout(() => {
+      if (prevCategory) preloadCategory(prevCategory.id);
+    }, 2000);
+    
+    setTimeout(() => {
+      if (nextCategory) preloadCategory(nextCategory.id);
+    }, 3000);
+  }, [selectedCategory, categories, categoryImages]);
 
-    fetchGalleryImages();
-  }, []);
-
-  // Preload all categories when they are loaded
+  // Preload benachbarte Kategorien, wenn die Hauptkategorie geladen ist
   useEffect(() => {
-    if (categories.length > 0) {
-      preloadAllCategories();
+    if (!isLoadingImages && categoryImages[selectedCategory]) {
+      preloadNeighboringCategories();
     }
-  }, [categories, preloadAllCategories]);
-
-  // Preload neighboring categories when selected category changes
-  useEffect(() => {
-    if (categories.length > 0 && selectedCategory) {
-      preloadNeighboringCategories(selectedCategory);
-    }
-  }, [selectedCategory, categories, preloadNeighboringCategories]);
-
-  // Set default category when categories change or selectedCategory is invalid
-  useEffect(() => {
-    // Select the first category if none is selected and categories exist
-    if ((!selectedCategory || !categories.find(c => c.id === selectedCategory)) && categories.length > 0) {
-      setSelectedCategory(categories[0].id);
-    }
-  }, [categories, selectedCategory]);
-
-  // Find the current category data
-  const currentCategory = categories.find(
-    (category) => category.id === selectedCategory
-  ) || categories[0];
+  }, [isLoadingImages, categoryImages, selectedCategory, preloadNeighboringCategories]);
 
   return (
     <div className="fotogalerie">
@@ -211,16 +179,20 @@ export default function FotogaleriePage() {
                 </button>
               ))}
             </div>
-          ) : !isLoading && !error && (
+          ) : !isLoadingCategories && !error && (
             <div className="no-categories">
               <p>Noch keine Bilder vorhanden. Bitte fügen Sie über die Adminseite Bilder hinzu.</p>
             </div>
           )}
 
-          {/* Removed preloading div */}
-
-          {/* Loading state */}
-          {isLoading && (
+          {/* Loading states */}
+          {isLoadingCategories && (
+            <div className="loading-indicator">
+              <p>Kategorien werden geladen...</p>
+            </div>
+          )}
+          
+          {!isLoadingCategories && isLoadingImages && (
             <div className="loading-indicator">
               <p>Bilder werden geladen...</p>
             </div>
@@ -237,13 +209,21 @@ export default function FotogaleriePage() {
           )}
 
           {/* Gallery grid for the selected category */}
-          {!isLoading && !error && selectedCategory && currentCategory && (
+          {!isLoadingCategories && !isLoadingImages && !error && selectedCategory && 
+           categoryImages[selectedCategory] && categoryImages[selectedCategory].length > 0 && (
             <GalleryGrid
-              images={currentCategory.images}
-              category={currentCategory.name}
+              images={categoryImages[selectedCategory]}
+              category={categories.find(c => c.id === selectedCategory)?.name || ''}
             />
           )}
-
+          
+          {/* No images in this category */}
+          {!isLoadingCategories && !isLoadingImages && !error && selectedCategory && 
+           categoryImages[selectedCategory] && categoryImages[selectedCategory].length === 0 && (
+            <div className="no-images">
+              <p>Keine Bilder in dieser Kategorie vorhanden.</p>
+            </div>
+          )}
         </section>
       </div>
     </div>
