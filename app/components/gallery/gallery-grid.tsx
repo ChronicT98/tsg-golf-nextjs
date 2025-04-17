@@ -114,16 +114,13 @@ const GalleryGrid: React.FC<GalleryGridProps> = ({ images, category }) => {
 
   return (
     <div className="gallery-grid-container">
-      {/* Featured image - mit Performance-Optimierungen */}
+      {/* Featured image */}
       <div className="gallery-featured">
         <Image
           src={images[featuredImageIndex].src}
           alt={images[featuredImageIndex].alt}
           width={600}
           height={400}
-          priority={true} // Wichtiges Bild priorisieren - verbessert LCP
-          quality={85}    // Höhere Qualität für Hauptbild
-          sizes="(max-width: 768px) 90vw, 600px" // Responsive Größen
           className="featured-image"
           style={{ 
             maxWidth: '100%',
@@ -145,7 +142,7 @@ const GalleryGrid: React.FC<GalleryGridProps> = ({ images, category }) => {
         )}
       </div>
 
-      {/* Thumbnail grid - mit Lazy Loading und niedrigerer Qualität */}
+      {/* Thumbnail grid */}
       <div className="gallery-thumbnails">
         {images.map((image, index) => (
           <div 
@@ -158,9 +155,7 @@ const GalleryGrid: React.FC<GalleryGridProps> = ({ images, category }) => {
                 src={image.src}
                 alt={image.alt}
                 fill={true}
-                sizes="(max-width: 768px) 100px, 150px" // Responsive Größen für Thumbnails
-                quality={60}  // Niedrigere Qualität für Thumbnails
-                loading="lazy" // Explizites Lazy Loading für Thumbnails
+                sizes="128px"
                 style={{ objectFit: 'cover' }}
                 onError={() => console.error(`Fehler beim Laden des Thumbnails: ${image.src}`)}
               />
@@ -169,7 +164,7 @@ const GalleryGrid: React.FC<GalleryGridProps> = ({ images, category }) => {
         ))}
       </div>
 
-      {/* Modal for larger image view - jetzt auch mit Next.js Image */}
+      {/* Modal for larger image view */}
       {modalState.isOpen && (
         <div 
           className="gallery-modal"
@@ -177,14 +172,11 @@ const GalleryGrid: React.FC<GalleryGridProps> = ({ images, category }) => {
         >
           <div className="gallery-modal-content">
             <div className="gallery-modal-image-container">
-              {/* Next.js Image statt Standard-img */}
-              <Image
+              {/* Using standard img tag instead of Next.js Image for better compatibility with lightbox modals */}
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
                 src={images[modalState.imageIndex].src}
                 alt={images[modalState.imageIndex].alt}
-                width={1200}
-                height={800}
-                quality={85}
-                sizes="90vw"
                 className="gallery-modal-image"
                 style={{ 
                   maxWidth: '100%',

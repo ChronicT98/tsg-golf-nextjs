@@ -18,7 +18,7 @@ export default function Home() {
           <div className="container" style={{ marginTop: '3rem' }}>
             <div className="hero__image-container">
               <Image
-                src="/images/TSG-Members.jpg"
+                src="/images/TSG-Members2.jpg"
                 alt="Tuesday Selection Golf Members"
                 width={1200}
                 height={600}
