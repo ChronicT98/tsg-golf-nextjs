@@ -117,7 +117,7 @@ export default function Home() {
 
       {isModalOpen && (
   <ImageModal
-    imageUrl="/images/TSG-Members.jpg"
+    imageUrl="/images/TSG-Members2.jpg"
     alt="Tuesday Selection Golf Members"
     onClose={() => setIsModalOpen(false)}
   />
