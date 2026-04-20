@@ -119,10 +119,12 @@ const GalleryGrid: React.FC<GalleryGridProps> = ({ images, category }) => {
         <Image
           src={images[featuredImageIndex].src}
           alt={images[featuredImageIndex].alt}
-          width={600}
-          height={400}
+          width={1200}
+          height={800}
           className="featured-image"
-          style={{ 
+          priority={true}
+          sizes="(max-width: 768px) 100vw, 800px"
+          style={{
             maxWidth: '100%',
             maxHeight: '70vh',
             width: 'auto',
@@ -156,6 +158,8 @@ const GalleryGrid: React.FC<GalleryGridProps> = ({ images, category }) => {
                 alt={image.alt}
                 fill={true}
                 sizes="128px"
+                loading="lazy"
+                quality={60}
                 style={{ objectFit: 'cover' }}
                 onError={() => console.error(`Fehler beim Laden des Thumbnails: ${image.src}`)}
               />

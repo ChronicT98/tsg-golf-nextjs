@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import '@/app/styles/fotogalerie.css';
 import GalleryGrid from '@/app/components/gallery/gallery-grid';
 
@@ -39,62 +39,6 @@ export default function FotogaleriePage() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // State to track preloaded images
-  const [preloadedImages, setPreloadedImages] = useState<Set<string>>(new Set());
-
-  // Function to preload an image
-  const preloadImage = useCallback((url: string | undefined) => {
-    if (!url || preloadedImages.has(url)) return; // Skip if URL is undefined or already preloaded
-    
-    const imgElement = document.createElement('img');
-    imgElement.src = url;
-    imgElement.onload = () => {
-      setPreloadedImages(prev => {
-        const newSet = new Set(prev);
-        newSet.add(url);
-        return newSet;
-      });
-    };
-  }, [preloadedImages]);
-
-  // Function to preload all categories' images
-  const preloadAllCategories = useCallback(() => {
-    if (!categories.length) return;
-
-    // Preload first image from each category
-    categories.forEach(category => {
-      if (category.images && category.images.length > 0) {
-        // Preload first image from each category (you could preload more if needed)
-        const firstImage = category.images[0];
-        if (firstImage && firstImage.src) {
-          preloadImage(firstImage.src);
-        }
-      }
-    });
-  }, [categories, preloadImage]);
-
-  // Function to preload neighboring categories
-  const preloadNeighboringCategories = useCallback((currentCategoryId: string) => {
-    if (!categories.length) return;
-    
-    // Find the index of the current category
-    const currentIndex = categories.findIndex(c => c.id === currentCategoryId);
-    if (currentIndex === -1) return;
-    
-    // Get previous and next categories
-    const prevCategory = currentIndex > 0 ? categories[currentIndex - 1] : null;
-    const nextCategory = currentIndex < categories.length - 1 ? categories[currentIndex + 1] : null;
-    
-    // Preload images from previous category
-    if (prevCategory && prevCategory.images.length > 0) {
-      preloadImage(prevCategory.images[0].src);
-    }
-    
-    // Preload images from next category
-    if (nextCategory && nextCategory.images.length > 0) {
-      preloadImage(nextCategory.images[0].src);
-    }
-  }, [categories, preloadImage]);
 
   // Fetch images when the component mounts
   useEffect(() => {
@@ -155,20 +99,6 @@ export default function FotogaleriePage() {
 
     fetchGalleryImages();
   }, []);
-
-  // Preload all categories when they are loaded
-  useEffect(() => {
-    if (categories.length > 0) {
-      preloadAllCategories();
-    }
-  }, [categories, preloadAllCategories]);
-
-  // Preload neighboring categories when selected category changes
-  useEffect(() => {
-    if (categories.length > 0 && selectedCategory) {
-      preloadNeighboringCategories(selectedCategory);
-    }
-  }, [selectedCategory, categories, preloadNeighboringCategories]);
 
   // Set default category when categories change or selectedCategory is invalid
   useEffect(() => {

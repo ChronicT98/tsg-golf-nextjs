@@ -421,7 +421,9 @@ export async function GET() {
       orderedResponse.categories[category] = galleryByCategory.categories[category];
     });
 
-    return NextResponse.json(orderedResponse);
+    return NextResponse.json(orderedResponse, {
+      headers: { 'Cache-Control': 'public, s-maxage=300, stale-while-revalidate=600' },
+    });
   } catch (error) {
     console.error('Error in gallery API:', error);
     return NextResponse.json(

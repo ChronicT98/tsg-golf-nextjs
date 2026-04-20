@@ -2,6 +2,7 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   images: {
+    minimumCacheTTL: 3600,
     remotePatterns: [
       {
         protocol: 'https',
@@ -20,9 +21,14 @@ const nextConfig: NextConfig = {
         hostname: 'qeevsipplmosdujltokq.supabase.co',
         port: '',
         pathname: '/storage/v1/object/public/**',
-      }
+      },
+      {
+        protocol: 'https',
+        hostname: 'ktpqbmsmvoryywjatzdl.supabase.co',
+        port: '',
+        pathname: '/storage/v1/object/public/**',
+      },
     ],
-    unoptimized: true,
   },
 };
 
