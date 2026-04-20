@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useRef, DragEvent } from 'react';
+import React, { useState, useRef, useEffect, DragEvent } from 'react';
 
 interface FileUploadProps {
   onFileSelect: (files: File[], date?: string, year?: string) => void;
@@ -19,7 +19,15 @@ export default function FileUpload({
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [selectedDate, setSelectedDate] = useState('');
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear().toString());
+  const [availableYears, setAvailableYears] = useState<number[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    fetch('/api/years')
+      .then(r => r.json())
+      .then(setAvailableYears)
+      .catch(() => setAvailableYears([new Date().getFullYear()]));
+  }, []);
 
   const handleDragOver = (e: DragEvent<HTMLDivElement>) => {
     e.preventDefault();
@@ -232,11 +240,9 @@ export default function FileUpload({
                 onChange={(e) => setSelectedYear(e.target.value)}
                 required
               >
-                <option value="2025">2025</option>
-                <option value="2024">2024</option>
-                <option value="2023">2023</option>
-                <option value="2022">2022</option>
-                <option value="2021">2021</option>
+                {availableYears.map(year => (
+                  <option key={year} value={year.toString()}>{year}</option>
+                ))}
               </select>
             </div>
           )}

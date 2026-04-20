@@ -33,10 +33,40 @@ export default function ScorecardManager() {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [cardToDelete, setCardToDelete] = useState<{id: string, date: string, year: string} | null>(null);
   const [deleteLoading, setDeleteLoading] = useState(false);
+  const [availableYears, setAvailableYears] = useState<number[]>([]);
+  const [yearInput, setYearInput] = useState<string>('');
 
   useEffect(() => {
     fetchScorecards();
+    fetchYears();
   }, []);
+
+  const fetchYears = async () => {
+    const res = await fetch('/api/years');
+    const data = await res.json();
+    setAvailableYears(data);
+  };
+
+  const handleAddYear = async () => {
+    const year = parseInt(yearInput);
+    if (!year || year < 2000 || year > 2100) return;
+    const res = await fetch('/api/years', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ year }),
+    });
+    setAvailableYears(await res.json());
+    setYearInput('');
+  };
+
+  const handleRemoveYear = async (year: number) => {
+    const res = await fetch('/api/years', {
+      method: 'DELETE',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ year }),
+    });
+    setAvailableYears(await res.json());
+  };
 
   const fetchScorecards = async () => {
     try {
@@ -101,6 +131,38 @@ export default function ScorecardManager() {
 
   return (
     <div className="scorecard-manager">
+      <div className="year-manager" style={{ marginBottom: '24px', padding: '16px', border: '1px solid #ddd', borderRadius: '8px', background: '#f9f9f9' }}>
+        <h4 style={{ marginTop: 0 }}>Jahre verwalten</h4>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginBottom: '12px' }}>
+          {availableYears.map(year => (
+            <div key={year} style={{ display: 'flex', alignItems: 'center', gap: '4px', background: '#fff', border: '1px solid #ccc', borderRadius: '6px', padding: '4px 10px' }}>
+              <span>{year}</span>
+              <button
+                onClick={() => handleRemoveYear(year)}
+                style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#e53e3e', fontWeight: 'bold', fontSize: '16px', lineHeight: 1 }}
+                title="Jahr entfernen"
+              >×</button>
+            </div>
+          ))}
+        </div>
+        <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+          <input
+            type="number"
+            value={yearInput}
+            onChange={e => setYearInput(e.target.value)}
+            placeholder="z.B. 2027"
+            style={{ width: '100px', padding: '6px', border: '1px solid #ccc', borderRadius: '4px' }}
+            onKeyDown={e => e.key === 'Enter' && handleAddYear()}
+          />
+          <button
+            onClick={handleAddYear}
+            className="btn btn-primary btn-sm"
+          >
+            + Jahr hinzufügen
+          </button>
+        </div>
+      </div>
+
       <div className="year-selector">
         <label htmlFor="year-select">Jahr auswählen: </label>
         <select
