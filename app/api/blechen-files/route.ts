@@ -9,32 +9,20 @@ function parseYearFromFilename(filename: string): string | null {
 
 export async function GET() {
   try {
-    // Initialize years with empty values
-    const latestFiles: Record<string, string> = {
-      '2025': '',
-      '2024': '',
-      '2023': '',
-      '2022': '',
-      '2021': ''
-    };
+    const latestFiles: Record<string, string> = {};
 
-    const timestamp = Date.now(); // HINZUGEFÜGT: Timestamp für Cache-Busting
-
-    // List all files in the blechen directory from blob storage
-    const blobFiles = await list({ 
+    const blobFiles = await list({
       prefix: 'blechen/',
       token: process.env.BLOB_READ_WRITE_TOKEN
     });
 
-    // Process each blechen file
     blobFiles.blobs
       .filter(blob => blob.pathname.endsWith('.jpg'))
       .forEach(blob => {
         const filename = blob.pathname.split('/').pop() || '';
         const year = parseYearFromFilename(filename);
-        
-        if (year && latestFiles.hasOwnProperty(year)) {
-          latestFiles[year] = `${blob.url}?v=${timestamp}`; // HINZUGEFÜGT: ?v= Parameter
+        if (year) {
+          latestFiles[year] = blob.url;
         }
       });
 
