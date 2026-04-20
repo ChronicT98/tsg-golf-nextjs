@@ -127,7 +127,7 @@ export default function ScorecardManager() {
   if (loading) return <div>Lade Scorecards...</div>;
   if (error) return <div className="error-message">{error}</div>;
 
-  const years = Object.keys(scorecards).sort((a, b) => b.localeCompare(a));
+  const years = availableYears.map(y => y.toString());
 
   return (
     <div className="scorecard-manager">

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect } from 'react';
 import '@/app/styles/GolfScorecard.css';
 import '@/app/styles/spielergebnisse.css';
 import ImageModal from './image-modal';
@@ -35,12 +35,11 @@ interface ScorecardData {
 
 const ScorecardViewer: React.FC = () => {
   const [data, setData] = useState<ScorecardData | null>(null);
-  const [selectedYear, setSelectedYear] = useState('2025');
+  const [selectedYear, setSelectedYear] = useState('');
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  // Wrap years array in useMemo to prevent dependency changes
-  const years = useMemo(() => ['2025', '2024', '2023', '2022', '2021'], []);
+  const [years, setYears] = useState<string[]>([]);
   const [modalState, setModalState] = useState<ModalState>({
     isOpen: false,
     imageUrl: '',
@@ -178,12 +177,19 @@ const ScorecardViewer: React.FC = () => {
   }, [data, selectedYear, selectedDate, preloadImage, preloadNeighboringDates]);
 
   useEffect(() => {
-    const fetchScorecards = async () => {
+    const fetchAll = async () => {
       try {
-        const response = await fetch('/api/scorecards');
-        if (!response.ok) throw new Error('Fehler beim Laden der Scorecards');
-        const fetchedData = await response.json();
+        const [scorecardsRes, yearsRes] = await Promise.all([
+          fetch('/api/scorecards'),
+          fetch('/api/years'),
+        ]);
+        if (!scorecardsRes.ok) throw new Error('Fehler beim Laden der Scorecards');
+        const fetchedData = await scorecardsRes.json();
+        const fetchedYears: number[] = await yearsRes.json();
+        const yearStrings = fetchedYears.map(y => y.toString());
         setData(fetchedData);
+        setYears(yearStrings);
+        setSelectedYear(yearStrings[0] ?? '');
         setIsLoading(false);
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Fehler beim Laden der Scorecards');
@@ -191,8 +197,8 @@ const ScorecardViewer: React.FC = () => {
       }
     };
 
-    fetchScorecards();
-    const intervalId = setInterval(fetchScorecards, 5 * 60 * 1000);
+    fetchAll();
+    const intervalId = setInterval(fetchAll, 5 * 60 * 1000);
     return () => clearInterval(intervalId);
   }, []);
 
