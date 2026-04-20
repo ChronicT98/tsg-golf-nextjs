@@ -34,7 +34,7 @@ export default function Blechstatistik() {
     };
 
     fetchData();
-  }, [];
+  }, []);
 
   const openModal = useCallback((imageUrl: string, alt: string) => {
     setModalState({
