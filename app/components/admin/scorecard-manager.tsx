@@ -43,8 +43,11 @@ export default function ScorecardManager() {
 
   const fetchYears = async () => {
     const res = await fetch('/api/years');
-    const data = await res.json();
+    const data: number[] = await res.json();
     setAvailableYears(data);
+    const currentYear = new Date().getFullYear().toString();
+    const yearStrings = data.map(y => y.toString());
+    setSelectedYear(yearStrings.includes(currentYear) ? currentYear : yearStrings[0] ?? '');
   };
 
   const handleAddYear = async () => {
@@ -74,9 +77,6 @@ export default function ScorecardManager() {
       if (!response.ok) throw new Error('Fehler beim Laden der Scorecards');
       const data = await response.json();
       setScorecards(data);
-      // Set the most recent year as default
-      const years = Object.keys(data).sort((a, b) => b.localeCompare(a));
-      if (years.length > 0) setSelectedYear(years[0]);
       setLoading(false);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Ein Fehler ist aufgetreten');

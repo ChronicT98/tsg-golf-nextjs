@@ -25,9 +25,10 @@ export default function Blechstatistik() {
         const files = await filesRes.json();
         const yearNumbers: number[] = await yearsRes.json();
         const yearStrings = yearNumbers.map(y => y.toString());
+        const currentYear = new Date().getFullYear().toString();
         setLatestFiles(files);
         setYears(yearStrings);
-        setSelectedYear(yearStrings[0] ?? '');
+        setSelectedYear(yearStrings.includes(currentYear) ? currentYear : yearStrings[0] ?? '');
       } catch (error) {
         console.error('Error fetching blechen data:', error);
       }

@@ -187,9 +187,10 @@ const ScorecardViewer: React.FC = () => {
         const fetchedData = await scorecardsRes.json();
         const fetchedYears: number[] = await yearsRes.json();
         const yearStrings = fetchedYears.map(y => y.toString());
+        const currentYear = new Date().getFullYear().toString();
         setData(fetchedData);
         setYears(yearStrings);
-        setSelectedYear(yearStrings[0] ?? '');
+        setSelectedYear(yearStrings.includes(currentYear) ? currentYear : yearStrings[0] ?? '');
         setIsLoading(false);
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Fehler beim Laden der Scorecards');
