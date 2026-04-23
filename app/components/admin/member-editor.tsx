@@ -204,7 +204,7 @@ export default function MemberEditor({ member, category, onSave, onCancel }: Mem
     e.preventDefault();
     
     // Validierung der erforderlichen Felder
-    if (!formData.name || !formData.hcp || !formData.imagesrc) {
+    if (!formData.name || !formData.hcp) {
       alert('Bitte fülle alle erforderlichen Felder aus.');
       return;
     }
@@ -350,7 +350,6 @@ export default function MemberEditor({ member, category, onSave, onCancel }: Mem
             name="imagesrc"
             value={formData.imagesrc}
             onChange={handleInputChange}
-            required
           />
           <p className="help-text" style={{ fontSize: '0.875rem', color: '#666', marginTop: '0.25rem' }}>
             Du kannst entweder eine URL manuell eingeben oder das Bild direkt hochladen:
