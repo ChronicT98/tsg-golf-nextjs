@@ -275,17 +275,24 @@
 
 /* Desktop: Dropdown von oben */
 @media (min-width: 769px) {
+    /* Sticky nav immer über dem Dropdown — Burger bleibt sichtbar */
+    .nav-sticky-wrapper {
+        z-index: 200;
+    }
+
     .sidebar-menu {
         left: 0 !important;
         top: 50px;
         width: 100%;
-        height: auto;
+        height: auto !important;        /* überschreibt height: 100vh */
         max-height: 0;
         overflow: hidden;
         transition: max-height 0.35s ease, opacity 0.35s ease;
         opacity: 0;
         pointer-events: none;
         box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+        justify-content: flex-start;   /* Inhalt wächst nach unten */
+        padding-bottom: 0;
     }
 
     .sidebar-menu.active {
@@ -315,8 +322,10 @@
         white-space: nowrap;
     }
 
+    /* Overlay startet unterhalb der Sticky-Nav */
     .sidebar-overlay {
         top: 50px;
+        z-index: 140;
     }
 
     .sidebar-admin-item {
