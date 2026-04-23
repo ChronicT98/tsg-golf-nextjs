@@ -286,20 +286,21 @@
         right: 0;
         width: 100% !important;
         height: auto !important;
-        max-height: 0;
-        overflow: hidden !important;        /* überschreibt overflow-y: auto */
-        transition: max-height 0.35s ease, opacity 0.2s ease !important; /* überschreibt left-transition */
+        max-height: none !important;
+        overflow: hidden !important;
+        transform: scaleY(0) !important;
+        transform-origin: top center;
+        transition: transform 0.3s ease, opacity 0.2s ease !important;
         opacity: 0;
         pointer-events: none;
         box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
         flex-direction: column;
         justify-content: flex-start;
         padding-bottom: 0;
-        transform: none !important;
     }
 
     .sidebar-menu.active {
-        max-height: 600px;
+        transform: scaleY(1) !important;
         opacity: 1;
         pointer-events: auto;
     }
