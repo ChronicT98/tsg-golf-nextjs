@@ -92,6 +92,7 @@ export default function Navigation() {
           <li><Link href="/fotogalerie" onClick={toggleSidebar}>Fotogalerie</Link></li>
           <li><Link href="/videos" onClick={toggleSidebar}>Videos</Link></li>
           <li><Link href="/kontakt" onClick={toggleSidebar}>Kontakt</Link></li>
+          <li className="sidebar-admin-item"><Link href="/admin/login" onClick={toggleSidebar}>Admin</Link></li>
         </ul>
       </nav>
     </>
